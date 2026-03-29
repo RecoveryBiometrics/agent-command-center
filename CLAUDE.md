@@ -41,9 +41,16 @@ Each skill is a self-contained playbook that any agent team can run. Skills are 
 5. Built the **visual dashboard** (Next.js) showing all businesses, teams, agents, skills
 6. Dashboard builds clean and runs at localhost:3000
 
+### What was DONE (2026-03-29):
+1. Bill reviewed the dashboard — fixed Podcast Pipeline showing no agents
+2. Added Blog Production Team (3 agents) to GlobalHighLevel
+3. Added Core Pipeline Team (3 agents) to Podcast Pipeline Engine
+4. Added **rich agent detail** to every agent: duties list, inputs, outputs, self-healing, tools, cost
+5. Built **clickable agent detail panel** — slide-out from right with full agent profile
+6. All 25+ agents now have complete job descriptions viewable from the dashboard
+
 ### What to do NEXT (in order):
-1. **Open the dashboard** — `cd ~/Projects/agent-command-center/dashboard && npm run dev` → http://localhost:3000 — review it, give feedback
-2. **Deploy dashboard** — push to GitHub, deploy to Vercel so it has a real URL
+1. **Deploy dashboard** — push to GitHub, deploy to Vercel so it has a real URL
 3. **Build setup wizards** — interactive scripts inside each skill that generate .env + config for a new business
 4. **Connect to Slack** — install Claude for Slack, add Slack MCP server
 5. **Set up GitHub MCP** — so agents can see across all repos
