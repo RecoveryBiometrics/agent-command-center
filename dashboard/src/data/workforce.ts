@@ -1,13 +1,13 @@
-export type AgentStatus = "active" | "idle" | "error" | "scheduled";
-export type ProjectStatus = "live" | "building" | "planned" | "paused";
+// ─── TYPES ──────────────────────────────────────────────────────
 
-export interface Agent {
+export type AgentStatus = "active" | "idle" | "error" | "scheduled";
+export type ProjectStatus = "live" | "building" | "planned" | "paused" | "not-running";
+
+// Layer 1: Individual Lego pieces — reusable worker definitions
+export interface Role {
   id: string;
   name: string;
-  role: string;
-  status: AgentStatus;
-  lastRun?: string;
-  nextRun?: string;
+  title: string; // e.g., "Event Scraper", "Content Writer"
   description: string;
   duties: string[];
   inputs: string;
@@ -17,25 +17,28 @@ export interface Agent {
   cost?: string;
 }
 
-export interface Skill {
+// Layer 2: Assembled Lego sets — roles snapped together
+export interface TeamTemplate {
   id: string;
   name: string;
-  description: string;
-  deployedTo: string[]; // business IDs using this skill
-  agentCount: number;
-  configurable: boolean;
-}
-
-export interface Team {
-  id: string;
-  name: string;
-  businessId: string;
   skillId: string;
-  agents: Agent[];
-  status: AgentStatus;
-  dailyReport?: string;
+  description: string;
+  roleIds: string[]; // ordered pipeline: role1 → role2 → role3
 }
 
+// Layer 2b: A deployed instance of a template for a specific business
+export interface TeamInstance {
+  id: string;
+  templateId: string;
+  businessId: string;
+  status: AgentStatus;
+  runsOn: string; // "GitHub Actions", "IONOS VPS", "local", "not deployed"
+  schedule?: string; // "daily 6am ET", "weekly Tuesdays 9am ET", "24/7", etc.
+  lastRun?: string;
+  nextRun?: string;
+}
+
+// Layer 3: Who the sets are built for
 export interface Business {
   id: string;
   name: string;
@@ -44,19 +47,550 @@ export interface Business {
   website?: string;
   deploy?: string;
   github?: string;
-  teams: Team[];
   description: string;
+  directorId: string; // which executive manages this business
 }
 
-// ─── YOUR SKILLS ───────────────────────────────────────────────
+// Skills — the instruction manuals
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  configurable: boolean;
+}
+
+// Org chart — leadership layer
+export type ExecLevel = "ceo" | "vp" | "director";
+
+export interface Executive {
+  id: string;
+  name: string;
+  title: string;
+  level: ExecLevel;
+  reportsTo: string; // ID of who they report to ("none" for CEO)
+  description: string;
+  responsibilities: string[];
+}
+
+// ─── LAYER 1: ROLE CATALOG ─────────────────────────────────────
+
+export const roles: Role[] = [
+  // ── SEO Content Pipeline roles ──
+  {
+    id: "researcher",
+    name: "Researcher",
+    title: "Event Scraper",
+    description:
+      "Scrapes real upcoming events from multiple platforms for configured cities.",
+    duties: [
+      "Scrapes 3 live event platforms (Eventbrite, Patch.com, AllEvents.in) for real upcoming events",
+      "Processes configured number of cities per daily run, cycling through all service areas",
+      "Parses JSON-LD structured data from each platform, with HTML fallback scraping",
+      "Deduplicates events by normalized title (removes punctuation, articles)",
+      "Filters out junk patterns (navigation text like 'Sign Up', 'Browse', etc.)",
+      "Converts ISO dates to human-readable format",
+      "Returns max 5 unique events per city with: name, date, location, description, source URL",
+    ],
+    inputs:
+      "City name, state, county from the service area rotation schedule",
+    outputs:
+      "Array of verified real upcoming events (max 5 per city) with full metadata",
+    tools: ["Eventbrite scraper", "Patch.com scraper", "AllEvents.in scraper"],
+  },
+  {
+    id: "fact-checker",
+    name: "Fact Checker",
+    title: "Data Validator",
+    description:
+      "Validates data quality and accuracy. Used at multiple pipeline stages for different checks.",
+    duties: [
+      "Research validation: validates every scraped event is future-dated, filters past events and junk data",
+      "Copy validation: compares articles across cities, flags >85% similarity as duplicate",
+      "Returns valid/invalid verdict per item with specific issues found",
+      "If validation fails, triggers a retry of the previous step (up to 3 attempts)",
+    ],
+    inputs: "Data from the previous pipeline stage (research or copy)",
+    outputs: "Filtered/validated data — only clean items pass through",
+    selfHealing:
+      "Retries the upstream step up to 3 times before skipping the item",
+  },
+  {
+    id: "copywriter",
+    name: "Copywriter",
+    title: "Content Writer",
+    description:
+      "Writes articles that naturally tie local events to the business niche. Unique per city.",
+    duties: [
+      "Writes 2-3 paragraph articles for each validated event",
+      "Naturally ties the event to the business niche (configurable tie-in template)",
+      "Uses 5 rotating copy variation templates to keep content fresh",
+      "Adds a call-to-action with business name, city, and correct phone number per region",
+      "Deduplicates against existing articles already published for that city",
+    ],
+    inputs:
+      "Validated events, business config (name, niche, phone numbers, CTA template)",
+    outputs:
+      "Array of articles with: id, title, slug, date, excerpt, body, category",
+    tools: ["Claude API (Haiku)"],
+    cost: "~$0.01 per city",
+  },
+  {
+    id: "seo-auditor",
+    name: "SEO Auditor",
+    title: "Quality Assurance",
+    description:
+      "Validates SEO standards on content. Auto-fixes common issues.",
+    duties: [
+      "Validates title format: under 60 characters, includes city name and service keyword",
+      "Validates meta description: 120-160 characters, compelling and accurate",
+      "Validates slug format: hyphenated, lowercase, URL-safe",
+      "Checks schema.org readiness (can the article generate valid structured data?)",
+      "Validates H1 presence and format",
+      "Auto-applies fixes for common issues (trimming titles, reformatting slugs, etc.)",
+    ],
+    inputs: "Fact-checked articles",
+    outputs: "Pass/fail per article, plus auto-fixed versions where possible",
+    selfHealing:
+      "Auto-applies fixes, then re-audits. Up to 3 rounds before flagging for manual review.",
+  },
+  {
+    id: "engineer",
+    name: "Engineer",
+    title: "Deployer",
+    description:
+      "Deploys content to production via git and hosting platform.",
+    duties: [
+      "Writes audited content as JSON files to the configured data directory",
+      "Appends new content to existing arrays (doesn't overwrite previous content)",
+      "Runs git add, git commit with dated message, git push to main branch",
+      "Triggers auto-deploy via the push (Vercel, Cloudflare, etc.)",
+      "Reports deployment count and generates review URLs",
+    ],
+    inputs: "Audited and approved content from SEO Auditor",
+    outputs: "Committed files, deployed to production, live URLs",
+    tools: ["Git", "Vercel/Cloudflare (auto-deploy on push)"],
+  },
+  // ── Directory roles ──
+  {
+    id: "discoverer",
+    name: "Discoverer",
+    title: "Business Finder",
+    description:
+      "Uses AI-powered web search to find real, currently operating local businesses.",
+    duties: [
+      "Uses Gemini 2.0 Flash with grounded web search to find real businesses",
+      "Searches for configured business categories in each city",
+      "Processes configured number of cities per day, cycling through all service areas",
+      "For each business: confirms name, phone, website, address, and description",
+      "Returns raw business records with verification status",
+    ],
+    inputs: "City name, state, configured business categories",
+    outputs:
+      "Raw business records with: name, phone, website, address, description, verification flag",
+    tools: ["Gemini 2.0 Flash (grounded search)"],
+    cost: "~$0.02 per city",
+  },
+  {
+    id: "verifier",
+    name: "Verifier",
+    title: "Business Validator",
+    description:
+      "Independently re-confirms each discovered business exists and is currently operating.",
+    duties: [
+      "Takes every business from the Discoverer and independently re-verifies it exists",
+      "Asks Gemini: 'Does {business name} exist in {city}, {state}? Is it currently operating?'",
+      "Only businesses that pass verification move forward — never publish unconfirmed listings",
+      "Marks each business as verified/unverified with a timestamp",
+    ],
+    inputs: "Discovered businesses from the Discoverer",
+    outputs: "Verified businesses only — unverified ones are dropped entirely",
+    tools: ["Gemini 2.0 Flash"],
+  },
+  {
+    id: "quality-auditor",
+    name: "Quality Auditor",
+    title: "Listing QA",
+    description: "Scores every business listing on quality and accuracy.",
+    duties: [
+      "Scores every business listing on a 0-100 quality scale",
+      "Checks phone format (valid US pattern: 10-11 digits)",
+      "Checks website reachability (HTTP HEAD request — is the site actually live?)",
+      "Checks address plausibility (does it look like a real address?)",
+      "Runs duplicate detection (fuzzy name matching across all listings)",
+      "Checks description quality (no placeholders, minimum 30 characters, no generic text)",
+      "Verifies business type accuracy (is a pharmacy actually a pharmacy?)",
+    ],
+    inputs:
+      "Verified businesses + all existing listings in the directory",
+    outputs:
+      "Quality score (0-100) per listing, specific flags (phone-invalid, website-dead, duplicate, etc.)",
+    tools: ["HTTP client", "Gemini (verification)", "Fuzzy matching"],
+  },
+  {
+    id: "places-enricher",
+    name: "Places Enricher",
+    title: "Data Enrichment",
+    description:
+      "Adds Google Places data — star ratings, hours, photos, verified addresses.",
+    duties: [
+      "Searches Google Places API for each business listing",
+      "Enriches with: Google Maps URL, star rating, review count",
+      "Adds operating hours (weekday text descriptions)",
+      "Verifies and corrects addresses against Google's data",
+      "Pulls first 3 photo references for the listing",
+      "Checks business operational status (is it permanently closed?)",
+      "Rate-limited: 1 request per second to stay within free tier",
+      "Idempotent: only enriches listings that don't already have Places data",
+    ],
+    inputs: "Verified business listings without existing Google Places data",
+    outputs:
+      "Enriched listings with: maps URL, rating, reviews, hours, photos, verified address",
+    tools: ["Google Places API"],
+    cost: "Free tier covers most usage",
+  },
+  // ── SEO Reporting roles ──
+  {
+    id: "gsc-fetcher",
+    name: "GSC Fetcher",
+    title: "Data Collector",
+    description:
+      "Fetches performance data from Google Search Console.",
+    duties: [
+      "Fetches current 28-day performance data (clicks, impressions, CTR, avg position)",
+      "Fetches prior 28-day period for comparison (period-over-period trends)",
+      "Pulls data by two dimensions: page-level and query-level",
+      "Archives previous week's data for historical trend analysis",
+      "Stores results in dated backup files",
+    ],
+    inputs: "Google Search Console API via service account",
+    outputs:
+      "Structured performance data: current period, prior period, per-page and per-query breakdowns",
+    tools: ["Google Search Console API", "Google Service Account"],
+  },
+  {
+    id: "indexing-inspector",
+    name: "Indexing Inspector",
+    title: "Index Checker",
+    description:
+      "Checks which pages Google has indexed via URL Inspection API.",
+    duties: [
+      "Checks indexing status of 200 pages per run via Google URL Inspection API",
+      "Categorizes pages as: indexed, crawled-not-indexed, or errors",
+      "Tracks last crawl time and fetch status for each page",
+      "Maintains cumulative tracking for long-term trends",
+      "Identifies newly indexed pages since the last report (wins!)",
+      "Calculates overall index rate (% of all pages in Google's index)",
+    ],
+    inputs: "List of site pages + Google URL Inspection API",
+    outputs:
+      "Indexing status per page, newly indexed pages, cumulative index rate",
+    tools: ["Google URL Inspection API", "Google Service Account"],
+  },
+  {
+    id: "seo-analyst",
+    name: "SEO Analyst",
+    title: "Report Writer",
+    description:
+      "Analyzes ranking data, attributes movements to changes, writes weekly reports.",
+    duties: [
+      "Calculates period-over-period totals (clicks, impressions, CTR, avg position)",
+      "Identifies wins: pages that moved up 3+ positions with 20+ impressions",
+      "Identifies drops: pages that fell 3+ positions with 20+ impressions",
+      "Identifies opportunities: pages at positions 8-20 with low CTR (almost page 1)",
+      "Identifies gaps: queries with 50+ impressions but 0 clicks (missing landing pages)",
+      "Connects page movements to deployed SEO changes with confidence levels",
+      "Flags false correlations: bulk movements, competing explanations, premature attributions",
+      "Generates full markdown report + plain-English email summary",
+    ],
+    inputs: "GSC performance data, indexing status, SEO-CHANGELOG.md",
+    outputs:
+      "Markdown report with wins/drops/opportunities/gaps/attribution + email summary",
+    tools: ["Data analysis", "SEO-CHANGELOG parser", "Gmail SMTP"],
+  },
+  {
+    id: "keyword-miner",
+    name: "Keyword Miner",
+    title: "Opportunity Finder",
+    description:
+      "Mines Google Search Console for missed opportunities and recommends new pages.",
+    duties: [
+      "Fetches all search queries from GSC (last 28 days, up to 1,000)",
+      "Groups queries by city + service keyword",
+      "Identifies queries with 50+ impressions but 0 clicks (no landing page exists)",
+      "Checks if matching pages were recently created (avoids duplicating recent work)",
+      "Recommends new city/service page combinations to generate",
+      "Auto-updates page generation config for new pages on next build",
+    ],
+    inputs: "Google Search Console query data (last 28 days)",
+    outputs:
+      "List of new page recommendations, auto-updated page config",
+    tools: ["Google Search Console API", "Content changelog"],
+  },
+  // ── Podcast Pipeline roles ──
+  {
+    id: "scheduler",
+    name: "Scheduler",
+    title: "Orchestrator",
+    description:
+      "Runs the full pipeline on configurable timer cycles.",
+    duties: [
+      "Runs continuously with configurable cycle intervals (default: 25 hours, synced to NotebookLM daily limit)",
+      "Each cycle: triggers content discovery → audio → SEO → transcription → publishing → blog",
+      "Processes up to configured episodes per cycle (default 3, max 20 with NotebookLM Plus)",
+      "Tracks last run time to enforce cycle intervals",
+      "Counts successes and failures from each run",
+      "Sends optional daily email summary of what was published",
+      "Logs all activity with timestamps",
+    ],
+    inputs: "Cycle timer + all configured content sources",
+    outputs: "Orchestrates the full pipeline — triggers all other roles in sequence",
+    tools: ["Python scheduler", "Gmail SMTP (optional summary)"],
+  },
+  {
+    id: "content-scraper",
+    name: "Content Scraper",
+    title: "Source Finder",
+    description:
+      "Discovers content from multiple sources. Tries each in priority order.",
+    duties: [
+      "Tries content sources in configured priority order until it finds unpublished content",
+      "Website mode: crawls full site, specific section, or sitemap (up to 500 pages)",
+      "YouTube mode: extracts transcripts from channel videos via yt-dlp",
+      "RSS mode: parses RSS/Atom feeds, fetches full article if summary too short",
+      "Manual mode: reads from topics list or CLI flag, researches via web search",
+      "Auto-discovery mode: searches web + Reddit for fresh topics when other sources exhausted",
+      "Caches all discovered content to prevent re-processing",
+      "Skips any content that's already been published as an episode",
+    ],
+    inputs:
+      "Configured content sources (website URL, YouTube channel, RSS feed, topic list, or niche keyword)",
+    outputs: "Content object with: title, body text, source URL, source type",
+    tools: ["Web scraper", "yt-dlp", "RSS parser", "DuckDuckGo search"],
+  },
+  {
+    id: "audio-producer",
+    name: "Audio Producer",
+    title: "Podcast Generator",
+    description:
+      "Generates natural two-host podcast conversation via NotebookLM.",
+    duties: [
+      "Creates a temporary text file with the episode content",
+      "Uses browser automation (Playwright) to interact with Google NotebookLM",
+      "Creates a new NotebookLM notebook with the episode title",
+      "Uploads the content as a source document",
+      "Triggers 'Generate Audio' — produces a natural two-host conversation",
+      "Waits for generation to complete (typically several minutes)",
+      "Downloads the finished audio as MP4",
+      "Cleans up the temporary notebook and files",
+    ],
+    inputs: "Content object (title + body) from the Content Scraper",
+    outputs: "MP4 audio file",
+    tools: ["Google NotebookLM", "Playwright (browser automation)"],
+    cost: "Free (3 eps/day) or $20/mo Plus (20 eps/day)",
+  },
+  {
+    id: "seo-writer",
+    name: "SEO Writer",
+    title: "Metadata Optimizer",
+    description:
+      "Writes optimized episode titles, descriptions, and keyword tags.",
+    duties: [
+      "Takes the original content title and first 2,000 characters of body",
+      "Writes an SEO-optimized episode title (50-70 characters, varied phrasing)",
+      "Writes a compelling podcast app description (150-250 characters)",
+      "Generates 5-8 keyword tags for discoverability",
+      "Falls back to original title if Claude API is not configured",
+    ],
+    inputs: "Original content title, body excerpt, podcast name, niche",
+    outputs: "SEO metadata: optimized title, description, and keyword tags",
+    tools: ["Claude API (Haiku)"],
+    cost: "~$0.003 per episode",
+  },
+  {
+    id: "transcriber",
+    name: "Transcriber",
+    title: "Audio-to-Text",
+    description:
+      "Converts podcast audio to text with speaker labels.",
+    duties: [
+      "Uploads the MP4 audio file to Gemini API",
+      "Sends a transcription prompt requesting full accuracy with speaker labels",
+      "Returns complete transcript text with Host 1 / Host 2 labels",
+      "Enables full-text search within podcast apps",
+      "Improves accessibility for hearing-impaired listeners",
+      "Optional — pipeline continues without transcription if this fails or is disabled",
+    ],
+    inputs: "MP4 audio file from the Audio Producer",
+    outputs: "Full transcript text with speaker labels",
+    tools: ["Google Gemini 2.0 Flash"],
+    cost: "~$0.05/day",
+  },
+  {
+    id: "publisher",
+    name: "Publisher",
+    title: "Distribution",
+    description:
+      "Uploads episodes to Transistor.fm for distribution to all podcast platforms.",
+    duties: [
+      "Requests an authorized upload URL from Transistor.fm API",
+      "Uploads the audio file directly to Transistor's storage",
+      "Creates the episode record with: SEO title, description, tags, transcript, audio URL",
+      "Sets episode status to 'published' (immediately live)",
+      "Transistor auto-distributes to: Spotify, Apple Podcasts, Amazon Music, Google Podcasts",
+      "Returns the episode's share URL and embeddable HTML player",
+      "Logs the episode to prevent re-processing",
+    ],
+    inputs: "Audio file, SEO metadata (title, description, tags), transcript text",
+    outputs: "Published episode with: Transistor ID, share URL, embed HTML",
+    tools: ["Transistor.fm API"],
+    cost: "$19/mo (Transistor hosting)",
+  },
+  {
+    id: "blog-researcher",
+    name: "Blog Researcher",
+    title: "Web + Reddit Scraper",
+    description:
+      "Searches the web and Reddit for real data and community perspectives.",
+    duties: [
+      "Searches DuckDuckGo for '{episode title} {niche}' — pulls top 5 results with snippets",
+      "Searches targeted subreddits relevant to the niche for real discussions",
+      "Searches general Reddit via 'site:reddit.com {title}' for broader community takes",
+      "Compiles SERP snippets + Reddit thread summaries into a structured research package",
+      "Gives the writer real data and perspectives to reference (not AI-generated fluff)",
+    ],
+    inputs: "Episode title, podcast niche, configured subreddits",
+    outputs: "Research object with: SERP results + Reddit discussions",
+    tools: ["DuckDuckGo search", "Reddit scraper"],
+  },
+  {
+    id: "blog-writer",
+    name: "Blog Writer",
+    title: "SEO Content Writer",
+    description:
+      "Writes full SEO blog post from episode content and research.",
+    duties: [
+      "Writes 800-1,200 word SEO blog post using episode content + research findings",
+      "Structures with H2/H3 headings optimized for search",
+      "Generates a clickable table of contents with anchor links",
+      "Includes a 'Pro Tip' callout box highlighting key actionable advice",
+      "Writes an FAQ section using expandable Q&A format",
+      "Embeds the podcast player so readers can listen inline",
+      "Places affiliate link CTA if configured",
+      "Assigns a category from the configured category list",
+    ],
+    inputs:
+      "Episode content, SEO metadata, research findings, podcast embed HTML",
+    outputs: "Full HTML blog post + assigned category",
+    tools: ["Claude API (Haiku)"],
+    cost: "~$0.01 per post",
+  },
+  {
+    id: "blog-fact-checker",
+    name: "Blog Fact Checker",
+    title: "Content Validator",
+    description:
+      "Validates blog posts for factual accuracy, fabricated stats, and compliance.",
+    duties: [
+      "Reviews the entire blog post for factual accuracy",
+      "Catches fabricated or made-up statistics (a common AI hallucination)",
+      "Verifies product and company name spellings",
+      "Checks any pricing claims against known data",
+      "Flags potential legal or compliance issues",
+      "Applies custom fact-check rules if configured",
+      "Returns corrected HTML if issues found, or passes original through if clean",
+    ],
+    inputs: "Blog post HTML from the Blog Writer",
+    outputs: "Passed/failed verdict, corrected HTML, list of issues found",
+    tools: ["Claude API (Haiku)"],
+  },
+  {
+    id: "site-builder",
+    name: "Site Builder",
+    title: "Static Site Generator",
+    description:
+      "Builds the blog website from published post data.",
+    duties: [
+      "Reads all published blog posts from post data files",
+      "Auto-discovers categories from post metadata",
+      "Generates homepage with responsive post grid",
+      "Generates individual post pages",
+      "Generates category listing pages",
+      "Generates sitemap.xml, robots.txt, and llms.txt",
+      "Applies configurable theme (dark/light), accent color, and font",
+      "Outputs complete static site ready for any host",
+    ],
+    inputs: "Blog post data files",
+    outputs: "Complete static site: HTML pages, sitemap, robots.txt, llms.txt",
+    tools: ["Python static site generator"],
+  },
+  // ── OM Generation roles ──
+  {
+    id: "county-scraper",
+    name: "County Scraper",
+    title: "Property Data Collector",
+    description:
+      "Pulls property data from county auditor websites.",
+    duties: [
+      "Takes a parcel ID and queries the county auditor website",
+      "Extracts 25 property data fields: sqft, year built, tax, zoning, lot size, etc.",
+      "Handles multi-parcel lookups for properties spanning multiple parcels",
+      "Returns structured property data that feeds the OM Generator",
+      "No API key needed — scrapes public county records",
+    ],
+    inputs: "Parcel ID (e.g., 076-0002-0138-00)",
+    outputs:
+      "Structured property data: 25 fields including sqft, year built, tax, zoning, lot size, assessed value",
+    tools: ["County auditor website scraper"],
+  },
+  {
+    id: "om-generator",
+    name: "OM Generator",
+    title: "Document Writer",
+    description:
+      "AI-generates professional offering memorandum sections.",
+    duties: [
+      "Takes property data + deal details from the input wizard",
+      "Generates 11 professional OM sections using Claude Haiku",
+      "Sections: executive summary, property overview, financial analysis, market analysis, etc.",
+      "Uses investment-grade language and formatting standards",
+      "Calculates NOI, cap rate, debt service coverage from inputs",
+      "Generates in ~43 seconds total (~4 seconds per section)",
+      "Each section can be individually regenerated",
+    ],
+    inputs:
+      "Property data from County Scraper + deal details (price, units, rents, expenses)",
+    outputs: "11 complete OM sections ready for editing",
+    tools: ["Claude API (Haiku 3.5)"],
+    cost: "~$0.15 per OM (charging clients $9 = 98% margin)",
+  },
+  {
+    id: "pdf-builder",
+    name: "PDF Builder",
+    title: "Document Export",
+    description:
+      "Renders investment-grade branded PDF from OM content.",
+    duties: [
+      "Takes finalized OM content from the editor",
+      "Renders a professional, investment-grade branded PDF using Puppeteer",
+      "Applies the premium PDF template with client branding",
+      "Handles photo placement from the editor",
+      "Generates table of contents with page numbers",
+      "Optimizes for printing and digital viewing",
+    ],
+    inputs: "Finalized OM content from the editor (HTML)",
+    outputs: "Investment-grade branded PDF file",
+    tools: ["Puppeteer (headless Chrome PDF rendering)"],
+  },
+];
+
+// ─── SKILLS ────────────────────────────────────────────────────
+
 export const skills: Skill[] = [
   {
     id: "seo-content-pipeline",
     name: "SEO Content Pipeline",
     description:
       "Daily local content generation, business discovery, directory management, GSC mining, weekly SEO reports",
-    deployedTo: ["safebath"],
-    agentCount: 6,
     configurable: true,
   },
   {
@@ -64,31 +598,141 @@ export const skills: Skill[] = [
     name: "Podcast Pipeline",
     description:
       "Content-to-podcast automation with blog generation. Supports website, YouTube, RSS, manual, and auto-discovery sources",
-    deployedTo: ["globalhighlevel"],
-    agentCount: 5,
     configurable: true,
   },
   {
     id: "om-generation",
     name: "OM Generation",
     description:
-      "AI-generated Offering Memorandums from parcel data. 8-step wizard, county scraper, WYSIWYG editor, PDF export",
-    deployedTo: ["hatch"],
-    agentCount: 3,
-    configurable: false, // skill not yet written
-  },
-  {
-    id: "ghl-integration",
-    name: "GHL Integration",
-    description:
-      "GoHighLevel webhook handling, pipeline automation, CRM sync, contact management",
-    deployedTo: ["hatch", "reiamplifi"],
-    agentCount: 2,
-    configurable: false, // skill not yet written
+      "AI-generated Offering Memorandums from parcel data. Wizard input, county scraper, editor, PDF export",
+    configurable: false,
   },
 ];
 
-// ─── YOUR BUSINESSES ───────────────────────────────────────────
+// ─── LAYER 2: TEAM TEMPLATES ───────────────────────────────────
+
+export const teamTemplates: TeamTemplate[] = [
+  {
+    id: "seo-content-team",
+    name: "SEO Content Team",
+    skillId: "seo-content-pipeline",
+    description:
+      "Scrapes local events, writes unique articles tied to business niche, validates quality, deploys to production.",
+    roleIds: [
+      "researcher",
+      "fact-checker",
+      "copywriter",
+      "fact-checker",
+      "seo-auditor",
+      "engineer",
+    ],
+  },
+  {
+    id: "directory-team",
+    name: "Directory Team",
+    skillId: "seo-content-pipeline",
+    description:
+      "Discovers real local businesses, verifies they exist, scores quality, enriches with Google data.",
+    roleIds: ["discoverer", "verifier", "quality-auditor", "places-enricher"],
+  },
+  {
+    id: "seo-reporting-team",
+    name: "SEO Reporting Team",
+    skillId: "seo-content-pipeline",
+    description:
+      "Fetches search performance data, checks indexing, analyzes wins/drops/gaps, mines for opportunities.",
+    roleIds: [
+      "gsc-fetcher",
+      "indexing-inspector",
+      "seo-analyst",
+      "keyword-miner",
+    ],
+  },
+  {
+    id: "content-production-team",
+    name: "Content Production Team",
+    skillId: "podcast-pipeline",
+    description:
+      "Full podcast + blog pipeline: discovers content, generates audio, optimizes SEO, transcribes, publishes, writes blog, fact-checks.",
+    roleIds: [
+      "scheduler",
+      "content-scraper",
+      "audio-producer",
+      "seo-writer",
+      "transcriber",
+      "publisher",
+      "blog-researcher",
+      "blog-writer",
+      "blog-fact-checker",
+      "site-builder",
+    ],
+  },
+  {
+    id: "om-builder-team",
+    name: "OM Builder Team",
+    skillId: "om-generation",
+    description:
+      "Scrapes county property data, AI-generates offering memorandum sections, exports branded PDF.",
+    roleIds: ["county-scraper", "om-generator", "pdf-builder"],
+  },
+];
+
+// ─── LAYER 2b: DEPLOYED TEAM INSTANCES ─────────────────────────
+
+export const teamInstances: TeamInstance[] = [
+  // SafeBath
+  {
+    id: "sb-seo",
+    templateId: "seo-content-team",
+    businessId: "safebath",
+    status: "scheduled",
+    runsOn: "GitHub Actions",
+    schedule: "Daily, 6:00 AM ET",
+    lastRun: "2026-03-29 06:00 ET",
+    nextRun: "2026-03-30 06:00 ET",
+  },
+  {
+    id: "sb-directory",
+    templateId: "directory-team",
+    businessId: "safebath",
+    status: "scheduled",
+    runsOn: "GitHub Actions",
+    schedule: "Daily, 6:00 AM ET",
+    lastRun: "2026-03-29 06:15 ET",
+    nextRun: "2026-03-30 06:15 ET",
+  },
+  {
+    id: "sb-reporting",
+    templateId: "seo-reporting-team",
+    businessId: "safebath",
+    status: "scheduled",
+    runsOn: "GitHub Actions",
+    schedule: "Weekly, Tuesdays 9:07 AM ET",
+    nextRun: "2026-04-01 09:07 ET",
+  },
+  // GlobalHighLevel
+  {
+    id: "ghl-production",
+    templateId: "content-production-team",
+    businessId: "globalhighlevel",
+    status: "active",
+    runsOn: "IONOS VPS ($2/mo)",
+    schedule: "24/7 — 25-hour cycles, 20 episodes/day",
+    lastRun: "2026-03-29 (continuous)",
+  },
+  // Hatch
+  {
+    id: "hatch-om",
+    templateId: "om-builder-team",
+    businessId: "hatch",
+    status: "idle",
+    runsOn: "Local only (not deployed)",
+    schedule: "Manual — triggered from localhost:3000",
+  },
+];
+
+// ─── LAYER 3: BUSINESSES ───────────────────────────────────────
+
 export const businesses: Business[] = [
   {
     id: "safebath",
@@ -98,725 +742,41 @@ export const businesses: Business[] = [
     website: "safebathgrabbar.com",
     deploy: "Vercel",
     github: "RecoveryBiometrics/safebath",
-    description: "Local service business — grab bar installation, bathroom safety. 5 states, 1,427 pages.",
-    teams: [
-      {
-        id: "safebath-seo",
-        name: "SEO Content Team",
-        businessId: "safebath",
-        skillId: "seo-content-pipeline",
-        status: "active",
-        agents: [
-          {
-            id: "sb-researcher",
-            name: "Researcher",
-            role: "Event Scraper",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:00 ET",
-            nextRun: "2026-03-29 06:00 ET",
-            description:
-              "Scrapes Eventbrite, Patch.com, AllEvents.in for real local events in 8 cities/day",
-            duties: [
-              "Scrapes 3 live event platforms (Eventbrite, Patch.com, AllEvents.in) for real upcoming events",
-              "Processes 8 cities per daily run, cycling through 167 cities across all service areas",
-              "Parses JSON-LD structured data from each platform, with HTML fallback scraping",
-              "Deduplicates events by normalized title (removes punctuation, articles)",
-              "Filters out junk patterns (navigation text like 'Sign Up', 'Browse', etc.)",
-              "Converts ISO dates to human-readable format",
-              "Returns max 5 unique events per city with: name, date, location, description, source URL",
-            ],
-            inputs: "City name, state, county from the service area rotation schedule",
-            outputs: "Array of verified real upcoming events (max 5 per city) with full metadata",
-            tools: ["Eventbrite scraper", "Patch.com scraper", "AllEvents.in scraper"],
-          },
-          {
-            id: "sb-factcheck1",
-            name: "Fact Checker #1",
-            role: "Research Validator",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:02 ET",
-            nextRun: "2026-03-29 06:02 ET",
-            description:
-              "Validates events are future-dated, filters junk data. Self-healing with 3 retries.",
-            duties: [
-              "Validates every scraped event is future-dated (filters out past events)",
-              "Checks for junk data that slipped through the scraper filters",
-              "Returns a valid/invalid verdict for each event",
-              "If validation fails, triggers a retry — researcher re-scrapes (up to 3 attempts)",
-            ],
-            inputs: "Raw scraped events from the Researcher",
-            outputs: "Filtered array of only valid, future-dated events",
-            selfHealing: "If invalid data found, retries the full research step up to 3 times before skipping the city",
-          },
-          {
-            id: "sb-copywriter",
-            name: "Copywriter",
-            role: "Content Writer",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:05 ET",
-            nextRun: "2026-03-29 06:05 ET",
-            description:
-              "Writes 2-3 paragraph articles tying local events to bathroom safety. Unique per city.",
-            duties: [
-              "Writes 2-3 paragraph articles for each validated event",
-              "Naturally ties the event to the business niche (e.g., bathroom safety for SafeBath)",
-              "Uses 5 rotating safety-focused copy variation templates to keep content fresh",
-              "Adds a call-to-action with business name, city, and correct phone number per region",
-              "Deduplicates against existing articles already published for that city",
-              "Uses the exact phone number per county/state (PA/DE/MD default, NV override, SC override)",
-            ],
-            inputs: "Validated events from Fact Checker #1, business config (name, niche, phone numbers, CTA template)",
-            outputs: "Array of articles with: id, title, slug, date, excerpt, body, category",
-            tools: ["Claude API (Haiku)"],
-            cost: "~$0.01 per city",
-          },
-          {
-            id: "sb-factcheck2",
-            name: "Fact Checker #2",
-            role: "Copy Validator",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:08 ET",
-            nextRun: "2026-03-29 06:08 ET",
-            description:
-              "Checks cross-city uniqueness (85% threshold). Flags duplicate phrasing.",
-            duties: [
-              "Compares every article against articles written for sibling cities",
-              "Flags articles that are more than 85% similar to another city's article",
-              "Checks for duplicate or overused phrasing patterns across the batch",
-              "Validates that titles and body content are genuinely unique",
-            ],
-            inputs: "Generated articles from the Copywriter",
-            outputs: "Valid/invalid verdict per article, plus specific issues found",
-            selfHealing: "If articles are too similar, sends them back to the Copywriter for revision (up to 3 rounds)",
-          },
-          {
-            id: "sb-seo-auditor",
-            name: "SEO Auditor",
-            role: "Quality Assurance",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:10 ET",
-            nextRun: "2026-03-29 06:10 ET",
-            description:
-              "Validates titles, meta descriptions, slugs, schema. Auto-fixes common issues.",
-            duties: [
-              "Validates title format: under 60 characters, includes city name and service keyword",
-              "Validates meta description: 120-160 characters, compelling and accurate",
-              "Validates slug format: hyphenated, lowercase, URL-safe",
-              "Checks schema.org readiness (can the article generate valid structured data?)",
-              "Validates H1 presence and format",
-              "Auto-applies fixes for common issues (trimming titles, reformatting slugs, etc.)",
-            ],
-            inputs: "Fact-checked articles from Fact Checker #2",
-            outputs: "Pass/fail per article, plus auto-fixed versions where possible",
-            selfHealing: "Auto-applies fixes, then re-audits. Up to 3 rounds before flagging for manual review.",
-          },
-          {
-            id: "sb-engineer",
-            name: "Engineer",
-            role: "Deployer",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:12 ET",
-            nextRun: "2026-03-29 06:12 ET",
-            description:
-              "Writes JSON to data directory, commits to git, pushes to main. Vercel auto-deploys.",
-            duties: [
-              "Writes audited articles as JSON files to /src/data/local-news/{city-slug}.json",
-              "Appends new articles to existing city arrays (doesn't overwrite previous content)",
-              "Runs git add, git commit with dated message, git push to main branch",
-              "Triggers Vercel auto-deploy via the push (site live within 2-3 minutes)",
-              "Reports deployment count and total articles per city",
-              "Generates full URL for each new article for review",
-            ],
-            inputs: "Audited and approved articles from SEO Auditor",
-            outputs: "Committed JSON files, deployed to production, live URLs",
-            tools: ["Git", "Vercel (auto-deploy on push)"],
-          },
-        ],
-      },
-      {
-        id: "safebath-directory",
-        name: "Directory Team",
-        businessId: "safebath",
-        skillId: "seo-content-pipeline",
-        status: "active",
-        agents: [
-          {
-            id: "sb-discoverer",
-            name: "Discoverer",
-            role: "Business Finder",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:15 ET",
-            nextRun: "2026-03-29 06:15 ET",
-            description:
-              "Uses Gemini grounded search to find real local businesses. 10 cities/day.",
-            duties: [
-              "Uses Gemini 2.0 Flash with grounded web search to find real, currently operating businesses",
-              "Searches for configured business categories (senior centers, pharmacies, VNAs, home health, etc.)",
-              "Processes 10 cities per day, cycling through all service area cities",
-              "For each business found: confirms name, phone, website, address, and description",
-              "Returns raw business records with verification status",
-            ],
-            inputs: "City name, state, configured business categories",
-            outputs: "Raw business records with: name, phone, website, address, description, verification flag",
-            tools: ["Gemini 2.0 Flash (grounded search)"],
-            cost: "~$0.02 per city",
-          },
-          {
-            id: "sb-verifier",
-            name: "Verifier",
-            role: "Business Validator",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:20 ET",
-            nextRun: "2026-03-29 06:20 ET",
-            description:
-              "Re-confirms each discovered business exists and is currently operating.",
-            duties: [
-              "Takes every business from the Discoverer and independently re-verifies it exists",
-              "Asks Gemini: 'Does {business name} exist in {city}, {state}? Is it currently operating?'",
-              "Only businesses that pass verification move forward — we never publish unconfirmed listings",
-              "Marks each business as verified/unverified with a timestamp",
-            ],
-            inputs: "Discovered businesses from the Discoverer",
-            outputs: "Verified businesses only — unverified ones are dropped entirely",
-            tools: ["Gemini 2.0 Flash"],
-          },
-          {
-            id: "sb-auditor",
-            name: "Quality Auditor",
-            role: "Listing QA",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:25 ET",
-            nextRun: "2026-03-29 06:25 ET",
-            description:
-              "Scores each listing 0-100. Checks phone, website, address, description quality.",
-            duties: [
-              "Scores every business listing on a 0-100 quality scale",
-              "Checks phone format (valid US pattern: 10-11 digits)",
-              "Checks website reachability (HTTP HEAD request — is the site actually live?)",
-              "Checks address plausibility (does it look like a real address?)",
-              "Runs duplicate detection (fuzzy name matching across all listings)",
-              "Checks description quality (no placeholders, minimum 30 characters, no generic text)",
-              "Verifies business type accuracy (is a pharmacy actually a pharmacy?)",
-              "Stores scores in quality-scores.json with flags for each issue found",
-            ],
-            inputs: "Verified businesses from the Verifier + all existing listings in the directory",
-            outputs: "Quality score (0-100) per listing, specific flags (phone-invalid, website-dead, duplicate-exact, etc.)",
-            tools: ["HTTP client (website checks)", "Gemini (verification)", "Fuzzy matching"],
-          },
-          {
-            id: "sb-enricher",
-            name: "Places Enricher",
-            role: "Data Enrichment",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:30 ET",
-            nextRun: "2026-03-29 06:30 ET",
-            description:
-              "Adds Google Places data — star ratings, hours, photos, verified addresses.",
-            duties: [
-              "Searches Google Places API for each business listing",
-              "Enriches with: Google Maps URL, star rating, review count",
-              "Adds operating hours (weekday text descriptions)",
-              "Verifies and corrects addresses against Google's data",
-              "Pulls first 3 photo references for the listing",
-              "Checks business operational status (is it permanently closed?)",
-              "Rate-limited: 1 request per second to stay within free tier",
-              "Idempotent: only enriches listings that don't already have Places data",
-            ],
-            inputs: "Verified business listings without existing Google Places data",
-            outputs: "Enriched listings with: maps URL, rating, reviews, hours, photos, verified address",
-            tools: ["Google Places API"],
-            cost: "Free tier covers most usage",
-          },
-        ],
-      },
-      {
-        id: "safebath-seo-report",
-        name: "SEO Reporting Team",
-        businessId: "safebath",
-        skillId: "seo-content-pipeline",
-        status: "active",
-        agents: [
-          {
-            id: "sb-gsc-fetcher",
-            name: "GSC Fetcher",
-            role: "Data Collector",
-            status: "scheduled",
-            nextRun: "2026-04-01 09:07 ET",
-            description:
-              "Fetches 28 days of Search Console data — clicks, impressions, CTR, positions.",
-            duties: [
-              "Fetches current 28-day performance data from Google Search Console (clicks, impressions, CTR, avg position)",
-              "Fetches prior 28-day period for comparison (period-over-period trends)",
-              "Pulls data by two dimensions: page-level and query-level",
-              "Archives previous week's data for historical trend analysis",
-              "Stores results in /seo-data/latest.json and dated backup files",
-            ],
-            inputs: "Google Search Console API via service account",
-            outputs: "Structured performance data: current period, prior period, per-page and per-query breakdowns",
-            tools: ["Google Search Console API", "Google Service Account"],
-          },
-          {
-            id: "sb-indexing-inspector",
-            name: "Indexing Inspector",
-            role: "Index Checker",
-            status: "scheduled",
-            nextRun: "2026-04-01 09:15 ET",
-            description:
-              "Checks indexing status of 200 pages via URL Inspection API.",
-            duties: [
-              "Checks indexing status of 200 pages per run via Google URL Inspection API",
-              "Categorizes pages as: indexed, crawled-not-indexed, or errors",
-              "Tracks last crawl time and fetch status for each page",
-              "Maintains cumulative tracking in /seo-data/inspect-cumulative.json",
-              "Identifies newly indexed pages since the last report (wins!)",
-              "Calculates overall index rate (% of all pages in Google's index)",
-            ],
-            inputs: "List of site pages + Google URL Inspection API",
-            outputs: "Indexing status per page, newly indexed pages, cumulative index rate",
-            tools: ["Google URL Inspection API", "Google Service Account"],
-          },
-          {
-            id: "sb-analyst",
-            name: "SEO Analyst",
-            role: "Report Writer",
-            status: "scheduled",
-            nextRun: "2026-04-01 09:25 ET",
-            description:
-              "Analyzes wins, drops, opportunities, gaps. Attributes movements to SEO changes.",
-            duties: [
-              "Calculates period-over-period totals (clicks, impressions, CTR, avg position)",
-              "Identifies wins: pages that moved up 3+ positions with 20+ impressions",
-              "Identifies drops: pages that fell 3+ positions with 20+ impressions",
-              "Identifies opportunities: pages at positions 8-20 with low CTR (almost page 1)",
-              "Identifies gaps: queries with 50+ impressions but 0 clicks (missing landing pages)",
-              "Parses SEO-CHANGELOG.md and connects page movements to deployed SEO changes",
-              "Assigns confidence levels to attributions (high/medium/low) based on timing and change type",
-              "Flags false correlations: bulk movements (algorithm update?), competing explanations, premature attributions",
-              "Generates full markdown report + plain-English email summary",
-              "Sends weekly report email to configured recipients",
-            ],
-            inputs: "GSC performance data, indexing status, SEO-CHANGELOG.md",
-            outputs: "Markdown report with wins/drops/opportunities/gaps/attribution + email summary",
-            tools: ["Data analysis", "SEO-CHANGELOG parser", "Gmail SMTP"],
-          },
-          {
-            id: "sb-gsc-miner",
-            name: "Keyword Miner",
-            role: "Opportunity Finder",
-            status: "scheduled",
-            lastRun: "2026-03-28 06:35 ET",
-            nextRun: "2026-03-29 06:35 ET",
-            description:
-              "Mines GSC for queries with impressions but no clicks. Recommends new pages.",
-            duties: [
-              "Fetches all search queries from GSC (last 28 days, up to 1,000)",
-              "Groups queries by city + service keyword",
-              "Identifies queries with 50+ impressions but 0 clicks (no landing page exists for them)",
-              "Checks if matching pages were recently created (avoids duplicating recent work)",
-              "Recommends new city/service page combinations to generate",
-              "Logs recommendations to content-changelog.json",
-              "Updates constants.ts to auto-generate new pages on the next build",
-            ],
-            inputs: "Google Search Console query data (last 28 days)",
-            outputs: "List of new city/service page recommendations, auto-updated page config",
-            tools: ["Google Search Console API", "Content changelog"],
-          },
-        ],
-      },
-    ],
+    description:
+      "Local service business — grab bar installation, bathroom safety. 5 states, 1,427 pages, 366 directory listings.",
+    directorId: "dir-safebath",
   },
   {
     id: "globalhighlevel",
     name: "GlobalHighLevel.com",
     status: "live",
-    path: "~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/",
+    path: "~/Developer/projects/marketing/podcast-pipeline/",
     website: "globalhighlevel.com",
     github: "RecoveryBiometrics/content-autopilot",
-    description: "GHL tutorial site + podcast. 80+ tutorials, 380 followers. Affiliate model.",
-    teams: [
-      {
-        id: "ghl-podcast",
-        name: "Podcast Production Team",
-        businessId: "globalhighlevel",
-        skillId: "podcast-pipeline",
-        status: "active",
-        agents: [
-          {
-            id: "ghl-scraper",
-            name: "Content Scraper",
-            role: "Source Finder",
-            status: "idle",
-            description:
-              "Discovers content from website, YouTube, RSS, or web search. Tries sources in priority order.",
-            duties: [
-              "Tries content sources in configured priority order until it finds unpublished content",
-              "Website mode: crawls full site, specific section, or sitemap (up to 500 pages)",
-              "YouTube mode: extracts transcripts from channel videos via yt-dlp",
-              "RSS mode: parses RSS/Atom feeds, fetches full article if summary is too short (<300 chars)",
-              "Manual mode: reads from topics.json or CLI --topic flag, researches via DuckDuckGo",
-              "Auto-discovery mode: searches web + Reddit for fresh topics in your niche when other sources are exhausted",
-              "Caches all discovered content to prevent re-processing",
-              "Skips any content that's already been published as an episode",
-            ],
-            inputs: "Configured content sources (website URL, YouTube channel, RSS feed, topic list, or niche keyword)",
-            outputs: "Content object with: title, body text, source URL, source type",
-            tools: ["Web scraper", "yt-dlp", "RSS parser", "DuckDuckGo search"],
-          },
-          {
-            id: "ghl-notebooklm",
-            name: "Audio Producer",
-            role: "Podcast Generator",
-            status: "idle",
-            description:
-              "Sends content to NotebookLM. Generates natural two-host podcast conversation.",
-            duties: [
-              "Creates a temporary text file with the episode content",
-              "Uses browser automation (Playwright) to interact with Google NotebookLM",
-              "Creates a new NotebookLM notebook with the episode title",
-              "Uploads the content as a source document",
-              "Triggers 'Generate Audio' — NotebookLM produces a natural two-host conversation",
-              "Waits for generation to complete (typically several minutes)",
-              "Downloads the finished audio as MP4",
-              "Cleans up the temporary notebook and files",
-            ],
-            inputs: "Content object (title + body) from the Content Scraper",
-            outputs: "MP4 audio file saved to data/audio/{title}.mp4",
-            tools: ["Google NotebookLM", "Playwright (browser automation)"],
-            cost: "Free (3 eps/day) or $20/mo Plus (20 eps/day)",
-          },
-          {
-            id: "ghl-seo-writer",
-            name: "SEO Writer",
-            role: "Metadata Optimizer",
-            status: "idle",
-            description:
-              "Claude writes optimized episode title, description, and tags.",
-            duties: [
-              "Takes the original content title and first 2,000 characters of body",
-              "Writes an SEO-optimized episode title (50-70 characters, varied phrasing)",
-              "Writes a compelling podcast app description (150-250 characters)",
-              "Generates 5-8 keyword tags for discoverability",
-              "If Claude API is not configured, falls back to using the original title and a trimmed description",
-            ],
-            inputs: "Original content title, body excerpt, podcast name, niche",
-            outputs: "SEO metadata: optimized title, description, and keyword tags",
-            tools: ["Claude API (Haiku)"],
-            cost: "~$0.003 per episode",
-          },
-          {
-            id: "ghl-transcriber",
-            name: "Transcriber",
-            role: "Audio-to-Text",
-            status: "idle",
-            description:
-              "Gemini transcribes audio with speaker labels for search and accessibility.",
-            duties: [
-              "Uploads the MP4 audio file to Gemini API",
-              "Sends a transcription prompt requesting full accuracy with speaker labels",
-              "Returns complete transcript text with Host 1 / Host 2 labels",
-              "Enables full-text search within podcast apps (listeners can search for topics)",
-              "Improves accessibility for hearing-impaired listeners",
-              "Cleans up the uploaded file from Gemini after transcription",
-              "Optional — pipeline continues without transcription if this fails or is disabled",
-            ],
-            inputs: "MP4 audio file from the Audio Producer",
-            outputs: "Full transcript text with speaker labels",
-            tools: ["Google Gemini 2.0 Flash"],
-            cost: "~$0.05/day",
-          },
-          {
-            id: "ghl-publisher",
-            name: "Publisher",
-            role: "Distribution",
-            status: "idle",
-            description:
-              "Uploads to Transistor.fm. Auto-distributes to Spotify, Apple, Amazon.",
-            duties: [
-              "Requests an authorized upload URL from Transistor.fm API",
-              "Uploads the audio file directly to Transistor's S3 storage",
-              "Creates the episode record with: SEO title, HTML description, tags, transcript, and audio URL",
-              "Sets episode status to 'published' (immediately live)",
-              "Transistor automatically distributes to: Spotify, Apple Podcasts, Amazon Music, Google Podcasts",
-              "Returns the episode's share URL and embeddable HTML player",
-              "Logs the episode to published.json to prevent re-processing",
-            ],
-            inputs: "Audio file, SEO metadata (title, description, tags), transcript text",
-            outputs: "Published episode with: Transistor ID, share URL, embed HTML",
-            tools: ["Transistor.fm API"],
-            cost: "$19/mo (Transistor hosting)",
-          },
-        ],
-      },
-      {
-        id: "ghl-blog",
-        name: "Blog Production Team",
-        businessId: "globalhighlevel",
-        skillId: "podcast-pipeline",
-        status: "active",
-        agents: [
-          {
-            id: "ghl-researcher",
-            name: "Researcher",
-            role: "Web + Reddit Scraper",
-            status: "idle",
-            description:
-              "Searches DuckDuckGo and targeted subreddits for related content and discussions.",
-            duties: [
-              "Searches DuckDuckGo for '{episode title} {niche}' — pulls top 5 results with snippets",
-              "Searches targeted subreddits relevant to the niche for real discussions and opinions",
-              "Searches general Reddit via 'site:reddit.com {title}' for broader community takes",
-              "Compiles SERP snippets + Reddit thread summaries into a structured research package",
-              "Gives the Blog Writer real data and community perspectives to reference (not just AI-generated fluff)",
-            ],
-            inputs: "Episode title, podcast niche, configured subreddits",
-            outputs: "Research object with: SERP results (title, snippet, URL) + Reddit discussions",
-            tools: ["DuckDuckGo search", "Reddit scraper"],
-          },
-          {
-            id: "ghl-blog-writer",
-            name: "Blog Writer",
-            role: "SEO Content Writer",
-            status: "idle",
-            description:
-              "Claude writes 800-1200 word SEO blog post with TOC, FAQ, pro tips, and podcast embed.",
-            duties: [
-              "Writes 800-1,200 word SEO blog post using the episode content + research findings",
-              "Structures with H2/H3 headings optimized for search",
-              "Generates a clickable table of contents with anchor links",
-              "Includes a 'Pro Tip' callout box highlighting key actionable advice",
-              "Writes an FAQ section using <details> tags (expandable Q&A)",
-              "Embeds the Transistor podcast player so readers can listen inline",
-              "Places affiliate link CTA twice if configured (mid-article and end)",
-              "Assigns a category from the configured category list",
-              "Uses a conversational, expert tone — not robotic or generic",
-            ],
-            inputs: "Episode content, SEO metadata, research findings, podcast embed HTML, affiliate link",
-            outputs: "Full HTML blog post + assigned category",
-            tools: ["Claude API (Haiku)"],
-            cost: "~$0.01 per post",
-          },
-          {
-            id: "ghl-fact-checker",
-            name: "Fact Checker",
-            role: "Content Validator",
-            status: "idle",
-            description:
-              "Claude validates facts, catches fabricated stats, checks product names and pricing claims.",
-            duties: [
-              "Reviews the entire blog post for factual accuracy",
-              "Catches fabricated or made-up statistics (a common AI hallucination)",
-              "Verifies product and company name spellings",
-              "Checks any pricing claims against known data",
-              "Flags potential legal or compliance issues",
-              "Applies custom fact-check rules if configured (e.g., 'never mention competitor X')",
-              "Can apply region-specific verification if TARGET_MARKET is set",
-              "Returns corrected HTML if issues are found, or passes the original through if clean",
-            ],
-            inputs: "Blog post HTML from the Blog Writer",
-            outputs: "Passed/failed verdict, corrected HTML, list of specific issues found",
-            tools: ["Claude API (Haiku)"],
-          },
-        ],
-      },
-    ],
+    deploy: "IONOS VPS",
+    description:
+      "GHL tutorial site + podcast. 80+ tutorials, 380 followers. Affiliate model (30-day free trial). Runs on IONOS VPS 24/7.",
+    directorId: "dir-ghl",
   },
   {
     id: "hatch",
     name: "Hatch Investments",
-    status: "building",
+    status: "not-running",
     path: "~/Projects/hatch-investments/",
     website: "localhost:3000",
     github: "RecoveryBiometrics/hatch-investments",
-    description: "AI operations platform for RE syndicators. OM Builder built, needs deploy.",
-    teams: [
-      {
-        id: "hatch-om",
-        name: "OM Builder Team",
-        businessId: "hatch",
-        skillId: "om-generation",
-        status: "idle",
-        agents: [
-          {
-            id: "hatch-scraper",
-            name: "County Scraper",
-            role: "Data Collector",
-            status: "idle",
-            description:
-              "Scrapes Hamilton County Auditor for 25 fields from parcel ID.",
-            duties: [
-              "Takes a parcel ID and queries the Hamilton County Auditor website (wedge.hcauditor.org)",
-              "Extracts 25 property data fields: square footage, year built, tax amount, zoning, lot size, etc.",
-              "Handles multi-parcel lookups for properties spanning multiple parcels",
-              "Returns structured property data that feeds the OM Generator",
-              "No API key needed — scrapes public county records",
-            ],
-            inputs: "Parcel ID (e.g., 076-0002-0138-00)",
-            outputs: "Structured property data: 25 fields including sqft, year built, tax, zoning, lot size, assessed value",
-            tools: ["Hamilton County Auditor website scraper"],
-          },
-          {
-            id: "hatch-generator",
-            name: "OM Generator",
-            role: "Document Writer",
-            status: "idle",
-            description:
-              "Claude generates 11 OM sections in 43 seconds using Haiku 3.5.",
-            duties: [
-              "Takes property data + deal details from the 8-step wizard",
-              "Generates 11 professional OM sections using Claude Haiku 3.5",
-              "Sections include: executive summary, property overview, financial analysis, market analysis, etc.",
-              "Uses investment-grade language and formatting standards",
-              "Calculates NOI, cap rate, debt service coverage from wizard inputs",
-              "Generates in ~43 seconds total (~4 seconds per section)",
-              "Each section can be individually regenerated from the editor",
-            ],
-            inputs: "Property data from County Scraper + deal details from 8-step wizard (price, units, rents, expenses)",
-            outputs: "11 complete OM sections ready for editing",
-            tools: ["Claude API (Haiku 3.5)"],
-            cost: "~$0.15 per OM (charging clients $9 = 98% margin)",
-          },
-          {
-            id: "hatch-pdf",
-            name: "PDF Builder",
-            role: "Document Export",
-            status: "idle",
-            description:
-              "Puppeteer renders investment-grade branded PDF from generated content.",
-            duties: [
-              "Takes the finalized OM content from the WYSIWYG editor",
-              "Renders a professional, investment-grade branded PDF using Puppeteer",
-              "Applies the premium PDF template with Hatch branding",
-              "Handles photo placement (drag-and-drop images from the editor)",
-              "Generates table of contents with page numbers",
-              "Optimizes for printing and digital viewing",
-            ],
-            inputs: "Finalized OM content from the WYSIWYG editor (HTML)",
-            outputs: "Investment-grade branded PDF file",
-            tools: ["Puppeteer (headless Chrome PDF rendering)"],
-          },
-        ],
-      },
-    ],
+    description:
+      "AI operations platform for RE syndicators. OM Builder works locally, needs deploy to Cloudflare.",
+    directorId: "dir-hatch",
   },
   {
     id: "reiamplifi",
     name: "REI Amplifi",
     status: "live",
     path: "~/Projects/reiamplifi/",
-    description: "Parent agency. 3.5 years on GHL. Serves RE syndicators + recovery/behavioral health.",
-    teams: [
-      {
-        id: "rei-pipeline",
-        name: "GHL Pipeline",
-        businessId: "reiamplifi",
-        skillId: "ghl-integration",
-        status: "active",
-        agents: [
-          {
-            id: "rei-ghl",
-            name: "GHL Automator",
-            role: "Pipeline Manager",
-            status: "active",
-            lastRun: "always-on",
-            description:
-              "Runs on IONOS VPS. Fully automated GHL pipeline handling.",
-            duties: [
-              "Runs 24/7 on IONOS VPS — always on, always processing",
-              "Handles GoHighLevel pipeline automations for the agency",
-              "Processes webhook events when deals move between pipeline stages",
-              "Triggers downstream automations (emails, tasks, notifications)",
-              "Manages CRM data flow between GHL and external systems",
-            ],
-            inputs: "GHL webhook events (pipeline stage changes, form submissions, etc.)",
-            outputs: "Automated pipeline actions, CRM updates, triggered workflows",
-            tools: ["GoHighLevel API", "IONOS VPS"],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "podcast-pipeline",
-    name: "Podcast Pipeline (Engine)",
-    status: "live",
-    path: "~/Developer/projects/podcast-pipeline/",
-    github: "RecoveryBiometrics/content-autopilot",
-    description: "The core podcast engine. Powers GlobalHighLevel and future podcast clients.",
-    teams: [
-      {
-        id: "pp-core",
-        name: "Core Pipeline Team",
-        businessId: "podcast-pipeline",
-        skillId: "podcast-pipeline",
-        status: "active",
-        agents: [
-          {
-            id: "pp-scheduler",
-            name: "Scheduler",
-            role: "Orchestrator",
-            status: "active",
-            description:
-              "Runs 25-hour cycles. Triggers content discovery, audio generation, publishing, and blog creation.",
-            duties: [
-              "Runs continuously with configurable cycle intervals (default: 25 hours, synced to NotebookLM daily limit reset)",
-              "Each cycle: triggers content discovery → audio generation → SEO → transcription → publishing → blog",
-              "Processes up to EPISODES_PER_DAY episodes per cycle (default 3, max 20 with Plus)",
-              "Tracks last run time in scheduler-state.json to enforce cycle intervals",
-              "Counts successes and failures from each run",
-              "Sends optional daily email summary of what was published",
-              "Logs all activity to logs/scheduler.log with timestamps",
-              "Can run in background: nohup python3 scheduler.py &",
-            ],
-            inputs: "Cycle timer + all configured content sources",
-            outputs: "Orchestrates the full pipeline — triggers all other agents in sequence",
-            tools: ["Python scheduler", "Gmail SMTP (optional daily summary)"],
-          },
-          {
-            id: "pp-discoverer",
-            name: "Auto-Discoverer",
-            role: "Topic Finder",
-            status: "idle",
-            description:
-              "Searches web and Reddit for fresh topics when all other content sources are exhausted.",
-            duties: [
-              "Activates as a fallback when website, YouTube, RSS, and manual topics are all exhausted",
-              "Generates 12 dynamic search queries based on your niche (tips, mistakes, how-to, trends, FAQs, etc.)",
-              "Searches DuckDuckGo for each query to find relevant articles and discussions",
-              "Searches Reddit (via site:reddit.com operator) for community discussions in your niche",
-              "Scrapes Reddit threads for real user opinions and discussion context",
-              "Prevents duplicate topics by checking 70%+ word overlap with already-published episode titles",
-              "Caches discovered topics in data/discovered-topics.json",
-            ],
-            inputs: "Podcast niche keyword, configured subreddits",
-            outputs: "Fresh topic with title, research context, and source URLs",
-            tools: ["DuckDuckGo search", "Reddit scraper"],
-          },
-          {
-            id: "pp-site-builder",
-            name: "Site Builder",
-            role: "Static Site Generator",
-            status: "idle",
-            description:
-              "Builds blog from published posts — homepage, post pages, categories, sitemap, robots.txt, llms.txt.",
-            duties: [
-              "Reads all published blog posts from site/posts/*.json",
-              "Auto-discovers categories from post metadata",
-              "Generates homepage with responsive post grid",
-              "Generates individual post pages at blog/{slug}/index.html",
-              "Generates category listing pages at category/{slug}/index.html",
-              "Generates sitemap.xml for search engine discovery",
-              "Generates robots.txt with crawler directives",
-              "Generates llms.txt for AI model discovery",
-              "Applies configurable theme (dark/light), accent color, and Google Font",
-              "Outputs everything to site/public/ — ready for any static host",
-            ],
-            inputs: "Blog post JSON files from the Blog Writer",
-            outputs: "Complete static site: HTML pages, sitemap, robots.txt, llms.txt",
-            tools: ["Python static site generator"],
-          },
-        ],
-      },
-    ],
+    description:
+      "Parent agency. 3.5 years on GHL. No custom AI agents — uses GHL built-in automations only.",
+    directorId: "dir-reiamplifi",
   },
   {
     id: "mailer",
@@ -824,7 +784,7 @@ export const businesses: Business[] = [
     status: "building",
     path: "~/Developer/projects/marketing/mailer-dashboard/",
     description: "Email campaign management with Claude AI. In development.",
-    teams: [],
+    directorId: "dir-mailer",
   },
   {
     id: "recovery",
@@ -832,28 +792,235 @@ export const businesses: Business[] = [
     status: "paused",
     path: "~/Projects/recovery-biometrics/",
     description: "Oura Ring + FeatherStone biometrics for recovery. Low priority.",
-    teams: [],
+    directorId: "dir-recovery",
   },
 ];
 
-// ─── SUMMARY STATS ─────────────────────────────────────────────
+// ─── ORG CHART: EXECUTIVES ─────────────────────────────────────
+
+export const executives: Executive[] = [
+  // CEO
+  {
+    id: "ceo",
+    name: "Bill",
+    title: "CEO",
+    level: "ceo",
+    reportsTo: "none",
+    description:
+      "Sets strategy, approves major decisions, reviews daily briefings. All VPs report here.",
+    responsibilities: [
+      "Set company strategy and priorities",
+      "Review daily executive briefings",
+      "Approve new business launches",
+      "Approve skill updates that affect multiple businesses",
+      "YC application and investor relations",
+    ],
+  },
+  // VPs
+  {
+    id: "vp-growth",
+    name: "VP of Growth",
+    title: "VP of Growth",
+    level: "vp",
+    reportsTo: "ceo",
+    description:
+      "Owns all live, revenue-generating businesses. Gets daily rollup reports. Decides resource allocation.",
+    responsibilities: [
+      "Monitor daily output across all live businesses (SafeBath, GHL)",
+      "Flag underperforming businesses or teams",
+      "Decide resource allocation (which business gets more agent capacity)",
+      "Approve new team deployments to existing businesses",
+      "Report rollup metrics to CEO daily",
+    ],
+  },
+  {
+    id: "vp-product",
+    name: "VP of Product",
+    title: "VP of Product",
+    level: "vp",
+    reportsTo: "ceo",
+    description:
+      "Owns products being built or not yet live. Responsible for getting them to launch.",
+    responsibilities: [
+      "Get Hatch Investments deployed and live",
+      "Oversee Mailer Dashboard development",
+      "Manage the build-to-launch pipeline",
+      "Decide when a product is ready to transfer to VP of Growth",
+      "Coordinate with VP of Operations on shared infrastructure needs",
+    ],
+  },
+  {
+    id: "vp-operations",
+    name: "VP of Operations",
+    title: "VP of Operations",
+    level: "vp",
+    reportsTo: "ceo",
+    description:
+      "Owns shared infrastructure, quality standards, and the Skills Library. Ensures SOPs work across all businesses.",
+    responsibilities: [
+      "Maintain and improve the Skills Library (reusable SOPs)",
+      "Ensure skill updates roll out cleanly to all businesses",
+      "Own quality standards across all teams",
+      "Manage shared infrastructure (IONOS VPS, GitHub Actions)",
+      "Onboarding playbook for new businesses",
+    ],
+  },
+  // Directors
+  {
+    id: "dir-safebath",
+    name: "Director of SafeBath",
+    title: "Director of SafeBath",
+    level: "director",
+    reportsTo: "vp-growth",
+    description:
+      "Owns SafeBath Grab Bar operations. 3 teams, 14 agent roles. Daily content + directory + weekly SEO reports.",
+    responsibilities: [
+      "Ensure daily content pipeline runs successfully (8 cities/day)",
+      "Monitor directory quality scores (target: 80+ average)",
+      "Review weekly SEO report and flag action items",
+      "Track indexing progress (target: 90%+ index rate)",
+      "Report daily status to VP of Growth",
+    ],
+  },
+  {
+    id: "dir-ghl",
+    name: "Director of GlobalHighLevel",
+    title: "Director of GlobalHighLevel",
+    level: "director",
+    reportsTo: "vp-growth",
+    description:
+      "Owns GlobalHighLevel.com operations. 1 team, 10 agent roles. 24/7 podcast + blog production on IONOS VPS.",
+    responsibilities: [
+      "Ensure 20 episodes/day production target is met",
+      "Monitor blog post quality and fact-check pass rate",
+      "Track affiliate conversions and listener growth",
+      "Ensure IONOS VPS uptime and scheduler health",
+      "Report daily status to VP of Growth",
+    ],
+  },
+  {
+    id: "dir-hatch",
+    name: "Director of Hatch Investments",
+    title: "Director of Hatch Investments",
+    level: "director",
+    reportsTo: "vp-product",
+    description:
+      "Owns Hatch Investments product. Getting OM Builder from local-only to deployed and live.",
+    responsibilities: [
+      "Get OM Builder deployed to Cloudflare",
+      "Set up GHL integration (webhook → auto-generate OM)",
+      "Onboard first client (Benjie) for testing",
+      "Build remaining 5 services (public records, mailer, newsletter, SEO, GBP)",
+      "Report progress to VP of Product",
+    ],
+  },
+  {
+    id: "dir-mailer",
+    name: "Director of Mailer",
+    title: "Director of Mailer Dashboard",
+    level: "director",
+    reportsTo: "vp-product",
+    description:
+      "Owns Mailer Dashboard development. Getting email campaign tool from concept to working product.",
+    responsibilities: [
+      "Define feature requirements for email campaign management",
+      "Oversee Claude AI integration for email writing/optimization",
+      "Get to MVP and first internal test",
+      "Report progress to VP of Product",
+    ],
+  },
+  {
+    id: "dir-reiamplifi",
+    name: "Director of REI Amplifi",
+    title: "Director of REI Amplifi",
+    level: "director",
+    reportsTo: "vp-growth",
+    description:
+      "Owns the parent agency entity. No custom AI agents — manages GHL built-in automations and client relationships.",
+    responsibilities: [
+      "Manage GHL built-in automations for agency operations",
+      "Client acquisition and relationship management",
+      "Coordinate with other Directors on cross-business needs",
+    ],
+  },
+  {
+    id: "dir-recovery",
+    name: "Director of Recovery Biometrics",
+    title: "Director of Recovery Biometrics",
+    level: "director",
+    reportsTo: "vp-product",
+    description: "Paused. Will reactivate when SafeBath and Hatch are stable.",
+    responsibilities: [
+      "Maintain project documentation",
+      "Reactivate when VP of Product greenlights",
+    ],
+  },
+  {
+    id: "dir-quality",
+    name: "Director of Quality & Skills",
+    title: "Director of Quality & Skills",
+    level: "director",
+    reportsTo: "vp-operations",
+    description:
+      "Owns the Skills Library and Role Catalog. Ensures SOPs are consistent and improving across all businesses.",
+    responsibilities: [
+      "Maintain and improve shared Skills (SEO, Podcast, OM)",
+      "Ensure Role definitions are accurate and up-to-date",
+      "Review quality metrics across all businesses",
+      "Approve skill updates before they roll out to production teams",
+      "Build setup wizards for deploying skills to new businesses",
+    ],
+  },
+];
+
+// ─── HELPER FUNCTIONS ──────────────────────────────────────────
+
+export function getRoleById(id: string): Role | undefined {
+  return roles.find((r) => r.id === id);
+}
+
+export function getTemplateById(id: string): TeamTemplate | undefined {
+  return teamTemplates.find((t) => t.id === id);
+}
+
+export function getInstancesForBusiness(businessId: string): TeamInstance[] {
+  return teamInstances.filter((ti) => ti.businessId === businessId);
+}
+
+export function getDirectReports(execId: string): Executive[] {
+  return executives.filter((e) => e.reportsTo === execId);
+}
+
 export function getStats() {
-  const allTeams = businesses.flatMap((b) => b.teams);
-  const allAgents = allTeams.flatMap((t) => t.agents);
-  const activeAgents = allAgents.filter(
-    (a) => a.status === "active" || a.status === "scheduled"
+  const uniqueRoleIds = new Set(
+    teamTemplates.flatMap((t) => t.roleIds)
   );
+  const activeInstances = teamInstances.filter(
+    (ti) => ti.status === "active" || ti.status === "scheduled"
+  );
+  const activeRoleCount = activeInstances.reduce((sum, ti) => {
+    const template = getTemplateById(ti.templateId);
+    return sum + (template ? template.roleIds.length : 0);
+  }, 0);
+  const totalRoleCount = teamInstances.reduce((sum, ti) => {
+    const template = getTemplateById(ti.templateId);
+    return sum + (template ? template.roleIds.length : 0);
+  }, 0);
 
   return {
     totalBusinesses: businesses.length,
-    liveBusinesses: businesses.filter((b) => b.status === "live").length,
-    totalTeams: allTeams.length,
-    activeTeams: allTeams.filter(
-      (t) => t.status === "active" || t.status === "scheduled"
+    liveBusinesses: businesses.filter(
+      (b) => b.status === "live"
     ).length,
-    totalAgents: allAgents.length,
-    activeAgents: activeAgents.length,
+    totalTeamInstances: teamInstances.length,
+    activeTeamInstances: activeInstances.length,
+    totalDeployedRoles: totalRoleCount,
+    activeDeployedRoles: activeRoleCount,
+    totalRoleTemplates: uniqueRoleIds.size,
     totalSkills: skills.length,
     readySkills: skills.filter((s) => s.configurable).length,
+    totalExecutives: executives.length,
+    vps: executives.filter((e) => e.level === "vp").length,
+    directors: executives.filter((e) => e.level === "director").length,
   };
 }
