@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { businesses, skills, getStats } from "@/data/workforce";
-import type { Business, Team, Agent, AgentStatus, ProjectStatus } from "@/data/workforce";
+import type {
+  Business,
+  Team,
+  Agent,
+  AgentStatus,
+  ProjectStatus,
+} from "@/data/workforce";
 
 function StatusDot({ status }: { status: AgentStatus | ProjectStatus }) {
   const colors: Record<string, string> = {
@@ -64,9 +70,168 @@ function StatCard({
   );
 }
 
-function AgentRow({ agent }: { agent: Agent }) {
+function AgentDetailPanel({
+  agent,
+  onClose,
+}: {
+  agent: Agent;
+  onClose: () => void;
+}) {
   return (
-    <div className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-[var(--bg-card-hover)] transition-colors">
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-[var(--bg-secondary)] border-l border-[var(--border)] overflow-y-auto shadow-2xl">
+        {/* Header */}
+        <div className="sticky top-0 bg-[var(--bg-secondary)] border-b border-[var(--border)] p-6 z-10">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <StatusDot status={agent.status} />
+                <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                  {agent.name}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 ml-5">
+                <span className="text-sm text-[var(--text-secondary)]">
+                  {agent.role}
+                </span>
+                <StatusBadge status={agent.status} />
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl leading-none p-1"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Description */}
+          <div>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              {agent.description}
+            </p>
+          </div>
+
+          {/* Schedule */}
+          {(agent.lastRun || agent.nextRun) && (
+            <div className="grid grid-cols-2 gap-3">
+              {agent.lastRun && (
+                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-3">
+                  <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                    Last Run
+                  </div>
+                  <div className="text-sm text-[var(--text-primary)]">
+                    {agent.lastRun}
+                  </div>
+                </div>
+              )}
+              {agent.nextRun && (
+                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-3">
+                  <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                    Next Run
+                  </div>
+                  <div className="text-sm text-[var(--text-primary)]">
+                    {agent.nextRun}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Duties */}
+          {agent.duties && agent.duties.length > 0 && (
+            <div>
+              <h3 className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-3">
+                Duties & Responsibilities
+              </h3>
+              <ul className="space-y-2">
+                {agent.duties.map((duty, i) => (
+                  <li
+                    key={i}
+                    className="flex gap-2 text-sm text-[var(--text-secondary)] leading-relaxed"
+                  >
+                    <span className="text-amber-500 shrink-0 mt-0.5">&#x2022;</span>
+                    {duty}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Inputs & Outputs */}
+          <div className="grid gap-3">
+            {agent.inputs && (
+              <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-4">
+                <div className="text-[10px] uppercase tracking-wider text-blue-400 font-semibold mb-2">
+                  Inputs
+                </div>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {agent.inputs}
+                </p>
+              </div>
+            )}
+            {agent.outputs && (
+              <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-4">
+                <div className="text-[10px] uppercase tracking-wider text-green-400 font-semibold mb-2">
+                  Outputs
+                </div>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {agent.outputs}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Self-Healing */}
+          {agent.selfHealing && (
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4">
+              <div className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold mb-2">
+                Self-Healing
+              </div>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {agent.selfHealing}
+              </p>
+            </div>
+          )}
+
+          {/* Tools & Cost */}
+          <div className="flex flex-wrap gap-3">
+            {agent.tools &&
+              agent.tools.map((tool, i) => (
+                <span
+                  key={i}
+                  className="text-xs bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] px-3 py-1.5 rounded-full"
+                >
+                  {tool}
+                </span>
+              ))}
+          </div>
+          {agent.cost && (
+            <div className="text-sm text-[var(--text-muted)]">
+              Cost: <span className="text-[var(--text-secondary)]">{agent.cost}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AgentRow({
+  agent,
+  onSelect,
+}: {
+  agent: Agent;
+  onSelect: (agent: Agent) => void;
+}) {
+  return (
+    <button
+      onClick={() => onSelect(agent)}
+      className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-[var(--bg-card-hover)] transition-colors text-left"
+    >
       <StatusDot status={agent.status} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -81,19 +246,28 @@ function AgentRow({ agent }: { agent: Agent }) {
           {agent.description}
         </div>
       </div>
-      <div className="text-right shrink-0">
-        <StatusBadge status={agent.status} />
-        {agent.lastRun && (
-          <div className="text-[10px] text-[var(--text-muted)] mt-1">
-            Last: {agent.lastRun}
-          </div>
-        )}
+      <div className="text-right shrink-0 flex items-center gap-2">
+        <div>
+          <StatusBadge status={agent.status} />
+          {agent.lastRun && (
+            <div className="text-[10px] text-[var(--text-muted)] mt-1">
+              Last: {agent.lastRun}
+            </div>
+          )}
+        </div>
+        <span className="text-[var(--text-muted)] text-sm">&#x203A;</span>
       </div>
-    </div>
+    </button>
   );
 }
 
-function TeamCard({ team }: { team: Team }) {
+function TeamCard({
+  team,
+  onSelectAgent,
+}: {
+  team: Team;
+  onSelectAgent: (agent: Agent) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
   const skill = skills.find((s) => s.id === team.skillId);
   const activeCount = team.agents.filter(
@@ -135,7 +309,7 @@ function TeamCard({ team }: { team: Team }) {
       {expanded && (
         <div className="border-t border-[var(--border)] p-3 space-y-0.5">
           {team.agents.map((agent) => (
-            <AgentRow key={agent.id} agent={agent} />
+            <AgentRow key={agent.id} agent={agent} onSelect={onSelectAgent} />
           ))}
         </div>
       )}
@@ -143,7 +317,13 @@ function TeamCard({ team }: { team: Team }) {
   );
 }
 
-function BusinessSection({ business }: { business: Business }) {
+function BusinessSection({
+  business,
+  onSelectAgent,
+}: {
+  business: Business;
+  onSelectAgent: (agent: Agent) => void;
+}) {
   const totalAgents = business.teams.reduce(
     (sum, t) => sum + t.agents.length,
     0
@@ -188,7 +368,11 @@ function BusinessSection({ business }: { business: Business }) {
       {business.teams.length > 0 ? (
         <div className="grid gap-3 ml-5">
           {business.teams.map((team) => (
-            <TeamCard key={team.id} team={team} />
+            <TeamCard
+              key={team.id}
+              team={team}
+              onSelectAgent={onSelectAgent}
+            />
           ))}
         </div>
       ) : (
@@ -234,6 +418,7 @@ function SkillCard({ skill }: { skill: (typeof skills)[0] }) {
 export default function Dashboard() {
   const stats = getStats();
   const [view, setView] = useState<"businesses" | "skills">("businesses");
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
   return (
     <div className="min-h-screen">
@@ -314,7 +499,11 @@ export default function Dashboard() {
         {view === "businesses" ? (
           <div className="space-y-8">
             {businesses.map((business) => (
-              <BusinessSection key={business.id} business={business} />
+              <BusinessSection
+                key={business.id}
+                business={business}
+                onSelectAgent={setSelectedAgent}
+              />
             ))}
           </div>
         ) : (
@@ -325,6 +514,13 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {selectedAgent && (
+        <AgentDetailPanel
+          agent={selectedAgent}
+          onClose={() => setSelectedAgent(null)}
+        />
+      )}
     </div>
   );
 }
