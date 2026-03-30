@@ -58,12 +58,23 @@ Each skill is a self-contained playbook that any agent team can run. Skills are 
 10. Fixed VS Code workspace — all 8 projects + Global Skills folder in sidebar
 11. Shelved visual builder — focus on operational excellence first
 
+### What was DONE (2026-03-30):
+1. Built **Health view** — default dashboard tab showing critical/warning/info/healthy alerts
+2. Auto-detects: not-running businesses, idle teams, skill gaps, no-team businesses
+3. Red badge on Health tab shows count of items needing attention
+4. Deployed to Vercel — live
+5. **Started Slack setup:**
+   - Bill has Reiamplifi Slack workspace (bill@reiamplifi.com)
+   - Slack connector connected in Claude Desktop
+   - Need to create Slack app at api.slack.com/apps for Claude Code MCP access
+   - Stopped at: "Create New App → From scratch → Name: Agent Command Center → Reiamplifi workspace"
+
 ### What to do NEXT (in order):
-1. **Get Hatch deployed** — revenue is waiting, OM Builder works locally, needs Cloudflare
-2. **Clone SEO pipeline to a 2nd business** — prove the Lego model works end-to-end
-3. **Connect to Slack** — install Claude for Slack, daily briefings
-4. **Set up GitHub MCP** — agents can see across all repos
-5. **Dashboard health view** — show what needs attention, what's broken, what's overdue
+1. **FINISH SLACK SETUP** — go to api.slack.com/apps, create "Agent Command Center" app, set permissions, install to workspace, add MCP to Claude Code
+2. **Create Slack channels** — #ceo-briefing, #safebath, #globalhighlevel, #hatch
+3. **Get Hatch deployed** — revenue is waiting (Bill working on this in separate terminal)
+4. **Clone SEO pipeline to a 2nd business** — prove the Lego model works
+5. **Set up GitHub MCP** — agents can see across all repos
 6. **Write remaining skills** — GHL Integration, OM Generation
 7. **Pull real agent status** — connect dashboard to GitHub Actions for live last-run times
 
