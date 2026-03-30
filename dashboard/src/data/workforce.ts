@@ -1024,3 +1024,133 @@ export function getStats() {
     directors: executives.filter((e) => e.level === "director").length,
   };
 }
+
+// ─── HEALTH / ATTENTION ITEMS ──────────────────────────────────
+
+export type AlertLevel = "critical" | "warning" | "info" | "success";
+export type AlertCategory = "not-running" | "no-teams" | "skill-gap" | "idle" | "overdue" | "healthy";
+
+export interface HealthAlert {
+  id: string;
+  level: AlertLevel;
+  category: AlertCategory;
+  title: string;
+  description: string;
+  action: string;
+  businessId?: string;
+  teamInstanceId?: string;
+}
+
+export function getHealthAlerts(): HealthAlert[] {
+  const alerts: HealthAlert[] = [];
+
+  // Check businesses that should be running but aren't
+  businesses.forEach((b) => {
+    if (b.status === "not-running") {
+      const instances = getInstancesForBusiness(b.id);
+      if (instances.length > 0) {
+        alerts.push({
+          id: `not-running-${b.id}`,
+          level: "critical",
+          category: "not-running",
+          title: `${b.name} is not running`,
+          description: `Has ${instances.length} team(s) configured but nothing is deployed or automated.`,
+          action: "Deploy to hosting and set up automation (GitHub Actions, VPS, or Cloudflare)",
+          businessId: b.id,
+        });
+      }
+    }
+  });
+
+  // Check businesses with no teams at all
+  businesses.forEach((b) => {
+    const instances = getInstancesForBusiness(b.id);
+    if (instances.length === 0 && b.status !== "paused") {
+      alerts.push({
+        id: `no-teams-${b.id}`,
+        level: b.status === "building" ? "warning" : "info",
+        category: "no-teams",
+        title: `${b.name} has no agent teams`,
+        description: b.status === "live"
+          ? "This business is live but has no AI agents working on it."
+          : "No teams deployed yet. Use /deploy-team when ready.",
+        action: b.status === "live"
+          ? "Consider deploying an SEO Content Team or other skill"
+          : "Continue building, then deploy teams when the product is ready",
+        businessId: b.id,
+      });
+    }
+  });
+
+  // Check for idle team instances (configured but not running)
+  teamInstances.forEach((ti) => {
+    if (ti.status === "idle") {
+      const template = getTemplateById(ti.templateId);
+      const biz = businesses.find((b) => b.id === ti.businessId);
+      alerts.push({
+        id: `idle-${ti.id}`,
+        level: "warning",
+        category: "idle",
+        title: `${template?.name || ti.templateId} is idle on ${biz?.name || ti.businessId}`,
+        description: `Team is configured but not actively running. Runs on: ${ti.runsOn}`,
+        action: "Deploy and activate this team, or remove it if no longer needed",
+        businessId: ti.businessId,
+        teamInstanceId: ti.id,
+      });
+    }
+  });
+
+  // Check for skill gaps — skills that aren't configurable yet
+  skills.forEach((s) => {
+    if (!s.configurable) {
+      alerts.push({
+        id: `skill-gap-${s.id}`,
+        level: "info",
+        category: "skill-gap",
+        title: `${s.name} skill is not ready to deploy`,
+        description: "This skill exists as a concept but hasn't been written as a reusable, configurable playbook yet.",
+        action: "Write the full SKILL.md with configuration variables and setup wizard steps",
+      });
+    }
+  });
+
+  // Check for missing skills that should exist based on team templates
+  const templateSkillIds = new Set(teamTemplates.map((t) => t.skillId));
+  const existingSkillIds = new Set(skills.map((s) => s.id));
+  templateSkillIds.forEach((skillId) => {
+    if (!existingSkillIds.has(skillId)) {
+      alerts.push({
+        id: `missing-skill-${skillId}`,
+        level: "warning",
+        category: "skill-gap",
+        title: `Skill "${skillId}" is referenced but doesn't exist`,
+        description: "A team template references this skill but it's not in the skills library.",
+        action: "Create this skill in ~/.claude/skills/",
+      });
+    }
+  });
+
+  // Success items — things running well
+  teamInstances.forEach((ti) => {
+    if (ti.status === "active" || ti.status === "scheduled") {
+      const template = getTemplateById(ti.templateId);
+      const biz = businesses.find((b) => b.id === ti.businessId);
+      alerts.push({
+        id: `healthy-${ti.id}`,
+        level: "success",
+        category: "healthy",
+        title: `${template?.name || ti.templateId} running on ${biz?.name || ti.businessId}`,
+        description: `${ti.runsOn}${ti.schedule ? ` — ${ti.schedule}` : ""}${ti.lastRun ? `. Last run: ${ti.lastRun}` : ""}`,
+        action: "No action needed — running as expected",
+        businessId: ti.businessId,
+        teamInstanceId: ti.id,
+      });
+    }
+  });
+
+  // Sort: critical first, then warning, info, success last
+  const levelOrder: Record<AlertLevel, number> = { critical: 0, warning: 1, info: 2, success: 3 };
+  alerts.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
+
+  return alerts;
+}

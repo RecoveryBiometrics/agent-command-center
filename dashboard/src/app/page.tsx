@@ -13,6 +13,7 @@ import {
   getTemplateById,
   getInstancesForBusiness,
   getDirectReports,
+  getHealthAlerts,
 } from "@/data/workforce";
 import type {
   Role,
@@ -23,6 +24,8 @@ import type {
   AgentStatus,
   ProjectStatus,
   ExecLevel,
+  HealthAlert,
+  AlertLevel,
 } from "@/data/workforce";
 
 // ─── SHARED COMPONENTS ─────────────────────────────────────────
@@ -537,11 +540,120 @@ function RoleCatalogCard({ role, onSelect }: { role: Role; onSelect: (r: Role) =
   );
 }
 
+// ─── HEALTH VIEW ───────────────────────────────────────────────
+
+function AlertIcon({ level }: { level: AlertLevel }) {
+  const icons: Record<AlertLevel, string> = {
+    critical: "!!",
+    warning: "!",
+    info: "i",
+    success: "OK",
+  };
+  const styles: Record<AlertLevel, string> = {
+    critical: "bg-red-500/20 text-red-400 border-red-500/30",
+    warning: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    info: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    success: "bg-green-500/20 text-green-400 border-green-500/30",
+  };
+  return (
+    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold border shrink-0 ${styles[level]}`}>
+      {icons[level]}
+    </span>
+  );
+}
+
+function HealthAlertCard({ alert }: { alert: HealthAlert }) {
+  const borderStyles: Record<AlertLevel, string> = {
+    critical: "border-red-500/30 bg-red-500/5",
+    warning: "border-amber-500/30 bg-amber-500/5",
+    info: "border-[var(--border)] bg-[var(--bg-card)]",
+    success: "border-green-500/20 bg-green-500/5",
+  };
+
+  return (
+    <div className={`border rounded-xl p-4 ${borderStyles[alert.level]}`}>
+      <div className="flex gap-3">
+        <AlertIcon level={alert.level} />
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-[var(--text-primary)] mb-0.5">{alert.title}</div>
+          <div className="text-sm text-[var(--text-secondary)] mb-2">{alert.description}</div>
+          <div className="text-xs text-amber-400">
+            Action: {alert.action}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HealthView() {
+  const alerts = getHealthAlerts();
+  const critical = alerts.filter((a) => a.level === "critical");
+  const warnings = alerts.filter((a) => a.level === "warning");
+  const info = alerts.filter((a) => a.level === "info");
+  const healthy = alerts.filter((a) => a.level === "success");
+
+  return (
+    <div className="space-y-8">
+      {/* Summary bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={`rounded-xl p-4 border ${critical.length > 0 ? "border-red-500/30 bg-red-500/10" : "border-[var(--border)] bg-[var(--bg-card)]"}`}>
+          <div className="text-3xl font-bold text-red-400">{critical.length}</div>
+          <div className="text-sm text-[var(--text-secondary)]">Critical</div>
+        </div>
+        <div className={`rounded-xl p-4 border ${warnings.length > 0 ? "border-amber-500/30 bg-amber-500/10" : "border-[var(--border)] bg-[var(--bg-card)]"}`}>
+          <div className="text-3xl font-bold text-amber-400">{warnings.length}</div>
+          <div className="text-sm text-[var(--text-secondary)]">Warnings</div>
+        </div>
+        <div className="rounded-xl p-4 border border-[var(--border)] bg-[var(--bg-card)]">
+          <div className="text-3xl font-bold text-blue-400">{info.length}</div>
+          <div className="text-sm text-[var(--text-secondary)]">Info</div>
+        </div>
+        <div className="rounded-xl p-4 border border-green-500/20 bg-green-500/5">
+          <div className="text-3xl font-bold text-green-400">{healthy.length}</div>
+          <div className="text-sm text-[var(--text-secondary)]">Healthy</div>
+        </div>
+      </div>
+
+      {/* Needs Attention */}
+      {(critical.length > 0 || warnings.length > 0) && (
+        <div>
+          <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">Needs Attention</h2>
+          <div className="space-y-3">
+            {critical.map((a) => <HealthAlertCard key={a.id} alert={a} />)}
+            {warnings.map((a) => <HealthAlertCard key={a.id} alert={a} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Info */}
+      {info.length > 0 && (
+        <div>
+          <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">Opportunities</h2>
+          <div className="space-y-3">
+            {info.map((a) => <HealthAlertCard key={a.id} alert={a} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Running Healthy */}
+      {healthy.length > 0 && (
+        <div>
+          <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">Running Healthy</h2>
+          <div className="space-y-3">
+            {healthy.map((a) => <HealthAlertCard key={a.id} alert={a} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN DASHBOARD ────────────────────────────────────────────
 
 export default function Dashboard() {
   const stats = getStats();
-  const [view, setView] = useState<"org" | "businesses" | "skills">("org");
+  const [view, setView] = useState<"health" | "org" | "businesses" | "skills">("health");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const ceo = executives.find((e) => e.level === "ceo")!;
@@ -575,22 +687,38 @@ export default function Dashboard() {
 
         {/* View Toggle */}
         <div className="flex gap-2">
-          {(["org", "businesses", "skills"] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                view === v
-                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              }`}
-            >
-              {v === "org" ? "Org Chart" : v === "businesses" ? "Businesses" : "Skills & Roles"}
-            </button>
-          ))}
+          {(["health", "org", "businesses", "skills"] as const).map((v) => {
+            const labels: Record<string, string> = {
+              health: "Health",
+              org: "Org Chart",
+              businesses: "Businesses",
+              skills: "Skills & Roles",
+            };
+            const alertCount = v === "health" ? getHealthAlerts().filter((a) => a.level === "critical" || a.level === "warning").length : 0;
+            return (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  view === v
+                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                {labels[v]}
+                {alertCount > 0 && (
+                  <span className="bg-red-500/20 text-red-400 text-xs font-bold px-1.5 py-0.5 rounded-full">
+                    {alertCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Main Content */}
+        {view === "health" && <HealthView />}
+
         {view === "org" && (
           <div className="space-y-4">
             <OrgExecCard exec={ceo} onSelectRole={setSelectedRole} />
