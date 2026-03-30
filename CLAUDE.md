@@ -42,26 +42,34 @@ Each skill is a self-contained playbook that any agent team can run. Skills are 
 6. Dashboard builds clean and runs at localhost:3000
 
 ### What was DONE (2026-03-29):
-1. Bill reviewed the dashboard — fixed Podcast Pipeline showing no agents
-2. Added Blog Production Team (3 agents) to GlobalHighLevel
-3. Added Core Pipeline Team (3 agents) to Podcast Pipeline Engine
-4. Added **rich agent detail** to every agent: duties list, inputs, outputs, self-healing, tools, cost
-5. Built **clickable agent detail panel** — slide-out from right with full agent profile
-6. All 25+ agents now have complete job descriptions viewable from the dashboard
+1. Bill reviewed dashboard — fixed Podcast Pipeline showing no agents, added Blog Production + Core Pipeline teams
+2. Added clickable agent detail panels with full duties, inputs, outputs, tools, cost
+3. **Deployed dashboard to Vercel** — live at https://dashboard-pied-three-98.vercel.app
+4. **Restructured to Lego Model:**
+   - 26 reusable Roles (individual Lego pieces) in lego-pieces/roles/
+   - 5 Team Templates (assembled sets) in lego-pieces/team-templates/
+   - Team Instances (deployed teams tied to businesses with schedules)
+5. **Built Org Chart:** CEO → 3 VPs → 8 Directors → Teams → Roles. 3 dashboard views (Org Chart, Businesses, Skills & Roles)
+6. Cleaned up businesses: removed fake GHL Automator, merged podcast+blog, corrected IONOS attribution
+7. **Created 5 global Claude Code skills** in ~/.claude/skills/:
+   - /seo-content-pipeline, /podcast-pipeline, /new-project, /deploy-team, /org-status
+8. **Symlinked skills** — one source of truth in ~/.claude/skills/, every project links to it. Update once, changes everywhere.
+9. Updated all project CLAUDE.md files with Org Position + Skills Used sections
+10. Fixed VS Code workspace — all 8 projects + Global Skills folder in sidebar
+11. Shelved visual builder — focus on operational excellence first
 
 ### What to do NEXT (in order):
-1. **Deploy dashboard** — push to GitHub, deploy to Vercel so it has a real URL
-3. **Build setup wizards** — interactive scripts inside each skill that generate .env + config for a new business
-4. **Connect to Slack** — install Claude for Slack, add Slack MCP server
-5. **Set up GitHub MCP** — so agents can see across all repos
+1. **Get Hatch deployed** — revenue is waiting, OM Builder works locally, needs Cloudflare
+2. **Clone SEO pipeline to a 2nd business** — prove the Lego model works end-to-end
+3. **Connect to Slack** — install Claude for Slack, daily briefings
+4. **Set up GitHub MCP** — agents can see across all repos
+5. **Dashboard health view** — show what needs attention, what's broken, what's overdue
 6. **Write remaining skills** — GHL Integration, OM Generation
-7. **Make dashboard live** — pull real agent status from GitHub Actions, show actual last-run times
-8. **Daily Slack reports** — scheduled agents post morning briefings to a #ceo-briefing channel
+7. **Pull real agent status** — connect dashboard to GitHub Actions for live last-run times
 
 ### Big Picture Vision
-- This becomes an **Agent Workforce Manager** product
-- Skills = reusable SOPs that deploy to any business
-- Teams = templates you clone across businesses
-- Dashboard = war room showing all agents everywhere
+- Lego model: Roles snap into Teams, Teams deploy to Businesses, Skills update once everywhere
+- Dashboard = war room (live at Vercel, shareable URL)
+- Slash commands = operational SOPs (/org-status, /deploy-team, /new-project)
 - Slack = communication layer (give orders, get reports)
-- Eventually: visual skill builder (drag-and-drop like n8n), skill marketplace, multi-tenant for clients
+- Visual builder shelved until 5+ clients need self-serve
