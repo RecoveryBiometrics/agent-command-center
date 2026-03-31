@@ -581,6 +581,80 @@ export const roles: Role[] = [
     outputs: "Investment-grade branded PDF file",
     tools: ["Puppeteer (headless Chrome PDF rendering)"],
   },
+  // ── Sales & Operations roles ──
+  {
+    id: "conversational-ai-agent",
+    name: "AI Sales Agent",
+    title: "SMS Outreach",
+    description:
+      "Handles warm SMS conversations with business owners who claimed directory listings. Texts as 'Bill'.",
+    duties: [
+      "Responds to inbound SMS from business owners via GHL Conversation AI",
+      "Follows 7-message discovery sequence over 14 days",
+      "25 hard rules for sounding human (no emojis, no bullet points, max 2-3 sentences)",
+      "Leads with free visibility audit, then featured listing ($99-199/mo)",
+      "Only pitches AI agent package ($279-497/mo) after trust is established",
+      "Gracefully exits if not interested — listing stays active",
+    ],
+    inputs: "Contact info, business name, conversation history from GHL",
+    outputs: "SMS responses via GHL, pipeline stage updates",
+    tools: ["GHL Conversation AI (auto-pilot)", "GHL Workflow"],
+    cost: "$0.01-0.03 per message",
+  },
+  {
+    id: "daily-reporter",
+    name: "Daily Reporter",
+    title: "Executive Briefing",
+    description:
+      "Generates plain-English CEO report: what each agent did, what went wrong, what's next.",
+    duties: [
+      "Pulls data from content changelog, wiki state, quality scores, directory stats",
+      "Calculates coverage metrics (% cities, days to full coverage)",
+      "Writes scannable CEO summary — bottom line, agent statuses, gaps, changes",
+      "Sends via Gmail API and Slack webhook",
+    ],
+    inputs: "Pipeline state files, content changelog, directory data",
+    outputs: "Email + Slack daily briefing",
+    tools: ["Gmail API (OAuth)", "Slack webhook"],
+    cost: "$0 (Gmail free tier)",
+  },
+  {
+    id: "pipeline-doctor",
+    name: "Pipeline Doctor",
+    title: "Diagnostics & Auto-Fix",
+    description:
+      "Analyzes pipeline runs, diagnoses failures, implements fixes, pushes. Invoked via /pipeline-doctor.",
+    duties: [
+      "Pulls GitHub Actions logs for latest run",
+      "Categorizes issues: CRITICAL / DEGRADED / QUALITY",
+      "Identifies root causes (API keys, thresholds, broken scrapers, dedup)",
+      "Implements fixes directly in source code",
+      "Enables missing APIs via gcloud CLI",
+      "Commits and pushes all fixes",
+    ],
+    inputs: "GitHub repo, Actions run logs",
+    outputs: "Issue table + committed code fixes",
+    tools: ["GitHub CLI", "gcloud CLI", "Source code editing"],
+    cost: "$0 (on-demand)",
+  },
+  {
+    id: "data-cleaner",
+    name: "Data Cleaner",
+    title: "Quality Enforcer",
+    description:
+      "Scans listings for fabricated/templated content and purges it. Nothing fake gets published.",
+    duties: [
+      "Detects templated patterns ('{CityName} Senior Center', fake VNAs, etc.)",
+      "Removes businesses with generic descriptions and no contact info",
+      "Deduplicates state-level resources (1 per state, not per city)",
+      "Produces verification report CSV",
+      "Supports dry-run and apply modes",
+    ],
+    inputs: "City wiki JSON files",
+    outputs: "Cleaned data files, verification report",
+    tools: ["verify-and-clean.js"],
+    cost: "$0",
+  },
 ];
 
 // ─── SKILLS ────────────────────────────────────────────────────
@@ -633,7 +707,7 @@ export const teamTemplates: TeamTemplate[] = [
     skillId: "seo-content-pipeline",
     description:
       "Discovers real local businesses, verifies they exist, scores quality, enriches with Google data.",
-    roleIds: ["discoverer", "verifier", "quality-auditor", "places-enricher"],
+    roleIds: ["discoverer", "verifier", "quality-auditor", "places-enricher", "data-cleaner"],
   },
   {
     id: "seo-reporting-team",
@@ -666,6 +740,22 @@ export const teamTemplates: TeamTemplate[] = [
       "blog-fact-checker",
       "site-builder",
     ],
+  },
+  {
+    id: "sales-team",
+    name: "Sales Team",
+    skillId: "seo-content-pipeline",
+    description:
+      "Handles inbound directory claims, texts business owners via AI, discovers their needs, leads toward featured listings and AI agent packages.",
+    roleIds: ["conversational-ai-agent"],
+  },
+  {
+    id: "operations-team",
+    name: "Operations Team",
+    skillId: "seo-content-pipeline",
+    description:
+      "Monitors pipeline health, diagnoses failures, sends daily executive reports, enforces data quality.",
+    roleIds: ["daily-reporter", "pipeline-doctor", "data-cleaner"],
   },
   {
     id: "om-builder-team",
@@ -709,6 +799,23 @@ export const teamInstances: TeamInstance[] = [
     runsOn: "GitHub Actions",
     schedule: "Weekly, Tuesdays 9:07 AM ET",
     nextRun: "2026-04-01 09:07 ET",
+  },
+  {
+    id: "sb-sales",
+    templateId: "sales-team",
+    businessId: "safebath",
+    status: "active",
+    runsOn: "GHL Conversation AI + Vercel",
+    schedule: "Always on — responds to inbound claims",
+  },
+  {
+    id: "sb-operations",
+    templateId: "operations-team",
+    businessId: "safebath",
+    status: "scheduled",
+    runsOn: "GitHub Actions",
+    schedule: "Daily, 6:00 AM ET (report) + on-demand (doctor)",
+    lastRun: "2026-03-31 06:00 ET",
   },
   // GlobalHighLevel
   {
