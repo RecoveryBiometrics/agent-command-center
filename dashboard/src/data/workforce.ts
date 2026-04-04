@@ -170,6 +170,25 @@ export const roles: Role[] = [
     outputs: "Committed files, deployed to production, live URLs",
     tools: ["Git", "Vercel/Cloudflare (auto-deploy on push)"],
   },
+  // ── SEO Optimizer roles ──
+  {
+    id: "gsc-analyst",
+    name: "GSC Analyst",
+    title: "Opportunity Prioritizer",
+    description:
+      "Reads flagged pages from GSC data and prioritizes by optimization opportunity.",
+    duties: [
+      "Loads improvement suggestions from gsc-topics.json (low CTR + almost-page-1 pages)",
+      "Scores pages by opportunity: impressions × CTR gap × position weight",
+      "Filters out pages on cooldown (28-day window) or with max retries exhausted",
+      "Validates post JSON exists for each flagged slug",
+      "Selects top N pages per cycle (default 10)",
+      "Passes prioritized list with existing content to downstream roles",
+    ],
+    inputs: "gsc-topics.json improvements list + seo-cooldown.json",
+    outputs: "Prioritized list of pages with post data, action type, and opportunity score",
+    tools: ["GSC data (via gsc-topics.json)", "Cooldown tracker"],
+  },
   // ── Directory roles ──
   {
     id: "discoverer",
@@ -758,6 +777,20 @@ export const teamTemplates: TeamTemplate[] = [
     roleIds: ["daily-reporter", "pipeline-doctor", "data-cleaner"],
   },
   {
+    id: "seo-optimizer-team",
+    name: "SEO Optimizer Team",
+    skillId: "seo-content-pipeline",
+    description:
+      "Takes flagged pages (low CTR, almost-page-1) and executes fixes — researches competitors, rewrites titles/descriptions, expands content, fact-checks, deploys. Tracks results and auto-retries.",
+    roleIds: [
+      "gsc-analyst",
+      "researcher",
+      "copywriter",
+      "fact-checker",
+      "engineer",
+    ],
+  },
+  {
     id: "om-builder-team",
     name: "OM Builder Team",
     skillId: "om-generation",
@@ -826,6 +859,14 @@ export const teamInstances: TeamInstance[] = [
     runsOn: "IONOS VPS ($2/mo)",
     schedule: "24/7 — 25-hour cycles, 20 episodes/day",
     lastRun: "2026-03-29 (continuous)",
+  },
+  {
+    id: "ghl-seo-optimizer",
+    templateId: "seo-optimizer-team",
+    businessId: "globalhighlevel",
+    status: "scheduled",
+    runsOn: "IONOS VPS ($2/mo)",
+    schedule: "Weekly (inside podcast pipeline scheduler)",
   },
   // Hatch
   {
