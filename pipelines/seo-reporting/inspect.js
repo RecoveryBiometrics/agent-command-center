@@ -99,14 +99,18 @@ async function inspectPages() {
     return { inspected: [], summary: null, skipped: true };
   }
 
-  console.log(`Inspecting ALL ${allUrls.length} pages from sitemap`);
+  // Cap per run to stay within API limits and time budget (~20 min max)
+  const MAX_PER_RUN = parseInt(process.env.MAX_INSPECT_PAGES || '200');
+  const urlsToInspect = allUrls.slice(0, MAX_PER_RUN);
+
+  console.log(`Inspecting ${urlsToInspect.length} of ${allUrls.length} pages from sitemap (max ${MAX_PER_RUN}/run)`);
 
   const auth = await getAuthClient();
   const searchconsole = google.searchconsole({ version: 'v1', auth });
 
   const results = [];
-  for (let i = 0; i < allUrls.length; i++) {
-    const fullUrl = allUrls[i];
+  for (let i = 0; i < urlsToInspect.length; i++) {
+    const fullUrl = urlsToInspect[i];
 
     if (i > 0) await sleep(DELAY_MS);
 
