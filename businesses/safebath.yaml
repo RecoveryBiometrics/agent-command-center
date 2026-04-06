@@ -65,6 +65,9 @@ seo:
   ga4_property_id: "14299063401"
   sitemap_url: https://safebathgrabbar.com/sitemap.xml
   seo_agent_email: seo-agent@reiamplifi.com
+  data_dir: seo-data            # relative to seo repo root in CI
+  reports_dir: seo-reports      # relative to seo repo root in CI
+  changelog_path: SEO-CHANGELOG.md
 
 # -- Content Pipeline Config --
 content:
