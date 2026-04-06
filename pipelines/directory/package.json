@@ -1,0 +1,14 @@
+{
+  "name": "directory-pipeline",
+  "version": "1.0.0",
+  "description": "Shared directory pipeline — city history, business discovery, quality audit for any business",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js --business safebath --businesses",
+    "test": "node -e \"require('./config'); console.log('config loads OK')\""
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "js-yaml": "^4.1.0"
+  }
+}

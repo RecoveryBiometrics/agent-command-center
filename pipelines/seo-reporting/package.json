@@ -1,0 +1,16 @@
+{
+  "name": "seo-reporting-pipeline",
+  "version": "1.0.0",
+  "description": "Shared weekly SEO reporting agent — GSC + GA4 analysis for any business",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js --business safebath",
+    "test": "node -e \"require('./config'); console.log('config loads OK')\""
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "googleapis": "^144.0.0",
+    "js-yaml": "^4.1.0",
+    "nodemailer": "^6.9.0"
+  }
+}
