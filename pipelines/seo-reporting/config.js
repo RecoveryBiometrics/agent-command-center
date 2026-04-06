@@ -78,6 +78,15 @@ const config = {
   // Email
   seoAgentEmail: biz.seo?.seo_agent_email || process.env.SEO_AGENT_EMAIL || '',
 
+  // Baseline metrics (from site's first 90 days — used for comparison in reports)
+  baseline: {
+    clicks: parseInt(biz.seo?.baseline_clicks || process.env.BASELINE_CLICKS || '0'),
+    impressions: parseInt(biz.seo?.baseline_impressions || process.env.BASELINE_IMPRESSIONS || '0'),
+    ctr: parseFloat(biz.seo?.baseline_ctr || process.env.BASELINE_CTR || '0'),
+    avgPosition: parseFloat(biz.seo?.baseline_avg_position || process.env.BASELINE_AVG_POSITION || '0'),
+    period: biz.seo?.baseline_period || process.env.BASELINE_PERIOD || 'N/A',
+  },
+
   // Raw YAML access
   _raw: biz,
 };
