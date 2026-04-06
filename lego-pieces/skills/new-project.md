@@ -1,1 +1,0 @@
-/Users/kerapassante/.claude/skills/new-project/SKILL.md

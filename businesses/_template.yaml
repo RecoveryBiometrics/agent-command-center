@@ -1,0 +1,98 @@
+# _template.yaml — Copy this file for a new business
+# Rename to: {business-slug}.yaml (e.g., gutterguard.yaml)
+#
+# After filling this out:
+#   1. Push agent-command-center (dashboard auto-updates)
+#   2. Run /new-project to create the project directory
+#   3. Run /deploy-team to set up pipelines
+#
+# Delete any sections that don't apply. Leave TODOs for things you'll fill in later.
+
+id: # short slug, no spaces (e.g., safebath, gutterguard)
+name: # display name (e.g., "GutterGuard Pro")
+status: building  # building | live | paused | planned
+website: # https://...
+niche: # one line (e.g., "gutter installation, home maintenance")
+description: # one sentence for the dashboard
+
+# -- Org --
+org:
+  director: # dir-{slug}
+  director_name: # Director of {Name}
+  reportsTo: vp-growth  # or vp-product
+  github: # RecoveryBiometrics/{repo-name}
+  path: # ~/Projects/{slug}/ or ~/Developer/projects/{slug}/
+  terminal_shortcut: # shell function name
+
+# -- Brand --
+brand:
+  phone_display: # "(555) 123-4567"
+  phone_tel: # "+15551234567"
+  email: # info@example.com
+  cta: # "Call Today for a Free Estimate"
+  voice: # tone/style description for content generation
+
+# -- Service Areas (if local service business) --
+# service_areas:
+#   states: []
+#   cities_per_run: 8
+#   phone_overrides:
+#     "County, ST":
+#       display: "(555) 999-8888"
+#       tel: "+15559998888"
+
+# -- Slack Channels --
+slack:
+  ops_log_channel: C0AQG0DP222  # shared #ops-log
+  ceo_channel: C0AQAHSQK38     # shared #ceo-briefing
+  business_channel: # create a new channel, put its ID here
+
+# -- SEO / Analytics (if website has GSC + GA4) --
+# seo:
+#   gsc_site_url: "sc-domain:example.com"
+#   ga4_property_id: ""
+#   sitemap_url: https://example.com/sitemap.xml
+
+# -- Content Config (if using seo-content-team) --
+# content:
+#   max_similarity_percent: 85
+#   categories: []
+#   subreddits: []
+
+# -- Directory Config (if using directory-team) --
+# directory:
+#   enabled: true
+#   business_categories: []
+
+# -- Secrets (names only — actual values go in .env / GitHub Secrets) --
+secrets:
+  anthropic_api_key: ANTHROPIC_API_KEY
+  google_genai_api_key: GOOGLE_GENAI_API_KEY
+  slack_bot_token: SLACK_BOT_TOKEN
+
+# -- Teams to Deploy --
+# Uncomment the teams you want. Run /deploy-team after.
+teams: []
+  # - template: seo-content-team
+  #   runs_on: GitHub Actions
+  #   schedule: "Daily, 6:00 AM ET"
+  #   status: scheduled
+  #
+  # - template: seo-reporting-team
+  #   runs_on: GitHub Actions
+  #   schedule: "Weekly, Tuesdays 9:07 AM ET"
+  #   status: scheduled
+  #
+  # - template: directory-team
+  #   runs_on: GitHub Actions
+  #   schedule: "Daily, 6:00 AM ET"
+  #   status: scheduled
+  #
+  # - template: content-production-team
+  #   runs_on: IONOS VPS
+  #   schedule: "24/7 — 25-hour cycles"
+  #   status: active
+
+# -- Deploy --
+deploy:
+  platform: # Vercel | Netlify | Cloudflare | Render

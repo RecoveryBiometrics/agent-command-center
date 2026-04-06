@@ -1,1 +1,0 @@
-/Users/kerapassante/.claude/skills/org-status/SKILL.md

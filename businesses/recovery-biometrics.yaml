@@ -1,0 +1,28 @@
+# recovery-biometrics.yaml — Single source of truth for Recovery Biometrics
+# Last updated: 2026-04-06
+
+id: recovery
+name: Recovery Biometrics
+status: paused  # reactivates when SafeBath + Hatch are stable
+website: # TBD
+niche: "Oura Ring + FeatherStone biometrics for addiction recovery"
+description: "Recovery-focused biometrics app. Paused until SafeBath and Hatch are stable."
+
+# -- Org --
+org:
+  director: dir-recovery
+  director_name: Director of Recovery Biometrics
+  reportsTo: vp-product
+  path: ~/Projects/recovery-biometrics/
+  terminal_shortcut: recovery
+
+# -- Key Context --
+notes:
+  - "Kera (Bill's wife) is VP of Therapy at Sunflowers Sober — connection to behavioral health space"
+
+# -- Deployed Teams --
+teams: []
+
+# -- Deploy --
+deploy:
+  platform: # TBD

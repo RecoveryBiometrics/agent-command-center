@@ -801,148 +801,16 @@ export const teamTemplates: TeamTemplate[] = [
 ];
 
 // ─── LAYER 2b: DEPLOYED TEAM INSTANCES ─────────────────────────
+// Generated from businesses/*.yaml — edit the YAML, not this file
 
-export const teamInstances: TeamInstance[] = [
-  // SafeBath
-  {
-    id: "sb-seo",
-    templateId: "seo-content-team",
-    businessId: "safebath",
-    status: "scheduled",
-    runsOn: "GitHub Actions",
-    schedule: "Daily, 6:00 AM ET",
-    lastRun: "2026-03-29 06:00 ET",
-    nextRun: "2026-03-30 06:00 ET",
-  },
-  {
-    id: "sb-directory",
-    templateId: "directory-team",
-    businessId: "safebath",
-    status: "scheduled",
-    runsOn: "GitHub Actions",
-    schedule: "Daily, 6:00 AM ET",
-    lastRun: "2026-03-29 06:15 ET",
-    nextRun: "2026-03-30 06:15 ET",
-  },
-  {
-    id: "sb-reporting",
-    templateId: "seo-reporting-team",
-    businessId: "safebath",
-    status: "scheduled",
-    runsOn: "GitHub Actions",
-    schedule: "Weekly, Tuesdays 9:07 AM ET",
-    nextRun: "2026-04-01 09:07 ET",
-  },
-  {
-    id: "sb-sales",
-    templateId: "sales-team",
-    businessId: "safebath",
-    status: "active",
-    runsOn: "GHL Conversation AI + Vercel",
-    schedule: "Always on — responds to inbound claims",
-  },
-  {
-    id: "sb-operations",
-    templateId: "operations-team",
-    businessId: "safebath",
-    status: "scheduled",
-    runsOn: "GitHub Actions",
-    schedule: "Daily, 6:00 AM ET (report) + on-demand (doctor)",
-    lastRun: "2026-03-31 06:00 ET",
-  },
-  // GlobalHighLevel
-  {
-    id: "ghl-production",
-    templateId: "content-production-team",
-    businessId: "globalhighlevel",
-    status: "active",
-    runsOn: "IONOS VPS ($2/mo)",
-    schedule: "24/7 — 25-hour cycles, 20 episodes/day",
-    lastRun: "2026-03-29 (continuous)",
-  },
-  {
-    id: "ghl-seo-optimizer",
-    templateId: "seo-optimizer-team",
-    businessId: "globalhighlevel",
-    status: "scheduled",
-    runsOn: "IONOS VPS ($2/mo)",
-    schedule: "Weekly (inside podcast pipeline scheduler)",
-  },
-  // Hatch
-  {
-    id: "hatch-om",
-    templateId: "om-builder-team",
-    businessId: "hatch",
-    status: "idle",
-    runsOn: "Local only (not deployed)",
-    schedule: "Manual — triggered from localhost:3000",
-  },
-];
+import { generatedTeamInstances, generatedBusinesses } from "./generated-workforce";
+
+export const teamInstances: TeamInstance[] = generatedTeamInstances;
 
 // ─── LAYER 3: BUSINESSES ───────────────────────────────────────
+// Generated from businesses/*.yaml — edit the YAML, not this file
 
-export const businesses: Business[] = [
-  {
-    id: "safebath",
-    name: "SafeBath Grab Bar",
-    status: "live",
-    path: "~/Developer/projects/safebath/",
-    website: "safebathgrabbar.com",
-    deploy: "Vercel",
-    github: "RecoveryBiometrics/safebath",
-    description:
-      "Local service business — grab bar installation, bathroom safety. 5 states, 1,427 pages, 366 directory listings.",
-    directorId: "dir-safebath",
-  },
-  {
-    id: "globalhighlevel",
-    name: "GlobalHighLevel.com",
-    status: "live",
-    path: "~/Developer/projects/marketing/podcast-pipeline/",
-    website: "globalhighlevel.com",
-    github: "RecoveryBiometrics/content-autopilot",
-    deploy: "IONOS VPS",
-    description:
-      "GHL tutorial site + podcast. 80+ tutorials, 380 followers. Affiliate model (30-day free trial). Runs on IONOS VPS 24/7.",
-    directorId: "dir-ghl",
-  },
-  {
-    id: "hatch",
-    name: "Hatch Investments",
-    status: "not-running",
-    path: "~/Projects/hatch-investments/",
-    website: "localhost:3000",
-    github: "RecoveryBiometrics/hatch-investments",
-    description:
-      "AI operations platform for RE syndicators. OM Builder works locally, needs deploy to Cloudflare.",
-    directorId: "dir-hatch",
-  },
-  {
-    id: "reiamplifi",
-    name: "REI Amplifi",
-    status: "live",
-    path: "~/Projects/reiamplifi/",
-    description:
-      "Parent agency. 3.5 years on GHL. No custom AI agents — uses GHL built-in automations only.",
-    directorId: "dir-reiamplifi",
-  },
-  {
-    id: "mailer",
-    name: "Mailer Dashboard",
-    status: "building",
-    path: "~/Developer/projects/marketing/mailer-dashboard/",
-    description: "Email campaign management with Claude AI. In development.",
-    directorId: "dir-mailer",
-  },
-  {
-    id: "recovery",
-    name: "Recovery Biometrics",
-    status: "paused",
-    path: "~/Projects/recovery-biometrics/",
-    description: "Oura Ring + FeatherStone biometrics for recovery. Low priority.",
-    directorId: "dir-recovery",
-  },
-];
+export const businesses: Business[] = generatedBusinesses;
 
 // ─── ORG CHART: EXECUTIVES ─────────────────────────────────────
 

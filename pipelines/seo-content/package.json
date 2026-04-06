@@ -1,0 +1,16 @@
+{
+  "name": "seo-content-pipeline",
+  "version": "1.0.0",
+  "description": "Shared 6-agent content pipeline — generates unique city content daily for any business",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js --business safebath",
+    "test": "node -e \"require('./config'); console.log('config loads OK')\""
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "googleapis": "^144.0.0",
+    "js-yaml": "^4.1.0",
+    "nodemailer": "^6.10.1"
+  }
+}

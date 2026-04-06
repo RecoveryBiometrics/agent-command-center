@@ -1,0 +1,38 @@
+# bass-forecast.yaml — Single source of truth for Bass Forecast
+# Last updated: 2026-04-06
+
+id: bass-forecast
+name: Bass Forecast
+status: building  # 90-day retainer active
+website: # Landon's app — 1.5M users, 600K-700K monthly website visitors
+niche: "Fishing app — content repurposing, affiliate links, technical SEO"
+description: "AI automation and ecosystem build for Bass Forecast. 90-day retainer with Landon Bloomer."
+
+# -- Org --
+org:
+  director: # N/A — contractor engagement, not internal business
+  reportsTo: # N/A
+  path: ~/Projects/bass-forecast/
+  terminal_shortcut: bass
+
+# -- Client --
+client:
+  name: Landon Bloomer
+  relationship: "College friend, app founder"
+  retainer: "$7,500/month"
+  term: "90-day initial"
+  api_cost_markup: "3x actual"
+  post_90_days: "15-20% revenue share on attributed assets"
+  equity_target: "1-2% milestone-based vesting after 6-12 months"
+
+# -- Key Docs --
+docs:
+  roadmap: docs/roadmap.md       # 92-item roadmap
+  call_notes: calls/             # Landon call transcripts
+
+# -- Deployed Teams --
+teams: []  # none yet — building orchestration layer first
+
+# -- Deploy --
+deploy:
+  platform: # TBD

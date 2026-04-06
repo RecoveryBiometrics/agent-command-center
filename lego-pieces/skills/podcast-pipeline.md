@@ -1,1 +1,0 @@
-/Users/kerapassante/.claude/skills/podcast-pipeline/SKILL.md

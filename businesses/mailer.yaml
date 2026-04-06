@@ -1,0 +1,31 @@
+# mailer.yaml — Single source of truth for Mailer Dashboard
+# Last updated: 2026-04-06
+
+id: mailer
+name: Mailer Dashboard
+status: building
+website: # TBD — in development
+niche: "Email campaign management with Claude AI"
+description: "Email campaign management tool. Next.js 14 + Claude AI. In development."
+
+# -- Org --
+org:
+  director: dir-mailer
+  director_name: Director of Mailer
+  reportsTo: vp-product
+  path: ~/Developer/projects/marketing/mailer-dashboard/
+  terminal_shortcut: mailer
+
+# -- Tech --
+tech:
+  framework: "Next.js 14"
+  language: TypeScript
+  styling: "Tailwind CSS + shadcn/ui"
+  ai: "@anthropic-ai/sdk"
+
+# -- Deployed Teams --
+teams: []
+
+# -- Deploy --
+deploy:
+  platform: # TBD

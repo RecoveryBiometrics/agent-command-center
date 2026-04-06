@@ -1,0 +1,145 @@
+# globalhighlevel.yaml — Single source of truth for GlobalHighLevel
+# Last updated: 2026-04-06
+
+id: globalhighlevel
+name: GlobalHighLevel.com
+status: live
+website: https://globalhighlevel.com
+niche: "GHL tips, agency growth, AI automation, CRM marketing"
+description: "Affiliate content site — podcast, blog, SEO. 1,565 articles, 20 episodes/day."
+
+# -- Org --
+org:
+  director: dir-ghl
+  director_name: Director of GlobalHighLevel
+  reportsTo: vp-growth
+  github: RecoveryBiometrics/content-autopilot
+  path: ~/Developer/projects/marketing/podcast-pipeline/
+  terminal_shortcut: podcast
+
+# -- Brand --
+brand:
+  affiliate_link: "https://www.gohighlevel.com/highlevel-bootcamp?fp_ref=amplifi-technologies12"
+  trial_link: https://globalhighlevel.com/trial
+  trial_length: "30-day"  # doubled from GHL standard 14-day
+  podcast_name: GoHighLevel Command Center
+  podcast_platform: Transistor.fm
+  required_tags:
+    - gohighlevel
+    - go high level
+    - GHL
+    - CRM
+    - marketing automation
+    - agency software
+
+# -- Slack Channels --
+slack:
+  ops_log_channel: C0AQG0DP222       # #ops-log (shared)
+  ceo_channel: C0AQAHSQK38           # #ceo-briefing
+  business_channel: C0AQ95LG97F      # #globalhighlevel
+
+# -- SEO / Analytics --
+seo:
+  gsc_site_url: "sc-domain:globalhighlevel.com"
+  ga4_property_id: "531015433"
+  site_url: https://globalhighlevel.com
+
+# -- Transistor (Podcast Hosting) --
+transistor:
+  show_id: "75382"
+
+# -- Google Drive --
+google_drive:
+  folder_id: "1xGOysDgcGGQRPdd1pE0gV--zgA5TiBhS"
+  credentials_file: credentials.json
+
+# -- Podcast Pipeline Config --
+podcast:
+  cycle_hours: 25
+  episodes_per_cycle: 20
+  publish_start_time: "8:00 AM ET"
+  publish_interval_minutes: 45
+  total_articles_target: 1565
+  notebooklm_quota_per_day: 20
+  min_content_length: 3000  # characters
+  ghl_solutions_base: "https://help.gohighlevel.com/support/solutions"
+
+# -- Blog Config --
+blog:
+  site_posts_dir: globalhighlevel-site/posts
+  categories_file: globalhighlevel-site/categories.json
+  ddg_max_results: 5
+
+# -- India Blog --
+india_blog:
+  ghl_starter_price_inr: "8,000/month"
+  ghl_agency_price_inr: "24,700/month"
+  ghl_starter_price_usd: "$97/month"
+  ghl_agency_price_usd: "$297/month"
+  primary_competitor: Zoho CRM
+  payment_methods: [Razorpay, PayU, UPI]
+  compliance_law: DPDP Act
+  target_cities:
+    - Mumbai
+    - Bangalore
+    - "Delhi/NCR"
+    - Hyderabad
+    - Pune
+    - Chennai
+
+# -- SEO Optimizer Config --
+seo_optimizer:
+  model: claude-haiku-4-5-20251001
+  max_pages_per_cycle: 10
+  schedule_days: 7
+  cooldown_days: 28
+  max_retry_attempts: 2
+  title_max_chars: 60
+  desc_max_chars: 155
+
+# -- Email --
+email:
+  from_address: bill@reiamplifi.com
+
+# -- Secrets (names only — actual values in .env / GitHub Secrets) --
+secrets:
+  transistor_api_key: TRANSISTOR_API_KEY
+  anthropic_api_key: ANTHROPIC_API_KEY
+  google_ai_api_key: GOOGLE_AI_API_KEY
+  google_drive_credentials: GOOGLE_CREDENTIALS_FILE
+  slack_bot_token: SLACK_BOT_TOKEN
+  gmail_address: GMAIL_ADDRESS
+  gmail_app_password: GMAIL_APP_PASSWORD
+
+# -- Deployed Teams --
+teams:
+  - template: content-production-team
+    instance_id: ghl-production
+    runs_on: IONOS VPS ($2/mo)
+    schedule: "24/7 — 25-hour cycles, 20 episodes/day"
+    status: active
+
+  - template: seo-optimizer-team
+    instance_id: ghl-seo-optimizer
+    runs_on: IONOS VPS (inside podcast scheduler)
+    schedule: "Weekly (7-day gate inside scheduler)"
+    status: scheduled
+
+# -- Deploy --
+deploy:
+  platform: Netlify  # git push triggers deploy
+  vps_host: IONOS
+  vps_user: williamcourterwelch
+  vps_working_dir: /home/williamcourterwelch/Claude_notebookLM_GHL_Podcast/ghl-podcast-pipeline
+  service_type: systemd
+  service_name: ghl-podcast
+  restart_delay_seconds: 30
+
+# -- Cost Estimates --
+costs:
+  transistor: "$19/month"
+  notebooklm: "~$20/month"
+  anthropic: "~$0.03/day"
+  google_ai: "~$0.05/day"
+  vps: "$2/month"
+  total_estimate: "~$42/month"

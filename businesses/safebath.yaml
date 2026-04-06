@@ -1,0 +1,168 @@
+# safebath.yaml — Single source of truth for SafeBath Grab Bar
+# Last updated: 2026-04-06
+
+id: safebath
+name: Safe Bath Grab Bars
+status: live  # live | building | planned | paused
+website: https://safebathgrabbar.com
+niche: "Grab bar installation, bathroom safety, aging in place"
+description: "Local service business — grab bar installation, bathroom safety. 5 states, 1,427 pages, 366 directory listings."
+
+# -- Org --
+org:
+  director: dir-safebath
+  director_name: Director of SafeBath
+  reportsTo: vp-growth
+  github: RecoveryBiometrics/safebath
+  path: ~/Developer/projects/safebath/
+  terminal_shortcut: safebath
+
+# -- Brand --
+brand:
+  phone_display: "(610) 840-6371"
+  phone_tel: "+16108406371"
+  email: info@safebathgrabbars.com
+  pricing_first: "$199"
+  pricing_additional: "$99"
+  pricing_text: "$199 first bar, $99 each additional (same visit)"
+  cta: "Call for Same-Week Scheduling"
+  voice: "Direct, trust-building, safety-focused, local. Lead with fear prevention, not features."
+  trust_signals:
+    - Licensed & Insured
+    - 20 Years Experience
+    - Lifetime Labor Warranty
+    - ADA-Compliant
+  address:
+    street: "123 Safety First Lane"
+    city: Exton
+    state: PA
+    zip: "19341"
+
+# -- Service Areas --
+service_areas:
+  states: [PA, DE, MD, NV, SC]
+  cities_per_run: 8
+  total_cities: 167  # across 8 counties
+  phone_overrides:
+    "Clark County, NV":
+      display: "(725) 425-7383"
+      tel: "+17254257383"
+    "Horry County, SC":
+      display: "(854) 246-2882"
+      tel: "+18542462882"
+  # Full city list lives in the project repo (too large for YAML):
+  cities_data_path: website/scripts/content-pipeline/cities-data.json
+
+# -- Slack Channels --
+slack:
+  ops_log_channel: C0AQG0DP222     # #ops-log (shared across businesses)
+  ceo_channel: C0AQAHSQK38         # #ceo-briefing
+  business_channel: C0AQCHCC2JW    # #safebath
+
+# -- SEO / Analytics --
+seo:
+  gsc_site_url: "sc-domain:safebathgrabbar.com"
+  ga4_property_id: "14299063401"
+  sitemap_url: https://safebathgrabbar.com/sitemap.xml
+  seo_agent_email: seo-agent@reiamplifi.com
+
+# -- Content Pipeline Config --
+content:
+  output_dir: website/src/data/local-news        # where generated articles go (relative to project path)
+  changelog_path: website/src/data/content-changelog.json
+  city_slug_prefix: bathroom-safety               # URL pattern: /bathroom-safety-{city}-{state}
+  max_similarity_percent: 85
+  max_retry_attempts: 3
+  categories:
+    - safety-tip
+    - local-news
+    - community
+    - seasonal
+    - stats
+  subreddits:
+    - AgingParents
+    - eldercare
+    - HomeImprovement
+    - occupationaltherapy
+    - CaregiverSupport
+    - Aging
+    - disability
+    - PhysicalTherapy
+
+# -- Directory / Wiki Config --
+directory:
+  enabled: true
+  cities_per_run: 10
+  gemini_model: "gemini-2.5-flash"
+  rate_limit_requests_per_min: 15
+  rate_limit_delay_ms: 4000
+  max_calls_per_city: 15
+  business_categories:
+    - Physical Therapy
+    - Occupational Therapy
+    - Home Health Agency
+    - Senior Center
+    - Medical Supply Store
+    - Home Care Agency
+    - Assisted Living
+    - Rehabilitation Center
+    - Elder Law Attorney
+    - Geriatric Care Manager
+
+# -- GHL CRM --
+ghl:
+  location_id: VL5PlkLBYG4mKk3N6PGw
+
+# -- Secrets (names only — actual values in .env / GitHub Secrets) --
+secrets:
+  anthropic_api_key: ANTHROPIC_API_KEY
+  google_genai_api_key: GOOGLE_GENAI_API_KEY
+  google_service_account_key: GOOGLE_SERVICE_ACCOUNT_KEY
+  google_oauth_credentials: GOOGLE_OAUTH_CREDENTIALS
+  slack_bot_token: SLACK_BOT_TOKEN
+  ghl_private_token: GHL_PRIVATE_TOKEN
+  smtp_user: SMTP_USER          # bill@reiamplifi.com
+  smtp_pass: SMTP_PASS
+
+# -- Deployed Teams --
+teams:
+  - template: seo-content-team
+    instance_id: sb-seo
+    runs_on: GitHub Actions
+    schedule: "Daily, 6:00 AM ET"
+    cron: "0 10 * * *"
+    status: scheduled
+    node_version: "20"
+
+  - template: directory-team
+    instance_id: sb-directory
+    runs_on: GitHub Actions
+    schedule: "Daily, 6:00 AM ET"
+    cron: "0 10 * * *"
+    status: scheduled
+
+  - template: seo-reporting-team
+    instance_id: sb-reporting
+    runs_on: GitHub Actions
+    schedule: "Weekly, Tuesdays 9:07 AM ET"
+    cron: "7 13 * * 2"
+    status: scheduled
+    node_version: "20"
+
+  - template: sales-team
+    instance_id: sb-sales
+    runs_on: GHL Conversation AI + Vercel
+    schedule: "Always on — responds to inbound claims"
+    status: active
+
+  - template: operations-team
+    instance_id: sb-operations
+    runs_on: GitHub Actions
+    schedule: "Daily, 6:00 AM ET (report) + on-demand (doctor)"
+    status: scheduled
+
+# -- Deploy --
+deploy:
+  platform: Vercel
+  auto_deploy: true  # push to main = live
+  gmb_profile: "https://www.google.com/maps/place/SafeBath+LLC/data!4m2!3m1!1s0x0:0xc84c5989269d2c24?sa=X&ved=1t:2428&ictx=111"

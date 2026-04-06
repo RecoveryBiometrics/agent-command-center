@@ -1,0 +1,53 @@
+# hatch.yaml — Single source of truth for Hatch Investments
+# Last updated: 2026-04-06
+
+id: hatch
+name: Hatch Investments
+status: not-running  # deployed to Render, needs Cloudflare migration
+website: https://om-builder.onrender.com  # live but not actively used
+niche: "Real estate syndication, investor relations, offering memorandums"
+description: "AI operations platform for real estate syndicators. OM Builder works locally, needs deploy to Cloudflare."
+
+# -- Org --
+org:
+  director: dir-hatch
+  director_name: Director of Hatch Investments
+  reportsTo: vp-product
+  github: RecoveryBiometrics/hatch-investments
+  path: ~/Projects/hatch-investments/
+  terminal_shortcut: hatch
+
+# -- Platform Pricing --
+pricing:
+  platform_only: "$1,197/mo"
+  platform_plus_consultation: "$1,947/mo"
+  services:
+    - name: OM Builder
+      actual_cost: "$0.35"
+      charged: "$9"
+      margin: "96%"
+    - name: Public Records Scraper
+    - name: Mailer Integration
+    - name: Investor Newsletter Generator
+    - name: SEO Blog Engine
+    - name: Local SEO + GBP
+
+# -- Secrets (names only) --
+secrets:
+  anthropic_api_key: ANTHROPIC_API_KEY
+  google_oauth_client_id: GOOGLE_OAUTH_CLIENT_ID
+  google_oauth_client_secret: GOOGLE_OAUTH_CLIENT_SECRET
+  slack_bot_token: SLACK_BOT_TOKEN
+
+# -- Deployed Teams --
+teams:
+  - template: om-builder-team
+    instance_id: hatch-om
+    runs_on: Render (needs migration to Cloudflare)
+    schedule: "On demand — web UI"
+    status: idle
+
+# -- Deploy --
+deploy:
+  platform: Render  # migrating to Cloudflare
+  auto_deploy: false

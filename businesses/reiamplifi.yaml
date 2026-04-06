@@ -1,0 +1,31 @@
+# reiamplifi.yaml — Single source of truth for REI Amplifi
+# Last updated: 2026-04-06
+
+id: reiamplifi
+name: REI Amplifi
+status: live
+website: # TODO
+niche: "GHL agency, AI automation for real estate and recovery verticals"
+description: "Parent agency. 3.5 years on GHL. No custom AI agents — uses GHL built-in automations."
+
+# -- Org --
+org:
+  director: dir-reiamplifi
+  director_name: Director of REI Amplifi
+  reportsTo: vp-growth
+  path: ~/Projects/reiamplifi/
+  terminal_shortcut: reiamplifi
+
+# -- Brand --
+brand:
+  email: bill@reiamplifi.com
+  target_verticals:
+    - Real estate syndicators
+    - Recovery / behavioral health
+
+# -- Deployed Teams --
+teams: []  # uses GHL built-in automations, no custom pipelines
+
+# -- Deploy --
+deploy:
+  platform: GHL  # GoHighLevel native
