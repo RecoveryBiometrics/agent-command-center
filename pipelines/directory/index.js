@@ -242,8 +242,32 @@ async function runBusinesses(args) {
     process.exit(1);
   }
 
-  const allCities = loadCities();
+  let allCities = loadCities();
   resetGlobalIndex();
+
+  // Apply analytics dispatch — reorder cities based on analytics recommendations
+  const dispatch = config.ANALYTICS_DISPATCH;
+  if (dispatch && dispatch.instructions) {
+    for (const instruction of dispatch.instructions) {
+      if (instruction.type === 'prioritize_regions' && instruction.regions) {
+        const prioritized = [];
+        const rest = [];
+        for (const city of allCities) {
+          const match = instruction.regions.some(target =>
+            (city.county && target.includes(city.county)) ||
+            city.name.includes(target) || city.state === target ||
+            target.includes(city.name)
+          );
+          if (match) prioritized.push(city);
+          else rest.push(city);
+        }
+        if (prioritized.length > 0) {
+          console.log(`[Analytics Dispatch] Prioritized ${prioritized.length} cities: ${prioritized.map(c => c.name).join(', ')}`);
+          allCities = [...prioritized, ...rest];
+        }
+      }
+    }
+  }
 
   // Handle --city <slug>
   const cityIdx = args.indexOf('--city');
@@ -294,6 +318,11 @@ async function runBusinesses(args) {
   }
 
   printSummary('Business Directory', batch, results, failures, processAll ? null : nextOffset, allCities.length);
+
+  // Clear analytics dispatch after processing
+  if (config.ANALYTICS_DISPATCH) {
+    config.clearAnalyticsDispatch();
+  }
 }
 
 // =====================================================================

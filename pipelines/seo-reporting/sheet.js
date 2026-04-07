@@ -65,4 +65,67 @@ async function fetchPendingChangesFromSheet() {
   }));
 }
 
-module.exports = { fetchChangelogFromSheet, fetchPendingChangesFromSheet };
+/**
+ * Write weekly SEO report summary to the "Weekly SEO Report" tab.
+ * Appends one row per run. Creates tab with headers if it doesn't exist.
+ */
+async function writeReportToSheet(analysis, inspection) {
+  if (!config.trackingSheetId) {
+    console.log('  No tracking_sheet_id — skipping Sheet report');
+    return false;
+  }
+
+  try {
+    const auth = await getAuthClient();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const spreadsheetId = config.trackingSheetId;
+    const TAB = 'Weekly SEO Report';
+
+    // Check if tab exists
+    const meta = await sheets.spreadsheets.get({ spreadsheetId });
+    const tabExists = meta.data.sheets.some(s => s.properties.title === TAB);
+
+    if (!tabExists) {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: { requests: [{ addSheet: { properties: { title: TAB } } }] },
+      });
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `'${TAB}'!A1:H1`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [['Date', 'Clicks', 'Impressions', 'CTR', 'Avg Position', 'Indexed Pages', 'Wins', 'Drops']] },
+      });
+    }
+
+    const date = new Date().toISOString().split('T')[0];
+    const t = analysis.currentTotals || {};
+    const indexed = inspection?.summary?.indexed || 'N/A';
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `'${TAB}'!A:H`,
+      valueInputOption: 'RAW',
+      requestBody: {
+        values: [[
+          date,
+          String(t.clicks || 0),
+          String(t.impressions || 0),
+          String(t.ctr ? (t.ctr * 100).toFixed(1) + '%' : 'N/A'),
+          String(t.avgPosition ? t.avgPosition.toFixed(1) : 'N/A'),
+          String(indexed),
+          String(analysis.wins?.length || 0),
+          String(analysis.drops?.length || 0),
+        ]],
+      },
+    });
+
+    console.log(`  Logged to Weekly SEO Report tab: ${date}`);
+    return true;
+  } catch (err) {
+    console.warn(`  Sheet report write failed: ${err.message}`);
+    return false;
+  }
+}
+
+module.exports = { fetchChangelogFromSheet, fetchPendingChangesFromSheet, writeReportToSheet };

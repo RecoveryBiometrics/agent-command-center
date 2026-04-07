@@ -10,6 +10,7 @@ const { review } = require('./review');
 const { generateReport, generateEmailBody } = require('./report');
 const { sendToSlack } = require('./slack');
 const { writeTodosToSheet, formatTodosForSlack } = require('./todos');
+const { writeReportToSheet } = require('./sheet');
 
 async function run() {
   console.log(`${config.businessName} SEO Agent starting...`);
@@ -54,8 +55,11 @@ async function run() {
     console.log('[7/7] Generating report...');
     const { md, reportPath } = await generateReport(data, analysis, interpretation, reviewResult, inspection);
 
+    // Write report summary to Sheet
+    console.log('Writing to Sheet...');
+    await writeReportToSheet(analysis, inspection);
+
     // Write actionable TODOs to Sheet
-    console.log('Writing TODOs...');
     const todoResult = await writeTodosToSheet(analysis, interpretation);
 
     // Send report to Slack #safebath channel

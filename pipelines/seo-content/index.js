@@ -123,10 +123,51 @@ async function processCity(city) {
   return null;
 }
 
+function applyDispatch(cities) {
+  const dispatch = config.ANALYTICS_DISPATCH;
+  if (!dispatch || !dispatch.instructions) return cities;
+
+  let reordered = [...cities];
+
+  for (const instruction of dispatch.instructions) {
+    if (instruction.type === 'prioritize_cities' && instruction.cities) {
+      // Move matching cities to the front
+      const prioritized = [];
+      const rest = [];
+      for (const city of reordered) {
+        const match = instruction.cities.some(target =>
+          city.name.includes(target) || city.state === target ||
+          (city.county && target.includes(city.county)) ||
+          target.includes(city.name)
+        );
+        if (match) prioritized.push(city);
+        else rest.push(city);
+      }
+      if (prioritized.length > 0) {
+        console.log(`[Analytics Dispatch] Prioritized ${prioritized.length} cities: ${prioritized.map(c => c.name).join(', ')}`);
+        reordered = [...prioritized, ...rest];
+      }
+    }
+
+    if (instruction.type === 'avoid_cities' && instruction.cities) {
+      const before = reordered.length;
+      reordered = reordered.filter(city =>
+        !instruction.cities.some(target =>
+          city.name.includes(target) || target.includes(city.name)
+        )
+      );
+      console.log(`[Analytics Dispatch] Deprioritized ${before - reordered.length} cities`);
+    }
+  }
+
+  return reordered;
+}
+
 async function run() {
   console.log(`${config.BUSINESS_NAME} Content Pipeline starting...\n`);
 
-  const allCities = parseCities();
+  let allCities = parseCities();
+  allCities = applyDispatch(allCities);
   const state = loadState();
 
   let offset = state.lastOffset;
@@ -182,6 +223,11 @@ async function run() {
     await sendPipelineEmail(results, failures);
   } catch (err) {
     console.warn('Email failed:', err.message);
+  }
+
+  // Clear analytics dispatch after processing
+  if (config.ANALYTICS_DISPATCH) {
+    config.clearAnalyticsDispatch();
   }
 
   return { results, failures };
