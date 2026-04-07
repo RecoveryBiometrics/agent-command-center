@@ -8,6 +8,7 @@ Central hub for all REI Amplifi AI agent operations. Contains reusable skills, b
 businesses/     — one YAML per business (single source of truth for config)
 pipelines/      — the actual code that runs the pipelines
 skills/         — backup of all skills (source of truth is ~/.claude/skills/)
+memory/         — backup of all memory files (source of truth is ~/.claude/projects/.../memory/)
 dashboard/      — Next.js visual dashboard (live on Vercel)
 ```
 
