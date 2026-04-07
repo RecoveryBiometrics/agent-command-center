@@ -63,7 +63,7 @@ slack:
 # -- SEO / Analytics --
 seo:
   gsc_site_url: "sc-domain:safebathgrabbar.com"
-  ga4_property_id: "14299063401"
+  ga4_property_id: "531047753"
   sitemap_url: https://safebathgrabbar.com/sitemap.xml
   seo_agent_email: seo-agent@reiamplifi.com
   data_dir: seo-data            # relative to seo repo root in CI
@@ -120,7 +120,7 @@ directory:
 
 # -- Analytics --
 analytics:
-  ga4_property_id: "14299063401"
+  ga4_property_id: "531047753"
   business_type: local_service
   schedule: weekly
   conversion_events:
