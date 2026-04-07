@@ -674,6 +674,128 @@ export const roles: Role[] = [
     tools: ["verify-and-clean.js"],
     cost: "$0",
   },
+
+  // ── Analytics Pipeline roles ──
+  {
+    id: "ga4-collector",
+    name: "GA4 Collector",
+    title: "Data Fetcher",
+    description:
+      "Fetches all GA4 data: traffic, events, conversions, landing pages, channels, devices, geo, new/returning, daily trends. Saves dated snapshots.",
+    duties: [
+      "Fetches 9 GA4 reports per run (overview, channels, pages, events, conversions, devices, geo, new/returning, daily)",
+      "Saves dated JSON snapshot + latest.json for trend comparison",
+      "Handles both current and prior 28-day periods",
+    ],
+    inputs: "Business YAML (ga4_property_id, conversion_events)",
+    outputs: "analytics-{date}.json, analytics-latest.json",
+    tools: ["googleapis (analyticsdata v1beta)"],
+    cost: "~$0 (GA4 API is free)",
+  },
+  {
+    id: "trend-detector",
+    name: "Trend Detector",
+    title: "Pattern Finder",
+    description:
+      "Compares current vs prior periods. Detects anomalies — traffic spikes/drops, channel shifts, bounce rate changes, bot traffic, service area coverage.",
+    duties: [
+      "Week-over-week and month-over-month comparison",
+      "Anomaly detection (traffic drop/spike, bounce ceiling, bot traffic)",
+      "Service area coverage analysis for local businesses",
+      "Channel shift detection",
+      "New top page detection",
+    ],
+    inputs: "GA4 snapshot, prior snapshot, alert thresholds from YAML",
+    outputs: "Trends array, anomalies array, channel trends, service area coverage",
+    tools: ["trends.js"],
+    cost: "$0",
+  },
+  {
+    id: "insight-generator",
+    name: "Insight Generator",
+    title: "Business Analyst",
+    description:
+      "Translates raw data into plain-English business insights. Reads business niche to frame insights appropriately for the business type.",
+    duties: [
+      "Generates plain-English insights from trends and data",
+      "Adapts interpretation by business type (local service, affiliate, SaaS)",
+      "Identifies content ROI, channel attribution, geo patterns",
+      "Surfaces high-bounce pages, conversion paths, audience growth",
+    ],
+    inputs: "GA4 snapshot, trend data, business niche",
+    outputs: "Array of categorized insights with confidence levels",
+    tools: ["insights.js"],
+    cost: "$0",
+  },
+  {
+    id: "analytics-fact-checker",
+    name: "Analytics Fact Checker",
+    title: "Data Validator",
+    description:
+      "Validates insights before they become recommendations. Catches bot traffic, insufficient sample sizes, conflicting signals, and seasonal patterns.",
+    duties: [
+      "Bot traffic detection (spike + high bounce + unusual geo)",
+      "Sample size validation (min sessions/conversions thresholds)",
+      "Conflicting signal detection (traffic up + conversions down)",
+      "Data freshness check (GA4 processing lag)",
+      "Bounce rate context (location pages vs blog posts)",
+    ],
+    inputs: "Raw insights, GA4 snapshot, trend data",
+    outputs: "Fact-checked insights with validated confidence (high/medium/low)",
+    tools: ["fact-check.js"],
+    cost: "$0",
+  },
+  {
+    id: "recommender",
+    name: "Recommender",
+    title: "Decision Advisor",
+    description:
+      "Generates prioritized, actionable recommendations from high-confidence insights. Max 3 per pipeline per run to prevent thrashing.",
+    duties: [
+      "Generates recommendations from high-confidence insights only",
+      "Each recommendation has: what, why, target pipeline, impact, effort",
+      "Medium confidence becomes suggestions (Sheet only, no dispatch)",
+      "Enforces max 3 per pipeline limit",
+    ],
+    inputs: "Fact-checked insights, GA4 snapshot, dispatch targets from YAML",
+    outputs: "Recommendations array, suggestions array",
+    tools: ["recommend.js"],
+    cost: "$0",
+  },
+  {
+    id: "executor",
+    name: "Executor",
+    title: "Dispatch Router",
+    description:
+      "Routes recommendations to target pipelines via dispatch files. SEO content and directory get JSON dispatch files. Podcast gets topic-weights.json via git push.",
+    duties: [
+      "Writes analytics-dispatch.json for SEO content pipeline",
+      "Writes directory-dispatch.json for directory pipeline",
+      "Updates topic-weights.json and git pushes for podcast pipeline",
+      "Dispatch files only influence ordering/weighting — never bypass quality checks",
+    ],
+    inputs: "Recommendations with target pipeline and params",
+    outputs: "Dispatch files in state/{businessId}/",
+    tools: ["dispatch.js", "git"],
+    cost: "$0",
+  },
+  {
+    id: "analytics-reporter",
+    name: "Analytics Reporter",
+    title: "Report Generator",
+    description:
+      "Logs results to Google Sheet 'Analytics' tab and posts Slack summary. Creates the full audit trail: data → insight → action.",
+    duties: [
+      "Appends row to business tracking sheet (Analytics tab)",
+      "Posts summary + sheet link to Slack business + CEO channels",
+      "Includes anomaly alerts when detected",
+      "Creates Analytics tab with headers if it doesn't exist",
+    ],
+    inputs: "Snapshot, insights, recommendations, dispatch results",
+    outputs: "Google Sheet row, Slack messages",
+    tools: ["googleapis (sheets v4)", "Slack API"],
+    cost: "$0",
+  },
 ];
 
 // ─── SKILLS ────────────────────────────────────────────────────
@@ -699,6 +821,13 @@ export const skills: Skill[] = [
     description:
       "AI-generated Offering Memorandums from parcel data. Wizard input, county scraper, editor, PDF export",
     configurable: false,
+  },
+  {
+    id: "analytics-team",
+    name: "Analytics Team",
+    description:
+      "GA4 analytics pipeline — collects data, detects trends, generates insights, fact-checks, recommends actions, dispatches to other pipelines",
+    configurable: true,
   },
 ];
 
@@ -797,6 +926,22 @@ export const teamTemplates: TeamTemplate[] = [
     description:
       "Scrapes county property data, AI-generates offering memorandum sections, exports branded PDF.",
     roleIds: ["county-scraper", "om-generator", "pdf-builder"],
+  },
+  {
+    id: "analytics-team",
+    name: "Analytics Team",
+    skillId: "analytics-team",
+    description:
+      "Collects all GA4 data, detects trends, generates fact-checked insights, dispatches recommendations to other pipelines. The brain of the system.",
+    roleIds: [
+      "ga4-collector",
+      "trend-detector",
+      "insight-generator",
+      "analytics-fact-checker",
+      "recommender",
+      "executor",
+      "analytics-reporter",
+    ],
   },
 ];
 

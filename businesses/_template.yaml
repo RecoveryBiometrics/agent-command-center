@@ -64,6 +64,18 @@ slack:
 #   enabled: true
 #   business_categories: []
 
+# -- Analytics (if website has GA4) --
+# analytics:
+#   ga4_property_id: ""
+#   business_type: local_service     # local_service | affiliate_content | saas_tool | agency
+#   schedule: weekly                 # daily | weekly
+#   conversion_events: []            # GA4 event names that = leads/revenue
+#   alert_thresholds:
+#     traffic_drop_pct: 20
+#     traffic_spike_pct: 50
+#     bounce_rate_ceiling: 75
+#   dispatch_targets: []             # pipelines analytics can instruct: seo-content, directory, content-production
+
 # -- Secrets (names only — actual values go in .env / GitHub Secrets) --
 secrets:
   anthropic_api_key: ANTHROPIC_API_KEY
@@ -92,6 +104,12 @@ teams: []
   #   runs_on: IONOS VPS
   #   schedule: "24/7 — 25-hour cycles"
   #   status: active
+  #
+  # - template: analytics-team
+  #   runs_on: GitHub Actions
+  #   schedule: "Weekly, Mondays 8:00 AM ET"
+  #   cron: "0 12 * * 1"
+  #   status: scheduled
 
 # -- Deploy --
 deploy:

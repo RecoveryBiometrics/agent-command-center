@@ -116,6 +116,30 @@ module.exports = {
   // Email
   EMAIL_TO: biz.brand?.email || process.env.EMAIL_TO || 'bill@reiamplifi.com',
 
+  // Analytics dispatch — read instructions from analytics pipeline if present
+  ANALYTICS_DISPATCH: (() => {
+    const dispatchPath = path.join(__dirname, `../../state/${businessId}/analytics-dispatch.json`);
+    if (fs.existsSync(dispatchPath)) {
+      try {
+        const dispatch = JSON.parse(fs.readFileSync(dispatchPath, 'utf8'));
+        console.log(`[Analytics Dispatch] Found ${dispatch.instructions?.length || 0} instructions from ${dispatch.dispatched_by || 'unknown'}`);
+        return dispatch;
+      } catch (e) {
+        console.warn(`[Analytics Dispatch] Could not read ${dispatchPath}: ${e.message}`);
+      }
+    }
+    return null;
+  })(),
+
+  // Clear dispatch file after reading (call after pipeline completes)
+  clearAnalyticsDispatch() {
+    const dispatchPath = path.join(__dirname, `../../state/${businessId}/analytics-dispatch.json`);
+    if (fs.existsSync(dispatchPath)) {
+      fs.unlinkSync(dispatchPath);
+      console.log('[Analytics Dispatch] Cleared dispatch file');
+    }
+  },
+
   // Raw YAML access (for anything not mapped above)
   _raw: biz,
 };
