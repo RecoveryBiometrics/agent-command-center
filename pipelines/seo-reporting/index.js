@@ -9,6 +9,7 @@ const { interpret } = require('./interpret');
 const { review } = require('./review');
 const { generateReport, generateEmailBody } = require('./report');
 const { sendToSlack } = require('./slack');
+const { writeTodosToSheet, formatTodosForSlack } = require('./todos');
 
 async function run() {
   console.log(`${config.businessName} SEO Agent starting...`);
@@ -53,10 +54,20 @@ async function run() {
     console.log('[7/7] Generating report...');
     const { md, reportPath } = await generateReport(data, analysis, interpretation, reviewResult, inspection);
 
+    // Write actionable TODOs to Sheet
+    console.log('Writing TODOs...');
+    const todoResult = await writeTodosToSheet(analysis, interpretation);
+
     // Send report to Slack #safebath channel
     const date = new Date().toISOString().split('T')[0];
     const emailBody = await generateEmailBody(data, analysis, interpretation, reviewResult, inspection, ga4);
     await sendToSlack(`${config.businessName} SEO Report — ${date}`, emailBody);
+
+    // Send action items summary to Slack
+    const todoSlack = formatTodosForSlack(todoResult);
+    if (todoSlack) {
+      await sendToSlack(`${config.businessName} — Action Items`, todoSlack);
+    }
 
     console.log('\nDone.');
     console.log(`  Clicks:       ${analysis.currentTotals.clicks}`);
