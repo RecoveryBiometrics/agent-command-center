@@ -8,7 +8,8 @@ const { google } = require('googleapis');
 const config = require('./config');
 
 const SHEET_TAB = 'SEO Changelog';
-const HEADERS = ['Date', 'Change Label', 'Type', 'URLs Affected', 'Expected Impact', 'Status'];
+// Column order matches existing Sheet: Date | Type | URLs Affected | What Changed | Expected Impact | Check By
+const HEADERS = ['Date', 'Type', 'URLs Affected', 'What Changed', 'Expected Impact', 'Check By'];
 
 async function getAuthClient() {
   const key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -57,11 +58,11 @@ async function logChangeToSheet({ city, state, count, url }) {
     const date = new Date().toISOString().split('T')[0];
     const row = [
       date,
-      `Added ${count} articles for ${city}, ${state}`,
       'new content',
       url,
+      `Added ${count} articles for ${city}, ${state}`,
       'New local content — impressions growth expected in 4-8 weeks',
-      'pending',
+      'Pending',
     ];
 
     await sheets.spreadsheets.values.append({

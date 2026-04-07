@@ -32,11 +32,12 @@ async function fetchChangelogFromSheet() {
     if (!rows || rows.length <= 1) return [];
 
     // Skip header row
+    // Sheet columns: Date | Type | URLs Affected | What Changed | Expected Impact | Check By
     return rows.slice(1).map(row => ({
       deployed: row[0] || '',
-      label: row[1] || '',
-      type: row[2] || 'unknown',
-      urlPatterns: (row[3] || '').split(',').map(s => s.trim()).filter(Boolean),
+      type: row[1] || 'unknown',
+      urlPatterns: (row[2] || '').split(',').map(s => s.trim()).filter(Boolean),
+      label: row[3] || '',
       expectedImpact: row[4] || '',
       status: row[5] || '',
     }));
