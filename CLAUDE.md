@@ -7,10 +7,11 @@ Central hub for all REI Amplifi AI agent operations. Contains reusable skills, b
 ```
 businesses/     — one YAML per business (single source of truth for config)
 pipelines/      — the actual code that runs the pipelines
+skills/         — backup of all skills (source of truth is ~/.claude/skills/)
 dashboard/      — Next.js visual dashboard (live on Vercel)
 ```
 
-**Skills live globally at `~/.claude/skills/`** (not in this repo). They are Claude Code instruction files that reference the pipelines and YAMLs here.
+**Skills live in TWO places:** `~/.claude/skills/` (Claude Code reads from here) AND `skills/` in this repo (backup). When updating a skill, update BOTH. If they ever drift, the global copy is what Claude uses — the repo copy is the backup.
 
 ## How It Works
 
@@ -31,7 +32,9 @@ dashboard/      — Next.js visual dashboard (live on Vercel)
 |----------|-------|---------|----------|
 | SafeBath | SEO Content Pipeline | GitHub Actions | Daily 6am ET |
 | SafeBath | SEO Reporting | GitHub Actions | Weekly Tues 9am ET |
+| SafeBath | Analytics | GitHub Actions | Weekly Mon 8am ET |
 | GlobalHighLevel | Podcast Pipeline | IONOS VPS | 24/7, 25-hour cycles |
+| GlobalHighLevel | Analytics | GitHub Actions | Weekly Mon 8am ET |
 
 ## Design Principles
 
@@ -39,7 +42,7 @@ dashboard/      — Next.js visual dashboard (live on Vercel)
 2. Configure once, run forever — setup handles all customization
 3. Clone and deploy — same skill, different business, zero code changes
 4. Edit once, updates everywhere — skills are shared, not copied. Never bake logic directly into a trigger prompt without a matching skill.
-5. Every business gets a Google Sheet tracker (SEO changelog, TODOs) — keeps token usage low
+5. Every business gets a Google Sheet tracker with 7 standard tabs (SEO Changelog, Analytics, Active TODOs, Build Queue, Directory Log, Weekly SEO Report, Costs)
 
 ## Owner
 
