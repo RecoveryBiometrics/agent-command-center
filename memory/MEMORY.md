@@ -1,0 +1,8 @@
+- [Single Source of Truth](project_single_source_of_truth.md) — Architecture: YAML registry + shared pipelines + global skills + Google Sheets integration
+- [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
+- [FB Social Pipeline](project_fb_social_pipeline.md) — Trigger ID, voice rules, Slack channel for daily FB posts
+- [Trigger Inventory](project_trigger_inventory.md) — 3 enabled triggers (plan max), 4 disabled. Undocumented limit.
+- [Check before asking](feedback_dont_ask_check_first.md) — Search codebase for answers before asking user setup questions
+- [Do the work](feedback_do_the_work.md) — Never punt to user when you have tools (gh, gcloud, MCP) to do it yourself
+- [Skills First](feedback_skill_sync.md) — Everything built must be a skill FIRST. No baking logic into triggers/scripts without a skill.
+- [Never make things up](feedback_never_make_things_up.md) — If it doesn't exist, say so. Don't fabricate features, config, or solutions.
