@@ -5,6 +5,7 @@ const { google } = require('googleapis');
 const SCOPES = [
   'https://www.googleapis.com/auth/webmasters',
   'https://www.googleapis.com/auth/analytics.readonly',
+  'https://www.googleapis.com/auth/spreadsheets.readonly',
 ];
 
 async function getAuthClient() {

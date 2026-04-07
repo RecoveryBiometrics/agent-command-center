@@ -87,6 +87,9 @@ const config = {
     period: biz.seo?.baseline_period || process.env.BASELINE_PERIOD || 'N/A',
   },
 
+  // Google Sheet tracking
+  trackingSheetId: biz.tracking_sheet_id || '',
+
   // Raw YAML access
   _raw: biz,
 };

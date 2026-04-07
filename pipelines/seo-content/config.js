@@ -100,6 +100,9 @@ module.exports = {
   // URL slug prefix for city pages (e.g., "bathroom-safety" → /bathroom-safety-west-chester-pa)
   CITY_SLUG_PREFIX: biz.content?.city_slug_prefix || biz.id,
 
+  // Google Sheet tracking
+  TRACKING_SHEET_ID: biz.tracking_sheet_id || '',
+
   // Slack
   SLACK_OPS_CHANNEL: biz.slack?.ops_log_channel || '',
   SLACK_CEO_CHANNEL: biz.slack?.ceo_channel || '',

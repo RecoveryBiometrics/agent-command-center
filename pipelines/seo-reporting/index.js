@@ -43,7 +43,7 @@ async function run() {
 
     // 5. Interpret — connect page movements to changelog entries
     console.log('[5/7] Interpreting — linking changes to results...');
-    const interpretation = interpret(analysis, data);
+    const interpretation = await interpret(analysis, data);
 
     // 6. Review — second pass to validate interpretations
     console.log('[6/7] Reviewing — checking for false correlations...');
@@ -51,11 +51,11 @@ async function run() {
 
     // 7. Generate report file
     console.log('[7/7] Generating report...');
-    const { md, reportPath } = generateReport(data, analysis, interpretation, reviewResult, inspection);
+    const { md, reportPath } = await generateReport(data, analysis, interpretation, reviewResult, inspection);
 
     // Send report to Slack #safebath channel
     const date = new Date().toISOString().split('T')[0];
-    const emailBody = generateEmailBody(data, analysis, interpretation, reviewResult, inspection, ga4);
+    const emailBody = await generateEmailBody(data, analysis, interpretation, reviewResult, inspection, ga4);
     await sendToSlack(`${config.businessName} SEO Report — ${date}`, emailBody);
 
     console.log('\nDone.');

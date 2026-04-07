@@ -1,5 +1,5 @@
 # safebath.yaml — Single source of truth for SafeBath Grab Bar
-# Last updated: 2026-04-06
+# Last updated: 2026-04-07
 
 id: safebath
 name: Safe Bath Grab Bars
@@ -7,13 +7,14 @@ status: live  # live | building | planned | paused
 website: https://safebathgrabbar.com
 niche: "Grab bar installation, bathroom safety, aging in place"
 description: "Local service business — grab bar installation, bathroom safety. 5 states, 1,427 pages, 366 directory listings."
+tracking_sheet_id: "1vGdGvjm9MXsL_RZSw3zk-ULpqxuhjt73UR7-q5OGbp4"
 
 # -- Org --
 org:
   director: dir-safebath
   director_name: Director of SafeBath
   reportsTo: vp-growth
-  github: RecoveryBiometrics/safebath
+  github: RecoveryBiometrics/safebath-website
   path: ~/Developer/projects/safebath/
   terminal_shortcut: safebath
 
@@ -51,7 +52,7 @@ service_areas:
       display: "(854) 246-2882"
       tel: "+18542462882"
   # Full city list lives in the project repo (too large for YAML):
-  cities_data_path: website/scripts/content-pipeline/cities-data.json
+  cities_data_path: scripts/content-pipeline/cities-data.json
 
 # -- Slack Channels --
 slack:
@@ -67,7 +68,7 @@ seo:
   seo_agent_email: seo-agent@reiamplifi.com
   data_dir: seo-data            # relative to seo repo root in CI
   reports_dir: seo-reports      # relative to seo repo root in CI
-  changelog_path: SEO-CHANGELOG.md
+  changelog_path: SEO-CHANGELOG.md    # fallback only — primary source is now the Google Sheet "SEO Changelog" tab
   baseline_clicks: 57
   baseline_impressions: 3548
   baseline_ctr: 0.016
@@ -76,8 +77,8 @@ seo:
 
 # -- Content Pipeline Config --
 content:
-  output_dir: website/src/data/local-news        # where generated articles go (relative to project path)
-  changelog_path: website/src/data/content-changelog.json
+  output_dir: src/data/local-news                 # where generated articles go (relative to project path)
+  changelog_path: src/data/content-changelog.json
   city_slug_prefix: bathroom-safety               # URL pattern: /bathroom-safety-{city}-{state}
   max_similarity_percent: 85
   max_retry_attempts: 3
@@ -116,6 +117,21 @@ directory:
     - Rehabilitation Center
     - Elder Law Attorney
     - Geriatric Care Manager
+
+# -- Analytics --
+analytics:
+  ga4_property_id: "14299063401"
+  business_type: local_service
+  schedule: weekly
+  conversion_events:
+    - click                          # tel: link clicks (phone calls)
+  alert_thresholds:
+    traffic_drop_pct: 20
+    traffic_spike_pct: 50
+    bounce_rate_ceiling: 75
+  dispatch_targets:
+    - seo-content
+    - directory
 
 # -- GHL CRM --
 ghl:
@@ -167,6 +183,13 @@ teams:
     instance_id: sb-operations
     runs_on: GitHub Actions
     schedule: "Daily, 6:00 AM ET (report) + on-demand (doctor)"
+    status: scheduled
+
+  - template: analytics-team
+    instance_id: sb-analytics
+    runs_on: GitHub Actions
+    schedule: "Weekly, Mondays 8:00 AM ET"
+    cron: "0 12 * * 1"
     status: scheduled
 
 # -- Deploy --

@@ -100,7 +100,7 @@ async function processCity(city) {
         }
       }
 
-      const deployResult = deploy(city, articles);
+      const deployResult = await deploy(city, articles);
 
       return {
         city: city.name,

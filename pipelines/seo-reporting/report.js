@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('./config');
+const { fetchPendingChangesFromSheet } = require('./sheet');
 
 const REPORTS_DIR = config.reportsDir;
 const BASELINE = config.baseline;
@@ -59,7 +60,7 @@ function pctChange(current, prior) {
   return ` (${sign}${pct.toFixed(1)}%)`;
 }
 
-function generateReport(data, analysis, interpretation, reviewResult, inspection) {
+async function generateReport(data, analysis, interpretation, reviewResult, inspection) {
   const date = new Date().toISOString().split('T')[0];
   const { currentTotals, priorTotals, wins, drops, opportunities, gaps } = analysis;
 
@@ -250,8 +251,9 @@ function generateReport(data, analysis, interpretation, reviewResult, inspection
     }
   }
 
-  // Pending changes status — parsed from SEO-CHANGELOG.md
-  const allChanges = parsePendingChanges();
+  // Pending changes — from Google Sheet first, markdown fallback
+  const sheetPending = await fetchPendingChangesFromSheet();
+  const allChanges = sheetPending !== null ? sheetPending : parsePendingChanges();
   const pending = allChanges.filter(c => !c.isComplete);
   const completed = allChanges.filter(c => c.isComplete);
 
@@ -293,7 +295,7 @@ function generateReport(data, analysis, interpretation, reviewResult, inspection
  * Written for paying clients who want to understand what's happening
  * with their SEO each week — and what we're doing about it.
  */
-function generateEmailBody(data, analysis, interpretation, reviewResult, inspection, ga4 = null) {
+async function generateEmailBody(data, analysis, interpretation, reviewResult, inspection, ga4 = null) {
   const date = new Date().toISOString().split('T')[0];
   const { currentTotals, priorTotals, wins, drops, opportunities, gaps } = analysis;
 
@@ -519,9 +521,10 @@ function generateEmailBody(data, analysis, interpretation, reviewResult, inspect
     }
   }
 
-  // --- Pending changes ---
-  const allChanges = parsePendingChanges();
-  const pending = allChanges.filter(c => !c.isComplete);
+  // --- Pending changes — from Google Sheet first, markdown fallback ---
+  const sheetPending = await fetchPendingChangesFromSheet();
+  const allChanges2 = sheetPending !== null ? sheetPending : parsePendingChanges();
+  const pending = allChanges2.filter(c => !c.isComplete);
 
   if (pending.length > 0) {
     out += `WORK IN PROGRESS\n\n`;

@@ -7,8 +7,9 @@ const fs = require('fs');
 const path = require('path');
 const config = require('./config');
 const { logChange } = require('./changelog');
+const { logChangeToSheet } = require('./sheet');
 
-function deploy(city, newEntries) {
+async function deploy(city, newEntries) {
   if (!fs.existsSync(config.NEWS_DATA_DIR)) {
     fs.mkdirSync(config.NEWS_DATA_DIR, { recursive: true });
   }
@@ -44,6 +45,13 @@ function deploy(city, newEntries) {
     action: 'news-added',
     detail: `${toAdd.length} articles: ${titles}`,
     source: 'content-pipeline',
+  });
+
+  await logChangeToSheet({
+    city: city.name,
+    state: city.state,
+    count: toAdd.length,
+    url: `/${city.slug}/local-news`,
   });
 
   return { deployed: toAdd.length, total: merged.length, filePath };

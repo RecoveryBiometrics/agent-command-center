@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('./config');
+const { fetchChangelogFromSheet } = require('./sheet');
 
 const CHANGELOG_PATH = config.changelogPath;
 const SITE = config.siteBase;
@@ -110,8 +111,11 @@ function getConfidence(change, positionDelta, weeks) {
 /**
  * Main interpretation: connect page movements to changelog entries.
  */
-function interpret(analysis, data) {
-  const changes = parseChangelog();
+async function interpret(analysis, data) {
+  const sheetChanges = await fetchChangelogFromSheet();
+  const changes = sheetChanges !== null
+    ? (console.log(`  Read ${sheetChanges.length} changelog entries from Google Sheet`), sheetChanges)
+    : (console.log('  Falling back to markdown changelog'), parseChangelog());
   const attributions = [];
   const unattributed = [];
 
