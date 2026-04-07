@@ -68,7 +68,7 @@ export const generatedBusinesses: Business[] = [
     path: "~/Developer/projects/safebath/",
     website: "safebathgrabbar.com",
     deploy: "Vercel",
-    github: "RecoveryBiometrics/safebath",
+    github: "RecoveryBiometrics/safebath-website",
     description: "Local service business — grab bar installation, bathroom safety. 5 states, 1,427 pages, 366 directory listings.",
     directorId: "dir-safebath",
   }
@@ -90,6 +90,14 @@ export const generatedTeamInstances: TeamInstance[] = [
     status: "scheduled" as AgentStatus,
     runsOn: "IONOS VPS (inside podcast scheduler)",
     schedule: "Weekly (7-day gate inside scheduler)",
+  },
+  {
+    id: "ghl-analytics",
+    templateId: "analytics-team",
+    businessId: "globalhighlevel",
+    status: "scheduled" as AgentStatus,
+    runsOn: "GitHub Actions",
+    schedule: "Weekly, Mondays 8:00 AM ET",
   },
   {
     id: "hatch-om",
@@ -138,5 +146,13 @@ export const generatedTeamInstances: TeamInstance[] = [
     status: "scheduled" as AgentStatus,
     runsOn: "GitHub Actions",
     schedule: "Daily, 6:00 AM ET (report) + on-demand (doctor)",
+  },
+  {
+    id: "sb-analytics",
+    templateId: "analytics-team",
+    businessId: "safebath",
+    status: "scheduled" as AgentStatus,
+    runsOn: "GitHub Actions",
+    schedule: "Weekly, Mondays 8:00 AM ET",
   }
 ];

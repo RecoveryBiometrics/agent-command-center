@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lake Fork Bass Fishing Forecast, Guides & Reports | BassForecast</title>
+<meta name="description" content="Lake Fork bass fishing forecast for today. Current BFR rating, water level, weather, tournament history, boat ramps, fishing guides, and tackle shops near Lake Fork, Texas.">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto',sans-serif;background:#fff;color:#333;line-height:1.6}
+
+/* NAV */
+.nav{background:#142648;padding:12px 0;position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{color:#fff;font-size:1.4rem;font-weight:700;letter-spacing:-0.5px}
+.logo span{color:#4da6ff}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:400}
+.nav-links a:hover{color:#fff}
+.nav-cta{background:#e8731a;color:#fff!important;padding:8px 16px;border-radius:6px;font-weight:500}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#142648 0%,#1a3a5c 50%,#0d1b2a 100%);padding:48px 0 40px;color:#fff}
+.hero-inner{max-width:1200px;margin:0 auto;padding:0 20px}
+.breadcrumb{font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:16px}
+.breadcrumb a{color:rgba(255,255,255,0.7);text-decoration:none}
+.hero h1{font-size:2.2rem;font-weight:700;margin-bottom:8px;line-height:1.2}
+.hero-sub{color:rgba(255,255,255,0.7);font-size:1rem;margin-bottom:24px}
+
+/* BFR CARD */
+.bfr-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:24px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.bfr-score{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0}
+.bfr-score.epic{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 0 30px rgba(34,197,94,0.3)}
+.bfr-number{font-size:2.5rem;font-weight:900;color:#fff;line-height:1}
+.bfr-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.9)}
+.bfr-details{flex:1;min-width:200px}
+.bfr-details h3{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.bfr-details p{font-size:0.85rem;color:rgba(255,255,255,0.7)}
+.bfr-tags{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.bfr-tag{background:rgba(255,255,255,0.12);padding:4px 10px;border-radius:99px;font-size:0.75rem;color:rgba(255,255,255,0.9)}
+.bfr-cta{background:#e8731a;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;white-space:nowrap}
+
+/* MAIN LAYOUT */
+.main{max-width:1200px;margin:0 auto;padding:32px 20px;display:grid;grid-template-columns:1fr 340px;gap:32px}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
+
+/* SECTION CARDS */
+.section{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:20px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.section h2{font-size:1.1rem;font-weight:700;color:#142648}
+.section h3{font-size:0.95rem;font-weight:600;color:#142648;margin:16px 0 8px}
+
+/* MODULE-SPECIFIC */
+.weather-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px}
+.weather-item{text-align:center;padding:12px 8px;background:#f8fafc;border-radius:8px}
+.weather-item .val{font-size:1.3rem;font-weight:700;color:#142648}
+.weather-item .lbl{font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em}
+
+.data-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:0.9rem}
+.data-row:last-child{border:none}
+.data-key{color:#6b7280}
+.data-val{font-weight:600;color:#142648}
+
+.listing-card{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6;align-items:flex-start}
+.listing-card:last-child{border:none}
+.listing-img{width:56px;height:56px;border-radius:8px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.listing-info{flex:1;min-width:0}
+.listing-name{font-weight:600;font-size:0.9rem;color:#142648}
+.listing-detail{font-size:0.8rem;color:#6b7280;margin-top:2px}
+.listing-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.listing-tag{background:#f0f9ff;color:#0369a1;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:500}
+.listing-tag.featured{background:#fef3c7;color:#92400e}
+.listing-badge{font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.listing-badge.open{background:#dcfce7;color:#166534}
+.listing-badge.top{background:#e8731a;color:#fff}
+
+.tournament-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem}
+.tournament-row:last-child{border:none}
+.t-event{font-weight:600;color:#142648}
+.t-detail{color:#6b7280}
+.t-winner{color:#e8731a;font-weight:500}
+
+.bait-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.bait-card{background:#f8fafc;border-radius:8px;padding:12px;text-align:center}
+.bait-card .emoji{font-size:1.8rem;margin-bottom:4px}
+.bait-card .name{font-size:0.8rem;font-weight:600;color:#142648}
+.bait-card .type{font-size:0.7rem;color:#6b7280}
+
+.ramp-list{display:grid;gap:8px}
+.ramp{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:8px;font-size:0.85rem}
+.ramp-name{font-weight:500;color:#142648}
+.ramp-info{color:#6b7280;font-size:0.8rem}
+
+.affiliate-card{display:block;border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-decoration:none;color:#333;transition:all 0.2s}
+.affiliate-card:hover{border-color:#e8731a;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.affiliate-card .af-title{font-weight:600;font-size:0.9rem;color:#142648;margin-bottom:4px}
+.affiliate-card .af-sub{font-size:0.8rem;color:#6b7280}
+.affiliate-card .af-price{font-size:1.1rem;font-weight:700;color:#e8731a;margin-top:8px}
+.affiliate-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.affiliate-grid{grid-template-columns:1fr}}
+
+/* SIDEBAR */
+.sidebar .section{border:1px solid #e5e7eb}
+.pro-card{background:linear-gradient(135deg,#142648,#1a3a5c);color:#fff;border:none;text-align:center}
+.pro-card h2{color:#fff}
+.pro-card p{color:rgba(255,255,255,0.7);font-size:0.85rem;margin-bottom:16px}
+.pro-btn{background:#e8731a;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;display:inline-block;text-decoration:none}
+
+.map-placeholder{width:100%;height:200px;background:#e5e7eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:0.85rem}
+
+.nearby-lake{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;align-items:center}
+.nearby-lake:last-child{border:none}
+.nearby-score{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0}
+
+/* DEMO BANNER */
+.demo-banner{background:#fef3c7;border-bottom:2px solid #f59e0b;padding:10px 20px;text-align:center;font-size:0.85rem;color:#92400e;font-weight:500}
+.demo-banner strong{color:#78350f}
+
+/* FOOTER */
+.footer{background:#142648;color:rgba(255,255,255,0.6);padding:40px 0 24px;margin-top:40px}
+.footer-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:32px}
+.footer-col h4{color:#fff;font-size:0.85rem;margin-bottom:12px}
+.footer-col a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.8rem;display:block;margin-bottom:6px}
+.footer-col a:hover{color:#fff}
+.footer-bottom{max-width:1200px;margin:24px auto 0;padding:16px 20px 0;border-top:1px solid rgba(255,255,255,0.1);font-size:0.75rem;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- DEMO BANNER -->
+<div class="demo-banner">
+<strong>DEMO:</strong> This is a concept mockup of what a Bass Forecast lake page could look like with all planned modules. Not a live page.
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+<div class="nav-inner">
+<div class="logo">Bass<span>Forecast</span></div>
+<div class="nav-links">
+<a href="#">How It Works</a>
+<a href="#">PRO Features</a>
+<a href="#">Lunker Club</a>
+<a href="#">Blog</a>
+<a href="#">Solunar</a>
+<a href="#">Lakes</a>
+<a href="#" class="nav-cta">Get the App</a>
+</div>
+</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+<div class="hero-inner">
+<div class="breadcrumb"><a href="#">Home</a> &rsaquo; <a href="#">Texas</a> &rsaquo; Lake Fork</div>
+<h1>Lake Fork, Texas — Bass Fishing Forecast</h1>
+<p class="hero-sub">Wood County, TX &bull; 27,264 acres &bull; Known for trophy largemouth bass &bull; Texas state record: 18.18 lbs</p>
+
+<div class="bfr-card">
+<div class="bfr-score epic">
+<div class="bfr-number">8.4</div>
+<div class="bfr-label">Epic</div>
+</div>
+<div class="bfr-details">
+<h3>Today's Bass Forecast Rating</h3>
+<p>Post-frontal clearing with stable barometric pressure. Bass moving shallow in warming water. Peak feeding window: 6:30-9:00 AM and 4:30-7:00 PM.</p>
+<div class="bfr-tags">
+<span class="bfr-tag">Shallow Cover</span>
+<span class="bfr-tag">Topwater Bite</span>
+<span class="bfr-tag">Post-Front Recovery</span>
+<span class="bfr-tag">Pre-Spawn Pattern</span>
+</div>
+</div>
+<button class="bfr-cta">Get Full 10-Day Forecast</button>
+</div>
+</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+<div class="content">
+
+<!-- EDITORIAL: LAKE FORK GUIDE -->
+<div class="section" style="border-left:3px solid #e8731a">
+<div class="section-header">
+<div class="section-icon" style="background:#fff7ed;color:#ea580c">📖</div>
+<h2>Lake Fork Bass Fishing Guide</h2>
+</div>
+<p style="font-size:0.9rem;color:#555;margin-bottom:14px">Lake Fork Reservoir is widely considered the best trophy largemouth bass lake in the United States. Located in the piney woods of East Texas about 80 miles east of Dallas, the 27,264-acre reservoir has produced more ShareLunker entries (13+ lb bass) than any other lake in Texas. The state record largemouth — 18.18 lbs — was caught here in 1992.</p>
+
+<h3>Seasonal Patterns</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0">
+<div style="background:#f0fdf4;padding:14px;border-radius:8px">
+<strong style="color:#16a34a;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">Spring (Mar-May)</strong>
+<p style="font-size:0.85rem;color:#555;margin-top:4px">Pre-spawn and spawn. Bass move to shallow flats and creek arms. 2-6 ft depth. Target submerged timber and grass lines. Best season for trophy fish. Water temp 58-72°F.</p>
+</div>
+<div style="background:#eff6ff;padding:14px;border-radius:8px">
+<strong style="color:#2563eb;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">Summer (Jun-Aug)</strong>
+<p style="font-size:0.85rem;color:#555;margin-top:4px">Bass relate to deep timber and creek channel ledges. 12-25 ft. Early morning topwater bite, then transition to deep cranks and Carolina rigs. Water temp 78-88°F. Fish early or late.</p>
+</div>
+<div style="background:#fef3c7;padding:14px;border-radius:8px">
+<strong style="color:#d97706;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">Fall (Sep-Nov)</strong>
+<p style="font-size:0.85rem;color:#555;margin-top:4px">Shad migration pulls bass into creek arms. Follow the bait. Spinnerbaits, crankbaits, and swimbaits over submerged timber. Schooling activity on the main lake. Water temp 60-78°F.</p>
+</div>
+<div style="background:#faf5ff;padding:14px;border-radius:8px">
+<strong style="color:#7c3aed;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">Winter (Dec-Feb)</strong>
+<p style="font-size:0.85rem;color:#555;margin-top:4px">Slow but big fish opportunities. Jerkbaits and blade baits on main lake points. 15-30 ft. Patience pays — fewer bites but quality fish. Water temp 42-55°F. Best mid-day when water warms.</p>
+</div>
+</div>
+
+<h3>Key Structure</h3>
+<p style="font-size:0.9rem;color:#555;margin-bottom:14px">Lake Fork is defined by standing timber — thousands of acres of flooded forest that create ambush points at every depth. The key areas are: <strong>Creek arms</strong> (Little Caney, Big Caney, Birch Creek, Running Creek) which concentrate bait and bass seasonally. <strong>Main lake points</strong> where creek channels swing close to the bank. <strong>Grass lines</strong> — hydrilla and milfoil beds that hold fish year-round. <strong>The 154 bridge</strong> — a classic structure spot with deep water access.</p>
+
+<h3>Regulations</h3>
+<div style="background:#fef2f2;padding:14px;border-radius:8px;margin-top:8px">
+<p style="font-size:0.85rem;color:#991b1b"><strong>Slot limit:</strong> All bass 16-24 inches must be released. Only 1 bass over 24" may be kept per day. 5 bass daily bag limit. This slot limit is what made Lake Fork a trophy fishery — it protects the breeding-size fish that produce the next generation of lunkers.</p>
+</div>
+</div>
+
+<!-- TOP 5 BAITS -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#fff7ed;color:#ea580c">🎣</div>
+<h2>Today's Top 5 Baits — Powered by Bait Advisor</h2>
+</div>
+<p style="font-size:0.85rem;color:#6b7280;margin-bottom:14px">Based on today's BFR of 8.4 (Epic), pre-spawn pattern, 64°F water temp, and post-frontal clearing conditions.</p>
+<div class="bait-grid">
+<div class="bait-card"><div class="emoji">🪱</div><div class="name">Texas-Rigged Worm</div><div class="type">Watermelon Red / 7"</div><div style="font-size:0.7rem;color:#6b7280;margin-top:4px">Flip to timber in 2-8 ft</div></div>
+<div class="bait-card"><div class="emoji">🐸</div><div class="name">Topwater Frog</div><div class="type">Black / Hollow Body</div><div style="font-size:0.7rem;color:#6b7280;margin-top:4px">Grass mats, early AM</div></div>
+<div class="bait-card"><div class="emoji">🐟</div><div class="name">Jerkbait</div><div class="type">Ghost Minnow / Suspending</div><div style="font-size:0.7rem;color:#6b7280;margin-top:4px">Points + channel swings</div></div>
+<div class="bait-card"><div class="emoji">🦐</div><div class="name">Jig + Craw Trailer</div><div class="type">PB&J / 3/8 oz</div><div style="font-size:0.7rem;color:#6b7280;margin-top:4px">Drag on timber roots</div></div>
+<div class="bait-card"><div class="emoji">🐛</div><div class="name">Ned Rig</div><div class="type">Green Pumpkin / 1/6 oz</div><div style="font-size:0.7rem;color:#6b7280;margin-top:4px">Finesse on tough bites</div></div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px">Shop these baits at <a href="#" style="color:#e8731a">Tackle Warehouse</a> &bull; <a href="#" style="color:#e8731a">Omnia Fishing</a> &bull; <a href="#" style="color:#e8731a">Amazon</a></p>
+</div>
+
+<!-- 10-DAY FORECAST PREVIEW -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#f0fdf4;color:#16a34a">📊</div>
+<h2>10-Day Bass Forecast — Lake Fork</h2>
+</div>
+<div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;text-align:center">
+<div style="padding:10px 4px;background:#16a34a;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Today</div><div style="font-size:1.2rem;font-weight:800">8.4</div><div style="font-size:0.6rem">Epic</div></div>
+<div style="padding:10px 4px;background:#22c55e;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Tue</div><div style="font-size:1.2rem;font-weight:800">7.6</div><div style="font-size:0.6rem">Good</div></div>
+<div style="padding:10px 4px;background:#eab308;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Wed</div><div style="font-size:1.2rem;font-weight:800">5.2</div><div style="font-size:0.6rem">Fair</div></div>
+<div style="padding:10px 4px;background:#f97316;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Thu</div><div style="font-size:1.2rem;font-weight:800">3.8</div><div style="font-size:0.6rem">Tough</div></div>
+<div style="padding:10px 4px;background:#eab308;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Fri</div><div style="font-size:1.2rem;font-weight:800">5.9</div><div style="font-size:0.6rem">Fair</div></div>
+<div style="padding:10px 4px;background:#22c55e;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Sat</div><div style="font-size:1.2rem;font-weight:800">7.1</div><div style="font-size:0.6rem">Good</div></div>
+<div style="padding:10px 4px;background:#16a34a;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Sun</div><div style="font-size:1.2rem;font-weight:800">8.0</div><div style="font-size:0.6rem">Epic</div></div>
+<div style="padding:10px 4px;background:#22c55e;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Mon</div><div style="font-size:1.2rem;font-weight:800">6.8</div><div style="font-size:0.6rem">Good</div></div>
+<div style="padding:10px 4px;background:#eab308;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Tue</div><div style="font-size:1.2rem;font-weight:800">5.5</div><div style="font-size:0.6rem">Fair</div></div>
+<div style="padding:10px 4px;background:#22c55e;border-radius:8px;color:#fff"><div style="font-size:0.65rem">Wed</div><div style="font-size:1.2rem;font-weight:800">6.3</div><div style="font-size:0.6rem">Good</div></div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:10px;text-align:center">Thursday front drops conditions — plan around it. Weekend looks strong. <a href="#" style="color:#e8731a">Get PRO for hourly breakdown →</a></p>
+</div>
+
+<!-- RECENT CATCHES -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#fdf2f8;color:#db2777">🐟</div>
+<h2>Recent Catches — Lake Fork Lunker Club</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+<div style="background:#f8fafc;border-radius:10px;padding:14px;text-align:center">
+<div style="font-size:2rem;margin-bottom:4px">🏆</div>
+<div style="font-weight:700;color:#142648;font-size:1.1rem">11.4 lbs</div>
+<div style="font-size:0.8rem;color:#6b7280">Jake M. — Mar 28</div>
+<div style="font-size:0.75rem;color:#e8731a;margin-top:4px">Jig + Craw / Timber / 6 ft</div>
+<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px">BFR was 7.9 (Good)</div>
+</div>
+<div style="background:#f8fafc;border-radius:10px;padding:14px;text-align:center">
+<div style="font-size:2rem;margin-bottom:4px">🎣</div>
+<div style="font-weight:700;color:#142648;font-size:1.1rem">8.7 lbs</div>
+<div style="font-size:0.8rem;color:#6b7280">Sarah T. — Mar 26</div>
+<div style="font-size:0.75rem;color:#e8731a;margin-top:4px">Texas Rig / Grass line / 4 ft</div>
+<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px">BFR was 8.1 (Epic)</div>
+</div>
+<div style="background:#f8fafc;border-radius:10px;padding:14px;text-align:center">
+<div style="font-size:2rem;margin-bottom:4px">🐟</div>
+<div style="font-weight:700;color:#142648;font-size:1.1rem">7.2 lbs</div>
+<div style="font-size:0.8rem;color:#6b7280">Marcus D. — Mar 24</div>
+<div style="font-size:0.75rem;color:#e8731a;margin-top:4px">Spinnerbait / Creek arm / 3 ft</div>
+<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px">BFR was 6.4 (Good)</div>
+</div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px;text-align:center"><a href="#" style="color:#e8731a">View all Lake Fork catches →</a> &bull; <a href="#" style="color:#6b7280">Submit your catch</a></p>
+</div>
+
+<!-- WEATHER -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#eff6ff;color:#2563eb">🌤</div>
+<h2>Current Conditions</h2>
+</div>
+<div class="weather-grid">
+<div class="weather-item"><div class="val">74°F</div><div class="lbl">Air Temp</div></div>
+<div class="weather-item"><div class="val">64°F</div><div class="lbl">Water Temp</div></div>
+<div class="weather-item"><div class="val">8 mph</div><div class="lbl">Wind SW</div></div>
+<div class="weather-item"><div class="val">30.12</div><div class="lbl">Barometer</div></div>
+<div class="weather-item"><div class="val">62%</div><div class="lbl">Humidity</div></div>
+<div class="weather-item"><div class="val">0%</div><div class="lbl">Rain Chance</div></div>
+</div>
+<div style="margin-top:16px">
+<div class="data-row"><span class="data-key">Lake Level</span><span class="data-val">400.28 ft (USGS)</span></div>
+<div class="data-row"><span class="data-key">Pool Elevation</span><span class="data-val">0.72 ft below normal</span></div>
+<div class="data-row"><span class="data-key">Sunrise</span><span class="data-val">6:52 AM</span></div>
+<div class="data-row"><span class="data-key">Sunset</span><span class="data-val">7:48 PM</span></div>
+<div class="data-row"><span class="data-key">Moon Phase</span><span class="data-val">Waxing Gibbous (72%)</span></div>
+<div class="data-row"><span class="data-key">Major Feed</span><span class="data-val">6:30 AM - 9:00 AM</span></div>
+<div class="data-row"><span class="data-key">Minor Feed</span><span class="data-val">12:15 PM - 1:45 PM</span></div>
+</div>
+</div>
+
+<!-- FISHING REPORTS -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#f0fdf4;color:#16a34a">📝</div>
+<h2>Lake Fork Fishing Reports</h2>
+</div>
+<div style="border-bottom:1px solid #f3f4f6;padding:14px 0">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<strong style="font-size:0.9rem;color:#142648">Mike R. — Guide Report</strong>
+<span style="font-size:0.75rem;color:#6b7280">April 4, 2026</span>
+</div>
+<p style="font-size:0.85rem;color:#555;margin-top:6px">Solid day on the water. Pre-spawn fish stacking up in Big Caney Creek arm in 4-8 ft around submerged timber. Texas-rigged Zoom Trick Worm (watermelon red) was the deal. Caught 14 keepers by noon, best fish 6.8 lbs. Water stained from recent rain — darker colors outperformed. Topwater bite was on fire from 6:30-8 AM before the wind picked up.</p>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:99px;font-size:0.7rem">14 keepers</span>
+<span style="background:#fff7ed;color:#ea580c;padding:2px 8px;border-radius:99px;font-size:0.7rem">Best: 6.8 lbs</span>
+<span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:99px;font-size:0.7rem">BFR: 7.9</span>
+</div>
+</div>
+<div style="border-bottom:1px solid #f3f4f6;padding:14px 0">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<strong style="font-size:0.9rem;color:#142648">Tommy L. — Weekend Trip</strong>
+<span style="font-size:0.75rem;color:#6b7280">March 30, 2026</span>
+</div>
+<p style="font-size:0.85rem;color:#555;margin-top:6px">First time on Lake Fork. Launched at SH 154 ramp (free, easy access). Struggled in the morning but switched to a black/blue jig around standing timber and it clicked. Caught 8 bass, biggest was 4.2 lbs. Water was clear on the main lake, stained in the creeks. Wish I'd brought a frog — saw fish busting on the surface in the grass but couldn't reach them with what I had.</p>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:99px;font-size:0.7rem">8 bass</span>
+<span style="background:#fff7ed;color:#ea580c;padding:2px 8px;border-radius:99px;font-size:0.7rem">Best: 4.2 lbs</span>
+<span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:99px;font-size:0.7rem">BFR: 6.1</span>
+</div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px"><a href="#" style="color:#e8731a">Read all Lake Fork reports →</a> &bull; <a href="#" style="color:#6b7280">Submit a fishing report</a></p>
+</div>
+
+<!-- FISHING GUIDES -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#f0fdf4;color:#16a34a">🚤</div>
+<h2>Fishing Guides on Lake Fork</h2>
+</div>
+<div class="listing-card-wrap">
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6">
+<div class="listing-img" style="background:#f0fdf4">🎖</div>
+<div class="listing-info">
+<div style="display:flex;align-items:center;gap:8px"><span class="listing-name">Captain James Henderson</span> <span class="listing-badge top">Featured</span></div>
+<div class="listing-detail">20+ years on Lake Fork &bull; Trophy bass specialist &bull; 4.9 stars (142 reviews)</div>
+<div class="listing-tags"><span class="listing-tag">Trophy Bass</span><span class="listing-tag">Boat Provided</span><span class="listing-tag">Half Day / Full Day</span></div>
+</div>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6">
+<div class="listing-img" style="background:#eff6ff">🐟</div>
+<div class="listing-info">
+<span class="listing-name">Lake Fork Guide Service — Mike Rodriguez</span>
+<div class="listing-detail">15 years experience &bull; Tournament prep &bull; 4.8 stars (89 reviews)</div>
+<div class="listing-tags"><span class="listing-tag">Tournament Prep</span><span class="listing-tag">Electronics Training</span></div>
+</div>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0">
+<div class="listing-img" style="background:#fef3c7">🎣</div>
+<div class="listing-info">
+<span class="listing-name">East Texas Bass Charters — Danny Wilkins</span>
+<div class="listing-detail">Family-friendly &bull; Bank + boat options &bull; 4.7 stars (56 reviews)</div>
+<div class="listing-tags"><span class="listing-tag">Family Friendly</span><span class="listing-tag">Beginners Welcome</span></div>
+</div>
+</div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px"><a href="#" style="color:#e8731a">View all 24 guides on Lake Fork →</a> &bull; <a href="#" style="color:#6b7280">Are you a guide? List for free</a></p>
+</div>
+
+<!-- TOURNAMENT HISTORY -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#fef3c7;color:#d97706">🏆</div>
+<h2>Tournament History — Lake Fork</h2>
+</div>
+<div class="tournament-row"><div><span class="t-event">Bassmaster Elite</span> <span class="t-detail">— Apr 2024</span></div><span class="t-winner">1st: Brandon Palaniuk — 82 lbs 4 oz</span></div>
+<div class="tournament-row"><div><span class="t-event">Toyota Series SW Division</span> <span class="t-detail">— Mar 2024</span></div><span class="t-winner">1st: Cody Bird — 67 lbs 12 oz</span></div>
+<div class="tournament-row"><div><span class="t-event">Bassmaster Elite</span> <span class="t-detail">— Apr 2023</span></div><span class="t-winner">1st: Matt Robertson — 78 lbs 8 oz</span></div>
+<div class="tournament-row"><div><span class="t-event">Bassmaster Open</span> <span class="t-detail">— Mar 2022</span></div><span class="t-winner">1st: Matt Becker — 45 lbs 2 oz</span></div>
+<div class="tournament-row"><div><span class="t-event">Toyota Series</span> <span class="t-detail">— Oct 2021</span></div><span class="t-winner">1st: Evan Barnes — 61 lbs 11 oz</span></div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px"><a href="#" style="color:#e8731a">View full tournament history →</a> &bull; Data from Bassmaster API</p>
+</div>
+
+<!-- BOAT RAMPS -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#f0f9ff;color:#0369a1">⛵</div>
+<h2>Boat Ramps — Lake Fork</h2>
+</div>
+<div class="ramp-list">
+<div class="ramp"><span class="ramp-name">Lake Fork Marina</span><span class="ramp-info">Paved &bull; 4 lanes &bull; $10/day</span></div>
+<div class="ramp"><span class="ramp-name">Minnow Bucket Marina</span><span class="ramp-info">Paved &bull; 2 lanes &bull; $8/day</span></div>
+<div class="ramp"><span class="ramp-name">Pope's Landing</span><span class="ramp-info">Paved &bull; 2 lanes &bull; $7/day</span></div>
+<div class="ramp"><span class="ramp-name">USACE Ramp — SH 154</span><span class="ramp-info">Paved &bull; 2 lanes &bull; Free</span></div>
+<div class="ramp"><span class="ramp-name">Birch Creek Park (USACE)</span><span class="ramp-info">Paved &bull; 3 lanes &bull; Free</span></div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px"><a href="#" style="color:#e8731a">View all 12 ramps on Lake Fork →</a></p>
+</div>
+
+<!-- TACKLE & BAIT SHOPS -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#fdf2f8;color:#db2777">🏪</div>
+<h2>Tackle & Bait Shops Near Lake Fork</h2>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6">
+<div class="listing-img" style="background:#fdf2f8">🎯</div>
+<div class="listing-info">
+<div style="display:flex;align-items:center;gap:8px"><span class="listing-name">Lake Fork Tackle</span> <span class="listing-badge open">Open Now</span></div>
+<div class="listing-detail">Full service &bull; Live bait &bull; 0.8 mi from SH 154 ramp</div>
+<div class="listing-tags"><span class="listing-tag">Live Shiners</span><span class="listing-tag">Live Crawfish</span><span class="listing-tag featured">Featured</span></div>
+</div>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6">
+<div class="listing-img" style="background:#eff6ff">🪱</div>
+<div class="listing-info">
+<span class="listing-name">Oakridge Marina & Bait</span>
+<div class="listing-detail">Live bait + gas &bull; On the water &bull; 4.6 stars</div>
+<div class="listing-tags"><span class="listing-tag">Live Minnows</span><span class="listing-tag">Fuel Dock</span></div>
+</div>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0">
+<div class="listing-img" style="background:#f0fdf4">🎣</div>
+<div class="listing-info">
+<span class="listing-name">Bass Pro Shops — Garland</span>
+<div class="listing-detail">Full outdoor retail &bull; 52 mi &bull; 4.4 stars</div>
+<div class="listing-tags"><span class="listing-tag">Full Retail</span></div>
+</div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px"><a href="#" style="color:#e8731a">View all shops near Lake Fork →</a> &bull; <a href="#" style="color:#6b7280">Own a shop? List for free</a></p>
+</div>
+
+<!-- ICE & SUPPLIES -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#ecfeff;color:#0891b2">🧊</div>
+<h2>Ice & Supplies Near Lake Fork</h2>
+</div>
+<div class="ramp-list">
+<div class="ramp"><span class="ramp-name">Brookshire Brothers — Quitman</span><span class="ramp-info">Bags + block &bull; 4.2 mi</span></div>
+<div class="ramp"><span class="ramp-name">Lake Fork Marina Store</span><span class="ramp-info">Bags &bull; 0.3 mi from ramp</span></div>
+<div class="ramp"><span class="ramp-name">Dollar General — Yantis</span><span class="ramp-info">Bags &bull; 6.1 mi</span></div>
+<div class="ramp"><span class="ramp-name">Minnow Bucket Marina</span><span class="ramp-info">Block ice + bags &bull; On the water</span></div>
+</div>
+</div>
+
+<!-- WHERE TO STAY -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#faf5ff;color:#7c3aed">🏠</div>
+<h2>Where to Stay — Lake Fork</h2>
+</div>
+<div class="affiliate-grid">
+<a href="#" class="affiliate-card">
+<div class="af-title">Lake Fork Waterfront Cabin</div>
+<div class="af-sub">3 bed &bull; Sleeps 8 &bull; Private dock &bull; Boat ramp access</div>
+<div class="af-price">From $145/night</div>
+</a>
+<a href="#" class="affiliate-card">
+<div class="af-title">Fisherman's Cove Lodge</div>
+<div class="af-sub">1 bed &bull; Sleeps 4 &bull; Lakefront &bull; Cleaning station</div>
+<div class="af-price">From $89/night</div>
+</a>
+<a href="#" class="affiliate-card">
+<div class="af-title">Oak Creek RV & Cabin Resort</div>
+<div class="af-sub">Cabins + RV sites &bull; Pool &bull; Marina access</div>
+<div class="af-price">From $65/night</div>
+</a>
+<a href="#" class="affiliate-card">
+<div class="af-title">Lake Fork KOA Campground</div>
+<div class="af-sub">Tent + RV &bull; Boat parking &bull; Camp store</div>
+<div class="af-price">From $35/night</div>
+</a>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px">Lodging via <a href="#" style="color:#e8731a">Booking.com</a> &bull; <a href="#" style="color:#e8731a">VRBO</a> &bull; Camping via <a href="#" style="color:#e8731a">Hipcamp</a> &bull; <a href="#" style="color:#e8731a">Recreation.gov</a></p>
+</div>
+
+<!-- MARINAS -->
+<div class="section">
+<div class="section-header">
+<div class="section-icon" style="background:#f0f9ff;color:#0369a1">⚓</div>
+<h2>Marinas — Lake Fork</h2>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6">
+<div class="listing-img" style="background:#f0f9ff">⛽</div>
+<div class="listing-info">
+<div style="display:flex;align-items:center;gap:8px"><span class="listing-name">Lake Fork Marina</span> <span class="listing-badge top">Featured</span></div>
+<div class="listing-detail">Full service &bull; Gas + diesel &bull; Boat slips &bull; Ramp &bull; Store</div>
+<div class="listing-tags"><span class="listing-tag">Fuel</span><span class="listing-tag">Slips</span><span class="listing-tag">Launch</span><span class="listing-tag">Ice</span><span class="listing-tag">Bait</span></div>
+</div>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6">
+<div class="listing-img" style="background:#eff6ff">🚤</div>
+<div class="listing-info">
+<span class="listing-name">Minnow Bucket Marina</span>
+<div class="listing-detail">Ramp + boat storage &bull; Live bait &bull; Tackle</div>
+<div class="listing-tags"><span class="listing-tag">Launch</span><span class="listing-tag">Storage</span><span class="listing-tag">Bait</span></div>
+</div>
+</div>
+<div class="listing-card" style="display:flex;gap:14px;padding:14px 0">
+<div class="listing-img" style="background:#f0fdf4">⚓</div>
+<div class="listing-info">
+<span class="listing-name">Oakridge Marina</span>
+<div class="listing-detail">Covered slips &bull; Fuel dock &bull; Convenience store</div>
+<div class="listing-tags"><span class="listing-tag">Fuel</span><span class="listing-tag">Covered Slips</span></div>
+</div>
+</div>
+<p style="font-size:0.8rem;color:#6b7280;margin-top:12px"><a href="#" style="color:#e8731a">View all marinas on Lake Fork →</a> &bull; <a href="#" style="color:#6b7280">Own a marina? List for free</a></p>
+</div>
+
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+<!-- PRO UPSELL -->
+<div class="section pro-card">
+<h2 style="font-size:1.1rem;margin-bottom:8px">Get the Full Forecast</h2>
+<p>10-day BFR rating, hourly bite windows, bait recommendations, and solunar data for Lake Fork.</p>
+<a href="#" class="pro-btn">Try PRO Free for 7 Days</a>
+</div>
+
+<!-- MAP -->
+<div class="section">
+<h2 style="font-size:1rem;margin-bottom:12px">Lake Fork Map</h2>
+<div class="map-placeholder">Interactive map — boat ramps, marinas, shops</div>
+</div>
+
+<!-- QUICK STATS -->
+<div class="section">
+<h2 style="font-size:1rem;margin-bottom:12px">Lake Fork Quick Stats</h2>
+<div class="data-row"><span class="data-key">Surface Area</span><span class="data-val">27,264 acres</span></div>
+<div class="data-row"><span class="data-key">Max Depth</span><span class="data-val">70 ft</span></div>
+<div class="data-row"><span class="data-key">Shoreline</span><span class="data-val">315 miles</span></div>
+<div class="data-row"><span class="data-key">County</span><span class="data-val">Wood / Rains / Hopkins</span></div>
+<div class="data-row"><span class="data-key">Built</span><span class="data-val">1980 (USACE)</span></div>
+<div class="data-row"><span class="data-key">State Record</span><span class="data-val">18.18 lbs (1992)</span></div>
+<div class="data-row"><span class="data-key">Species</span><span class="data-val">Largemouth, Crappie, Catfish</span></div>
+</div>
+
+<!-- NEARBY LAKES -->
+<div class="section">
+<h2 style="font-size:1rem;margin-bottom:12px">Nearby Lakes</h2>
+<div class="nearby-lake"><div class="nearby-score" style="background:#22c55e">7.8</div><div><strong>Lake Bob Sandlin</strong><div style="font-size:0.75rem;color:#6b7280">18 mi &bull; 9,460 acres</div></div></div>
+<div class="nearby-lake"><div class="nearby-score" style="background:#eab308">5.4</div><div><strong>Lake Tawakoni</strong><div style="font-size:0.75rem;color:#6b7280">32 mi &bull; 36,700 acres</div></div></div>
+<div class="nearby-lake"><div class="nearby-score" style="background:#22c55e">7.1</div><div><strong>Lake O' the Pines</strong><div style="font-size:0.75rem;color:#6b7280">45 mi &bull; 18,700 acres</div></div></div>
+<div class="nearby-lake"><div class="nearby-score" style="background:#f97316">4.2</div><div><strong>Cedar Creek Lake</strong><div style="font-size:0.75rem;color:#6b7280">58 mi &bull; 32,600 acres</div></div></div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="section" style="background:#f8fafc">
+<h2 style="font-size:1rem;margin-bottom:8px">Lake Fork Weekly Report</h2>
+<p style="font-size:0.85rem;color:#6b7280;margin-bottom:12px">Get the Lake Fork fishing report every Friday — conditions, patterns, and what's biting.</p>
+<div style="display:flex;gap:8px">
+<input type="email" placeholder="Your email" style="flex:1;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:0.85rem">
+<button style="background:#e8731a;color:#fff;border:none;padding:10px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.85rem">Subscribe</button>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+<div class="footer-inner">
+<div class="footer-col">
+<h4>BassForecast</h4>
+<a href="#">How It Works</a>
+<a href="#">PRO Features</a>
+<a href="#">Lunker Club</a>
+<a href="#">Blog</a>
+</div>
+<div class="footer-col">
+<h4>Lakes</h4>
+<a href="#">Texas Lakes</a>
+<a href="#">Florida Lakes</a>
+<a href="#">Alabama Lakes</a>
+<a href="#">All States</a>
+</div>
+<div class="footer-col">
+<h4>Directories</h4>
+<a href="#">Fishing Guides</a>
+<a href="#">Marinas</a>
+<a href="#">Tackle Shops</a>
+<a href="#">Tournaments</a>
+</div>
+<div class="footer-col">
+<h4>Connect</h4>
+<a href="#">Instagram</a>
+<a href="#">Facebook</a>
+<a href="#">YouTube</a>
+<a href="#">Contact</a>
+</div>
+</div>
+<div class="footer-bottom">
+&copy; 2026 BassForecast, LLC. All rights reserved. &bull; Privacy Policy &bull; Terms of Service
+</div>
+</div>
+
+</body>
+</html>

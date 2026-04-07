@@ -199,6 +199,25 @@ SLACK_WEBHOOK_URL=
 - `quality-scores.json` — Business listing quality scores (0-100)
 - `corrections-pending.json` — Quality fixes awaiting confirmation
 
+## Tracking (Google Sheet)
+
+Every business using this skill gets ONE Google Sheet for tracking. Tabs are added based on which skills the business uses.
+
+**Standard tabs (every business):**
+- TODOs — Area | Task | Priority | Status | Notes
+
+**SEO Content Pipeline adds:**
+- SEO Changelog — Date | Type | URLs Affected | What Changed | Expected Impact | Check By | Status
+- Ground rule in header: "Don't reverse SEO changes until 8 weeks have passed"
+
+**Other skills add their own tabs as needed** (e.g., OM Builder adds "OM Generation Log").
+
+**How it wires up:**
+- Business YAML gets: `tracking_sheet_id: "your-sheet-id"`
+- Each business CLAUDE.md links to the sheet
+- Skills read/write to the sheet via Google Workspace MCP
+- During setup, create the sheet and add the appropriate tabs
+
 ## Self-Healing
 - Every agent retries up to 3 times on failure
 - If a city fails all retries, it's skipped for that day and retried next cycle

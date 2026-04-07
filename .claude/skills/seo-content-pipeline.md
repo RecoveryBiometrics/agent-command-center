@@ -1,1 +1,0 @@
-/Users/kerapassante/.claude/skills/seo-content-pipeline/SKILL.md
