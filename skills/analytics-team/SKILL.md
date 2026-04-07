@@ -334,12 +334,13 @@ Use the Slack MCP tools (already connected) to post messages.
 
 ## How dispatch connects to other pipelines
 
-When the analytics pipeline writes a dispatch file, the target pipeline reads it on its next run:
-- **seo-content** `index.js` → calls `applyDispatch()` which reorders city queue based on `prioritize_cities` / `avoid_cities` instructions → clears file after run
-- **directory** `index.js` → reads `prioritize_regions` instructions, reorders city list → clears file after run
-- **podcast** → analytics commits updated `topic-weights.json` to the content-autopilot repo → VPS pulls on next 25hr cycle
+Analytics writes dispatch instructions to the **"Dispatch" tab** on the business's tracker sheet. Target pipelines read from this tab on their next CI run and mark rows as "consumed". This works across separate GitHub Actions jobs (no shared filesystem).
 
-## Standard Tracker Sheet (7 tabs per business)
+- **seo-content** `index.js` → reads pending `seo-content` rows from Dispatch tab → reorders city queue → marks rows consumed
+- **directory** `index.js` → reads pending `directory` rows from Dispatch tab → reorders city list → marks rows consumed
+- **podcast** → analytics commits updated `topic-weights.json` to the content-autopilot repo → VPS pulls on next 25hr cycle (also logged to Dispatch tab for visibility)
+
+## Standard Tracker Sheet (8 tabs per business)
 
 Every business tracker has these tabs:
 1. **SEO Changelog** — content pipeline writes after creating articles
@@ -349,6 +350,7 @@ Every business tracker has these tabs:
 5. **Directory Log** — directory pipeline writes
 6. **Weekly SEO Report** — seo-reporting pipeline writes
 7. **Costs** — track actuals over time
+8. **Dispatch** — analytics writes instructions, other pipelines read and consume
 
 **Franchise-wide sheet:** REI Amplifi Tracker — Build Queue + Costs for cross-business items.
 

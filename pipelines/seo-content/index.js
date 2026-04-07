@@ -123,15 +123,67 @@ async function processCity(city) {
   return null;
 }
 
-function applyDispatch(cities) {
-  const dispatch = config.ANALYTICS_DISPATCH;
-  if (!dispatch || !dispatch.instructions) return cities;
+async function readDispatchFromSheet() {
+  if (!config.TRACKING_SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_KEY) return [];
+
+  try {
+    const { google } = require('googleapis');
+    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+    const auth = new google.auth.GoogleAuth({ credentials, scopes: ['https://www.googleapis.com/auth/spreadsheets'] });
+    const sheets = google.sheets({ version: 'v4', auth: await auth.getClient() });
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: config.TRACKING_SHEET_ID,
+      range: 'Dispatch!A:F',
+    });
+
+    const rows = res.data.values;
+    if (!rows || rows.length <= 1) return [];
+
+    // Find pending rows for seo-content
+    const instructions = [];
+    const consumedRows = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const [date, target, type, params, reason, status] = rows[i];
+      if (target === 'seo-content' && status === 'pending') {
+        try {
+          instructions.push({ type, ...JSON.parse(params || '{}'), reason });
+          consumedRows.push(i + 1); // 1-indexed for Sheets API
+        } catch (e) {
+          instructions.push({ type, reason });
+          consumedRows.push(i + 1);
+        }
+      }
+    }
+
+    // Mark consumed rows
+    for (const rowNum of consumedRows) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: config.TRACKING_SHEET_ID,
+        range: `Dispatch!F${rowNum}`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [['consumed']] },
+      });
+    }
+
+    if (instructions.length > 0) {
+      console.log(`[Analytics Dispatch] Read ${instructions.length} instructions from Sheet`);
+    }
+    return instructions;
+  } catch (err) {
+    console.warn(`[Analytics Dispatch] Sheet read failed: ${err.message}`);
+    return [];
+  }
+}
+
+function applyDispatch(cities, instructions) {
+  if (!instructions || instructions.length === 0) return cities;
 
   let reordered = [...cities];
 
-  for (const instruction of dispatch.instructions) {
+  for (const instruction of instructions) {
     if (instruction.type === 'prioritize_cities' && instruction.cities) {
-      // Move matching cities to the front
       const prioritized = [];
       const rest = [];
       for (const city of reordered) {
@@ -167,7 +219,8 @@ async function run() {
   console.log(`${config.BUSINESS_NAME} Content Pipeline starting...\n`);
 
   let allCities = parseCities();
-  allCities = applyDispatch(allCities);
+  const dispatchInstructions = await readDispatchFromSheet();
+  allCities = applyDispatch(allCities, dispatchInstructions);
   const state = loadState();
 
   let offset = state.lastOffset;
@@ -223,11 +276,6 @@ async function run() {
     await sendPipelineEmail(results, failures);
   } catch (err) {
     console.warn('Email failed:', err.message);
-  }
-
-  // Clear analytics dispatch after processing
-  if (config.ANALYTICS_DISPATCH) {
-    config.clearAnalyticsDispatch();
   }
 
   return { results, failures };

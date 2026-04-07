@@ -47,6 +47,58 @@ function loadCities() {
   return JSON.parse(fs.readFileSync(config.CITIES_FILE, 'utf8'));
 }
 
+async function readDispatchFromSheet() {
+  if (!config.TRACKING_SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_KEY) return [];
+
+  try {
+    const { google } = require('googleapis');
+    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+    const auth = new google.auth.GoogleAuth({ credentials, scopes: ['https://www.googleapis.com/auth/spreadsheets'] });
+    const sheets = google.sheets({ version: 'v4', auth: await auth.getClient() });
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: config.TRACKING_SHEET_ID,
+      range: 'Dispatch!A:F',
+    });
+
+    const rows = res.data.values;
+    if (!rows || rows.length <= 1) return [];
+
+    const instructions = [];
+    const consumedRows = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const [date, target, type, params, reason, status] = rows[i];
+      if (target === 'directory' && status === 'pending') {
+        try {
+          instructions.push({ type, ...JSON.parse(params || '{}'), reason });
+          consumedRows.push(i + 1);
+        } catch (e) {
+          instructions.push({ type, reason });
+          consumedRows.push(i + 1);
+        }
+      }
+    }
+
+    for (const rowNum of consumedRows) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: config.TRACKING_SHEET_ID,
+        range: `Dispatch!F${rowNum}`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [['consumed']] },
+      });
+    }
+
+    if (instructions.length > 0) {
+      console.log(`[Analytics Dispatch] Read ${instructions.length} instructions from Sheet`);
+    }
+    return instructions;
+  } catch (err) {
+    console.warn(`[Analytics Dispatch] Sheet read failed: ${err.message}`);
+    return [];
+  }
+}
+
 function loadState() {
   if (fs.existsSync(config.STATE_FILE)) {
     return JSON.parse(fs.readFileSync(config.STATE_FILE, 'utf8'));
@@ -245,10 +297,10 @@ async function runBusinesses(args) {
   let allCities = loadCities();
   resetGlobalIndex();
 
-  // Apply analytics dispatch — reorder cities based on analytics recommendations
-  const dispatch = config.ANALYTICS_DISPATCH;
-  if (dispatch && dispatch.instructions) {
-    for (const instruction of dispatch.instructions) {
+  // Read analytics dispatch from Sheet
+  const instructions = await readDispatchFromSheet();
+  if (instructions.length > 0) {
+    for (const instruction of instructions) {
       if (instruction.type === 'prioritize_regions' && instruction.regions) {
         const prioritized = [];
         const rest = [];
@@ -318,11 +370,6 @@ async function runBusinesses(args) {
   }
 
   printSummary('Business Directory', batch, results, failures, processAll ? null : nextOffset, allCities.length);
-
-  // Clear analytics dispatch after processing
-  if (config.ANALYTICS_DISPATCH) {
-    config.clearAnalyticsDispatch();
-  }
 }
 
 // =====================================================================

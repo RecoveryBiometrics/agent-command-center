@@ -33,13 +33,27 @@ Every project has a CLAUDE.md at its root. Claude reads this automatically at th
 
 Keep these short (under 500 words). The shorter they are, the less you spend on tokens.
 
+## The Google Sheet Tracker
+
+Every business gets one Google Sheet with 8 standard tabs:
+1. **SEO Changelog** — content pipeline logs new articles
+2. **Analytics** — weekly GA4 analysis
+3. **Active TODOs** — action items from analytics + SEO reporting
+4. **Build Queue** — ideas and things to build
+5. **Directory Log** — directory pipeline logs
+6. **Weekly SEO Report** — SEO metrics over time
+7. **Costs** — track actual spend
+8. **Dispatch** — analytics pipeline writes instructions here for other pipelines to read
+
+The Dispatch tab is how the analytics "brain" talks to the content and directory pipelines. Analytics writes "prioritize Philadelphia" → content pipeline reads it on its next run → marks it consumed.
+
 ## Adding a New Business
 
 1. Copy `businesses/_template.yaml` → rename to `your-business.yaml`
 2. Fill in the business details
 3. Run `/new-project` to create the project directory
-4. Run `/deploy-team` to set up pipelines
-5. Create a Google Sheet tracker for the business, add the sheet ID to the YAML
+4. Claude creates a Google Sheet with all 8 tabs and shares it with the service account
+5. Run `/deploy-team` to set up pipelines
 
 ## Changing How a Skill Works
 

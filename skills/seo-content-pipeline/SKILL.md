@@ -61,14 +61,14 @@ When operating on a business, ALWAYS read its config first:
 6. **Engineer** → Writes JSON to configured data directory, merges with existing articles (append, don't replace). Logs each city batch to Google Sheet "SEO Changelog" tab so the SEO reporting pipeline can attribute ranking changes to content updates.
 
 ### Analytics Dispatch Integration
-The content pipeline reads dispatch instructions from the analytics team on startup:
-- `config.js` checks for `state/{businessId}/analytics-dispatch.json`
-- `index.js` calls `applyDispatch()` which reorders the city queue based on:
+The content pipeline reads dispatch instructions from the **Dispatch tab** on the business's tracker sheet:
+- `index.js` calls `readDispatchFromSheet()` which reads pending `seo-content` rows
+- `applyDispatch()` reorders the city queue based on:
   - `prioritize_cities` — moves matching cities to the front of the batch
   - `avoid_cities` — removes cities from the queue (saturated or low-converting)
   - `prioritize_categories` — weights content categories (logged, not yet acted on by copywriter)
-- After the pipeline completes, the dispatch file is cleared
-- If no dispatch file exists, the pipeline runs normally (zero risk)
+- After reading, rows are marked "consumed" in the Sheet
+- If no pending dispatch rows exist, the pipeline runs normally (zero risk)
 
 ### Configuration
 - CITIES_PER_RUN (default 8)

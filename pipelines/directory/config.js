@@ -99,28 +99,8 @@ module.exports = {
   BUSINESS_ID: biz.id,
   BUSINESS_NAME: biz.name,
 
-  // Analytics dispatch — read instructions from analytics pipeline if present
-  ANALYTICS_DISPATCH: (() => {
-    const dispatchPath = path.join(__dirname, `../../state/${businessId}/directory-dispatch.json`);
-    if (fs.existsSync(dispatchPath)) {
-      try {
-        const dispatch = JSON.parse(fs.readFileSync(dispatchPath, 'utf8'));
-        console.log(`[Analytics Dispatch] Found ${dispatch.instructions?.length || 0} instructions from ${dispatch.dispatched_by || 'unknown'}`);
-        return dispatch;
-      } catch (e) {
-        console.warn(`[Analytics Dispatch] Could not read ${dispatchPath}: ${e.message}`);
-      }
-    }
-    return null;
-  })(),
-
-  clearAnalyticsDispatch() {
-    const dispatchPath = path.join(__dirname, `../../state/${businessId}/directory-dispatch.json`);
-    if (fs.existsSync(dispatchPath)) {
-      fs.unlinkSync(dispatchPath);
-      console.log('[Analytics Dispatch] Cleared dispatch file');
-    }
-  },
+  // Tracking sheet ID (for dispatch reading)
+  TRACKING_SHEET_ID: biz.tracking_sheet_id || '',
 
   // Raw YAML
   _raw: biz,

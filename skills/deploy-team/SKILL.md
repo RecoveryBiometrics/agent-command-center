@@ -56,7 +56,7 @@ You are deploying an agent team to a business. This means taking a Team Template
 
 ## Standard Tracker Sheet (every business)
 
-When deploying any team, ensure the business has a tracker sheet with all 7 tabs:
+When deploying any team, ensure the business has a tracker sheet with all 8 tabs:
 1. **SEO Changelog** — content pipeline writes
 2. **Analytics** — analytics pipeline writes
 3. **Active TODOs** — analytics + seo-reporting write
@@ -64,6 +64,7 @@ When deploying any team, ensure the business has a tracker sheet with all 7 tabs
 5. **Directory Log** — directory pipeline writes
 6. **Weekly SEO Report** — seo-reporting pipeline writes
 7. **Costs** — track actuals
+8. **Dispatch** — analytics writes instructions, other pipelines read and consume
 
 Create with `google-workspace` MCP → `create_spreadsheet`, share with `safebath-seo@gen-lang-client-0592529269.iam.gserviceaccount.com` as Editor, add `tracking_sheet_id` to the YAML.
 
