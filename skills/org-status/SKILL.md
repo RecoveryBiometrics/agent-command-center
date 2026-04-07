@@ -96,6 +96,14 @@ NEXT ACTIONS
 - NotebookLM auth status (expires ~every 2 weeks)
 - SLACK_BOT_TOKEN set in all environments?
 
+## Backup drift check
+Compare local skills and memory against the repo backup. Flag any drift:
+```bash
+diff -rq ~/.claude/skills/ ~/Projects/agent-command-center/skills/ 2>/dev/null | grep -v .DS_Store
+diff -rq ~/.claude/projects/-Users-kerapassante-Projects/memory/ ~/Projects/agent-command-center/memory/ 2>/dev/null | grep -v .DS_Store
+```
+If any files differ, flag it as "NEEDS ATTENTION: skills/memory backup out of sync" and sync them.
+
 ## Deployment summary (for reference)
 
 | System | Platform | Schedule | Path |
@@ -103,9 +111,11 @@ NEXT ACTIONS
 | SafeBath Content | GitHub Actions | Daily 6am ET | ~/Developer/projects/safebath/ (safebath-website repo) |
 | SafeBath Directory | GitHub Actions | Daily 6am ET | ~/Developer/projects/safebath/ (safebath-website repo) |
 | SafeBath SEO Report | GitHub Actions | Weekly Tues 9am ET | ~/Developer/projects/safebath/ (safebath-website repo) |
+| SafeBath Analytics | GitHub Actions | Weekly Mon 8am ET | ~/Developer/projects/safebath/ (safebath-website repo) |
 | SafeBath Sales | GHL + Vercel | Always on | ~/Developer/projects/safebath/ (safebath-website repo) |
 | GHL Podcast | IONOS VPS (systemd) | 25-hour cycles | ~/Developer/projects/marketing/podcast-pipeline |
 | GHL SEO Optimizer | IONOS VPS | Weekly (7-day gate) | ~/Developer/projects/marketing/podcast-pipeline |
+| GHL Analytics | GitHub Actions | Weekly Mon 8am ET | ~/Developer/projects/marketing/podcast-pipeline (Claude-notebookLM-GHL-Podcast repo) |
 | Hatch OM Builder | Render | On demand | ~/Projects/hatch-investments/om-builder |
 | Mailer Dashboard | Not deployed | — | ~/Developer/projects/marketing/mailer-dashboard |
 
