@@ -148,3 +148,90 @@ Keep it short — this is read on a phone. One paragraph per business, bold head
 4. Log to #ops-log: `[Org Status] CEO Briefing posted to #ceo covering [N] businesses.`
 
 In terminal mode, skip the Slack posting — just display the full org status report.
+
+## Pipeline Health Collection (runs in briefing mode)
+
+When running in Slack briefing mode, ALSO collect structured pipeline health data and write it to the Pipeline Health sheet. This is the daily "did everything run?" check.
+
+### Data sources
+
+Read `~/Developer/projects/ops/projects.yml` — iterate every business's `pipelines:` block. For each pipeline, check status based on its `type`:
+
+**`github-actions` pipelines:**
+```bash
+gh run list --repo {pipeline.repo} --workflow {pipeline.workflow} --limit 1 --json status,conclusion,startedAt,updatedAt,name
+```
+- `conclusion: "success"` → status: ✅ success
+- `conclusion: "failure"` → status: ❌ FAILED
+- `status: "in_progress"` → status: 🔄 running
+- No runs found → status: ⚠️ no runs
+- Calculate duration from startedAt → updatedAt
+
+**`systemd` (VPS) pipelines:**
+```bash
+ssh -i ~/.ssh/ionos_ghl williamcourterwelch@74.208.190.10 "cat /home/williamcourterwelch/Claude_notebookLM_GHL_Podcast/ghl-podcast-pipeline/logs/scheduler-state.json"
+```
+- Parse `lastCycleEnd` timestamp
+- If age > `max_gap_hours` (from YAML, default 30) → status: ❌ OVERDUE
+- Otherwise → status: ✅ success
+- For `seo-optimizer`: also check `data/seo-changelog.json` last entry date
+
+**`web-service` pipelines:**
+```bash
+curl -s {pipeline.url}{pipeline.health_check}
+```
+- HTTP 200 → status: ✅ healthy
+- Otherwise → status: ❌ DOWN
+
+### Write to Google Sheet
+
+After collecting all pipeline statuses, write to the **"Pipeline Health" tab** in the REI Amplifi Tracker sheet.
+
+- Sheet ID: read `ops_sheet_id` from `projects.yml` (`1LKbt9n9xfPv76-9kpOM8oxv8jFMXMlWGSukCDWTD8pA`)
+- Use `mcp__google-workspace__append_table_rows` to add one row per pipeline
+- Columns: Date | Business | Pipeline | Platform | Schedule | Status | Last Run | Duration (min) | Notes
+
+Example rows:
+```
+2026-04-08 | SafeBath | Daily Content & Directory | github-actions | daily 6am ET | ✅ success | 2026-04-08 06:02 | 14 | 
+2026-04-08 | SafeBath | Weekly Analytics | github-actions | mondays 8am ET | ⏳ waiting | 2026-04-07 08:01 | 12 | next: Mon Apr 13
+2026-04-08 | GHL | Content Production | systemd | every 25 hours | ✅ success | 2026-04-08 03:42 | — | 
+2026-04-08 | Hatch | OM Builder | web-service | on-demand | ✅ healthy | — | — | 
+```
+
+### Enhanced Slack format
+
+When posting to #ceo-briefing, include the pipeline health block at the top of the message:
+
+```
+*Pipeline Health — [date]*
+
+*SafeBath* (3 pipelines)
+  Daily Content & Directory    ✅ ran 6:02am, 14 min
+  Weekly Analytics             ⏳ waiting (next: Mon Apr 13)
+  Weekly SEO Report            ⏳ waiting (next: Tue Apr 14)
+
+*GHL* (3 pipelines)
+  Content Production           ✅ last cycle 3:42am
+  SEO Optimizer                ⏳ waiting (next eligible: Apr 8)
+  Weekly Analytics             ⏳ waiting (next: Mon Apr 13)
+
+*Hatch*
+  OM Builder                   ✅ healthy (on-demand)
+
+[All green | N issues need attention]
+```
+
+Then follow with the regular CEO briefing content (business summaries, action items).
+
+### "Waiting" logic for scheduled pipelines
+
+For pipelines that run on a schedule (not continuous or on-demand):
+- If the last run was successful and the next scheduled run hasn't arrived yet → show ⏳ waiting with next run date
+- If the last run was successful and was today → show ✅ with the time
+- If the last run failed → show ❌ regardless of schedule
+- Calculate "next run" from the `schedule` field in YAML (e.g., "mondays 8am ET" → next Monday)
+
+### Auto-scaling
+
+This reads `projects.yml` dynamically. When a new business or pipeline is added to the registry, it automatically appears in the next health check. No code changes needed.
