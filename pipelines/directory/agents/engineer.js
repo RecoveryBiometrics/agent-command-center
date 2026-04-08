@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('../config');
-const { logChange } = require('../../changelog');
+const { logChange } = require('../../seo-content/changelog');
 
 /**
  * Load curated business overrides.

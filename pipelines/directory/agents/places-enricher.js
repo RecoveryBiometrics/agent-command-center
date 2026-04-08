@@ -16,7 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('../config');
-const { logChange } = require('../../changelog');
+const { logChange } = require('../../seo-content/changelog');
 
 const API_KEY = process.env.GOOGLE_GENAI_API_KEY
   || process.env.GOOGLE_AI_API_KEY
