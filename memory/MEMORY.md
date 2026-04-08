@@ -6,3 +6,4 @@
 - [Do the work](feedback_do_the_work.md) — Never punt to user when you have tools (gh, gcloud, MCP) to do it yourself
 - [Skills First](feedback_skill_sync.md) — Everything built must be a skill FIRST. No baking logic into triggers/scripts without a skill.
 - [Never make things up](feedback_never_make_things_up.md) — If it doesn't exist, say so. Don't fabricate features, config, or solutions.
+- [TODO Agent Skill](project_todo_agent.md) — BUILT: /todo-agent reads Active TODOs from Sheet and executes fixes (links, pages, investigations)

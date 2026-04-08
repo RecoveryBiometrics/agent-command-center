@@ -1,0 +1,14 @@
+{
+  "name": "interlinking-pipeline",
+  "version": "1.0.0",
+  "description": "Internal linking pipeline for SafeBath and other local SEO businesses",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node index.js --business safebath"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "js-yaml": "^4.1.0"
+  }
+}
