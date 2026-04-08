@@ -17,6 +17,8 @@ require('dotenv').config();
 const config = require('./lib/config');
 const { buildGraph } = require('./stages/01-graph/graph');
 const { generateNeighbors } = require('./stages/02-neighbors/neighbors');
+const { injectLinks } = require('./stages/03-inject/inject');
+const { auditLinks } = require('./stages/04-audit/audit');
 
 const args = process.argv.slice(2);
 const stageFlag = args.indexOf('--stage');
@@ -47,14 +49,16 @@ async function run() {
     generateNeighbors(config);
   }
 
-  // Stage 3: Inject (Phase 2)
+  // Stage 3: Inject relatedLinks into articles
   if (!targetStage || targetStage === 'inject') {
-    console.log('\n[3/4] Inject — not yet implemented (Phase 2)');
+    console.log('\n[3/4] Injecting related links into articles...');
+    injectLinks(config);
   }
 
-  // Stage 4: Audit (Phase 2)
+  // Stage 4: Audit link health
   if (!targetStage || targetStage === 'audit') {
-    console.log('\n[4/4] Audit — not yet implemented (Phase 2)');
+    console.log('\n[4/4] Auditing link health...');
+    auditLinks(config);
   }
 
   console.log(`\n${'='.repeat(50)}`);

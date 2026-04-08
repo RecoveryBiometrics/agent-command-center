@@ -143,16 +143,17 @@ function buildGraph(config) {
     }
   }
 
-  // 4. City → service links
+  // 4. City → service links (each city links to all services)
   for (const county of counties) {
     for (const city of county.cities) {
-      // Each city links to the main service
-      edges.push({
-        from: `/${slugifyCity(city)}`,
-        to: '/bathroom-safety-services/bathroom-grab-bar-installation',
-        type: 'city-to-service',
-        weight: 0.6,
-      });
+      for (const service of services) {
+        edges.push({
+          from: `/${slugifyCity(city)}`,
+          to: `/bathroom-safety-services/${service.slug}`,
+          type: 'city-to-service',
+          weight: 0.6,
+        });
+      }
     }
   }
 
