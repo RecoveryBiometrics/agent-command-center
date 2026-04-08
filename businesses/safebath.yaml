@@ -201,6 +201,14 @@ teams:
     schedule: "Daily, 6:00 AM ET (report) + on-demand (doctor)"
     status: scheduled
 
+  - template: content-builder-team
+    instance_id: sb-content-builder
+    runs_on: GitHub Actions
+    schedule: "Weekly, Wednesdays 6:00 AM ET"
+    cron: "0 10 * * 3"
+    status: scheduled
+    node_version: "20"
+
   - template: analytics-team
     instance_id: sb-analytics
     runs_on: GitHub Actions
