@@ -118,6 +118,22 @@ directory:
     - Elder Law Attorney
     - Geriatric Care Manager
 
+# -- Content Builder --
+content_builder:
+  enabled: true
+  max_todos_per_run: 5
+  model: claude-haiku-4-5-20251001
+  min_impressions_for_gap: 50
+  auto_deploy_articles: true
+  auto_deploy_pages: false
+
+# -- Interlinking --
+interlinking:
+  enabled: true
+  max_outbound_links_per_page: 15
+  max_related_links_per_article: 3
+  neighbor_count: 6
+
 # -- Analytics --
 analytics:
   ga4_property_id: "531047753"
