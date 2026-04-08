@@ -50,13 +50,35 @@ function injectLinks(config) {
     } catch { /* skip */ }
   }
 
-  // Find same-county cities that have articles
+  // Known larger/more recognizable cities — prioritize these as neighbors
+  const PRIORITY_CITIES = new Set([
+    'west-chester', 'phoenixville', 'downingtown', 'exton', 'malvern', 'paoli',
+    'media', 'drexel-hill', 'havertown', 'springfield', 'ardmore', 'broomall',
+    'norristown', 'king-of-prussia', 'lansdale', 'conshohocken', 'collegeville',
+    'philadelphia', 'center-city', 'germantown', 'chestnut-hill', 'fishtown',
+    'wilmington', 'newark', 'middletown', 'bear',
+    'lancaster', 'lititz', 'ephrata',
+    'elkton',
+    'rockville', 'bethesda', 'silver-spring', 'gaithersburg',
+    'las-vegas', 'henderson', 'north-las-vegas', 'summerlin',
+    'myrtle-beach', 'north-myrtle-beach', 'conway',
+    'kennett-square', 'coatesville', 'oxford',
+  ]);
+
+  // Find same-county cities that have articles, prioritizing recognizable cities
   function getNearbyCitiesWithArticles(citySlug) {
     const info = cityLookup[citySlug];
     if (!info) return [];
-    return Object.keys(allArticles)
-      .filter(s => s !== citySlug && cityLookup[s]?.county === info.county)
-      .slice(0, 5);
+    const candidates = Object.keys(allArticles)
+      .filter(s => s !== citySlug && cityLookup[s]?.county === info.county);
+    // Sort: priority cities first, then alphabetical
+    candidates.sort((a, b) => {
+      const aPriority = PRIORITY_CITIES.has(a) ? 0 : 1;
+      const bPriority = PRIORITY_CITIES.has(b) ? 0 : 1;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return a.localeCompare(b);
+    });
+    return candidates.slice(0, 5);
   }
 
   let filesUpdated = 0;
@@ -96,7 +118,7 @@ function injectLinks(config) {
         });
       }
 
-      // Link 3: same-category article in nearby city
+      // Link 3: same-category article in nearby city (include city name for context)
       for (const nearbySlug of nearbyCities) {
         if (links.length >= maxLinks) break;
         const nearbyArticles = allArticles[nearbySlug] || [];
@@ -107,7 +129,7 @@ function injectLinks(config) {
           const nearbyInfo = cityLookup[nearbySlug];
           if (nearbyInfo) {
             links.push({
-              text: sameCategory.title,
+              text: `${sameCategory.title} — ${nearbyInfo.city.name}, ${nearbyInfo.city.state}`,
               href: `/${nearbyInfo.pageSlug}/local-news/${sameCategory.slug}`,
             });
             break;
@@ -115,14 +137,10 @@ function injectLinks(config) {
         }
       }
 
-      // Only update if links changed
-      const existingLinks = JSON.stringify(article.relatedLinks || []);
-      const newLinks = JSON.stringify(links);
-      if (existingLinks !== newLinks) {
-        article.relatedLinks = links;
-        linksAdded += links.length;
-        changed = true;
-      }
+      // Always update — regenerate links with latest logic
+      article.relatedLinks = links;
+      linksAdded += links.length;
+      changed = true;
     }
 
     if (changed) {
