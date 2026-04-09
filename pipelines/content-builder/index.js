@@ -18,6 +18,7 @@ const { writeArticle } = require('./stages/03-write/write');
 const { checkArticle } = require('./stages/04-check/check');
 const { addLinks } = require('./stages/05-link/link');
 const { deployArticle } = require('./stages/06-deploy/deploy');
+const { optimizePage } = require('./stages/07-optimize/optimize');
 
 // Lazy-load constants parser (shared with interlinking pipeline)
 const { parseConstants } = require('../interlinking/lib/parse-constants');
@@ -104,13 +105,10 @@ async function run() {
         results.push({ todo, article, ...deployResult });
 
       } else if (todo.type === 'opportunity') {
-        // Opportunities: for now, just log and mark as noted
-        console.log('  Opportunity optimization not yet implemented — marking as noted');
-        if (!config.DRY_RUN && config.TRACKING_SHEET_ID && todo.row) {
-          const { updateTodoStatus } = require('./lib/sheet');
-          await updateTodoStatus(config.TRACKING_SHEET_ID, todo.row, 'Noted', 'Optimization pending — content-builder v1 handles gaps only');
-        }
-        results.push({ todo, deployed: false, reason: 'opportunity — not yet implemented' });
+        // Optimize existing page: rewrite title/meta, regenerate links
+        console.log('[7/7] Optimizing existing page...');
+        const optimizeResult = await optimizePage(todo, config, constants);
+        results.push({ todo, deployed: optimizeResult.optimized, ...optimizeResult });
       }
 
     } catch (err) {
