@@ -68,9 +68,9 @@ async function run() {
           article = await writeArticle(researchResult, config);
           article._keyword = todo.keyword; // Pass through for linking
 
-          // Stage 4: Check
+          // Stage 4: Check (structural + fact-check)
           console.log('[4/6] Checking content...');
-          checkResult = checkArticle(article, config);
+          checkResult = await checkArticle(article, config, researchResult);
 
           if (checkResult.pass) {
             break;

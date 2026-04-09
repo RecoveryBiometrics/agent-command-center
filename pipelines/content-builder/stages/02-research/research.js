@@ -1,12 +1,16 @@
 /**
  * Stage 2: Research Keyword
  *
- * Takes a classified TODO (gap type) and researches the keyword topic.
- * Uses Claude Haiku to generate a content brief.
+ * Takes a classified TODO (gap type) and researches the keyword using:
+ *   1. DuckDuckGo SERP scrape (what's ranking now)
+ *   2. Reddit questions (what real people ask)
+ *   3. Existing site content (what we already cover)
+ *   4. Claude brief generation with all that context
  */
 const fs = require('fs');
 const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
+const { scrapeDuckDuckGo, scrapeReddit } = require('../../lib/scrape');
 
 let _client = null;
 function getClient() {
@@ -58,7 +62,44 @@ function classifyKeyword(keyword) {
 }
 
 /**
- * Research a keyword and produce a content brief.
+ * Scan existing content to understand what we already cover on this topic.
+ */
+function getExistingCoverage(keyword, newsDir) {
+  const lower = keyword.toLowerCase();
+  const related = [];
+
+  try {
+    const files = fs.readdirSync(newsDir).filter(f => f.endsWith('.json'));
+    for (const file of files) {
+      const articles = JSON.parse(fs.readFileSync(path.join(newsDir, file), 'utf8'));
+      if (!Array.isArray(articles)) continue;
+      for (const a of articles) {
+        const titleMatch = (a.title || '').toLowerCase().includes(lower);
+        const bodyMatch = (a.body || '').toLowerCase().includes(lower);
+        if (titleMatch || bodyMatch) {
+          related.push({ title: a.title, slug: a.slug, category: a.category });
+        }
+      }
+    }
+  } catch { /* no existing content — fine */ }
+
+  return related.slice(0, 5);
+}
+
+/**
+ * Get subreddits from business config or use defaults.
+ */
+function getSubreddits(config) {
+  // Business YAML may have content.subreddits
+  if (config.SUBREDDITS && config.SUBREDDITS.length > 0) {
+    return config.SUBREDDITS;
+  }
+  // Fallback defaults
+  return ['HomeImprovement', 'AgingParents', 'eldercare', 'AskReddit'];
+}
+
+/**
+ * Research a keyword and produce a content brief with real data.
  */
 async function research(todo, config, constants) {
   const keyword = todo.keyword;
@@ -75,41 +116,92 @@ async function research(todo, config, constants) {
 
   const pageType = classifyKeyword(keyword);
 
-  // Read voice reference for brand context
-  const voicePath = path.join(__dirname, '../../references/voice.md');
-  const voice = fs.existsSync(voicePath) ? fs.readFileSync(voicePath, 'utf8') : '';
+  // ── Real web research ──────────────────────────────────────────
+  console.log('  Researching: SERP + Reddit + existing content...');
 
+  // 1. Scrape DuckDuckGo for what's currently ranking
+  const serpResults = await scrapeDuckDuckGo(keyword, 5);
+
+  // 2. Scrape Reddit for real user questions
+  const subreddits = getSubreddits(config);
+  const redditQuestions = await scrapeReddit(keyword, subreddits, 5);
+
+  // 3. Check what we already cover on this topic
+  const existingCoverage = getExistingCoverage(keyword, config.LOCAL_NEWS_DIR);
+
+  // ── Build context strings ──────────────────────────────────────
+  const serpContext = serpResults.length > 0
+    ? serpResults.map(r => `- "${r.title}": ${r.snippet}`).join('\n')
+    : 'No SERP data available — write from expertise.';
+
+  const redditContext = redditQuestions.length > 0
+    ? redditQuestions.map(q => `- ${q}`).join('\n')
+    : 'No Reddit questions found.';
+
+  const existingContext = existingCoverage.length > 0
+    ? existingCoverage.map(a => `- "${a.title}" (${a.category})`).join('\n')
+    : 'No existing content on this topic.';
+
+  // Read voice + SEO references (full, not truncated)
+  const voicePath = path.join(__dirname, '../../references/voice.md');
+  const seoPath = path.join(__dirname, '../../references/seo-rules.md');
+  const voice = fs.existsSync(voicePath) ? fs.readFileSync(voicePath, 'utf8') : '';
+  const seoRules = fs.existsSync(seoPath) ? fs.readFileSync(seoPath, 'utf8') : '';
+
+  // ── Generate brief with real data ──────────────────────────────
   const client = getClient();
   const response = await client.messages.create({
     model: config.MODEL,
-    max_tokens: 1024,
+    max_tokens: 2048,
     messages: [{
       role: 'user',
-      content: `You are a content researcher for a local grab bar installation business called "${config.BRAND.name}".
+      content: `You are a content researcher for "${config.BRAND.name}".
 
 KEYWORD: "${keyword}"
-IMPRESSIONS: ${todo.impressions} (people searching for this)
-CURRENT POSITION: ${todo.position}
-PAGE TYPE: ${pageType}
+IMPRESSIONS: ${todo.impressions}/month (people searching this)
+PAGE TYPE NEEDED: ${pageType}
 
-Research this keyword and produce a content brief. Include:
-1. TOPIC: What this keyword is really about (1 sentence)
-2. AUDIENCE: Who searches for this (1 sentence)
-3. QUESTIONS: 3 common questions people have about this topic
-4. LOCAL ANGLE: How to tie this to a local service business
-5. SUGGESTED TITLE: A title under 60 characters
-6. SUGGESTED CATEGORY: One of: safety-tip, local-news, community, seasonal, stats
+WHAT'S CURRENTLY RANKING (DuckDuckGo top results):
+${serpContext}
 
-Keep it concise. This brief will be used to write the actual content.
+REAL QUESTIONS PEOPLE ASK (Reddit):
+${redditContext}
+
+OUR EXISTING CONTENT ON THIS TOPIC:
+${existingContext}
 
 BRAND CONTEXT:
-${voice.slice(0, 500)}`,
+${voice}
+
+SEO RULES:
+${seoRules}
+
+BUSINESS DETAILS:
+- Name: ${config.BRAND.name}
+- CTA: ${config.BRAND.cta || ''}
+- Pricing: ${config.BRAND.pricing_text || config.BRAND.pricing || ''}
+- Phone: ${config.BRAND.phone_display || config.BRAND.phone || ''}
+
+Produce a detailed content brief:
+
+1. TOPIC: What this keyword is really about (2-3 sentences, informed by SERP data)
+2. SEARCH INTENT: What the searcher wants — information, a service, a comparison, etc.
+3. AUDIENCE: Who searches for this and what stage they're in (awareness, consideration, decision)
+4. KEY QUESTIONS TO ANSWER: 5 questions drawn from Reddit + SERP data (real questions, not made up)
+5. COMPETITOR ANGLE: What the top-ranking pages cover that we should cover better
+6. LOCAL ANGLE: How to tie this to our local service area
+7. SUGGESTED STRUCTURE: H1, 3-4 H2 sections, FAQ section if applicable
+8. SUGGESTED TITLE: Under 60 characters, includes keyword
+9. SUGGESTED CATEGORY: One of: safety-tip, local-news, community, seasonal, stats
+10. SOURCES: List any facts, stats, or claims from the SERP data that we can reference
+
+Be specific. This brief will guide a writer to create an 800+ word page.`,
     }],
   });
 
   const brief = response.content[0].text;
 
-  console.log(`  Researched: "${keyword}" → ${pageType} page`);
+  console.log(`  Researched: "${keyword}" → ${pageType} page (${serpResults.length} SERP, ${redditQuestions.length} Reddit)`);
 
   return {
     skip: false,
@@ -118,6 +210,9 @@ ${voice.slice(0, 500)}`,
     impressions: todo.impressions,
     position: todo.position,
     brief,
+    serpResults,
+    redditQuestions,
+    existingCoverage,
     todo,
   };
 }

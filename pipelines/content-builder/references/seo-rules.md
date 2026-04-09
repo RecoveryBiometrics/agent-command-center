@@ -19,8 +19,8 @@
 - Must include primary keyword
 
 ## Body content
-- Minimum 300 words for new pages
-- Minimum 200 characters for articles
+- Minimum 800 words for new gap pages (content-builder)
+- Minimum 300 words for news articles (daily pipeline)
 - Must mention city name at least 2 times for location content
 - Must mention county at least once
 - No placeholder text ([CITY], TODO, Lorem ipsum, etc.)

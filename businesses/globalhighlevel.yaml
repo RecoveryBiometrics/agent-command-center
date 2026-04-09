@@ -102,6 +102,34 @@ india_blog:
     - Pune
     - Chennai
 
+# -- Content Builder --
+content_builder:
+  enabled: true
+  max_todos_per_run: 5
+  model: claude-haiku-4-5-20251001
+  min_impressions_for_gap: 50
+  auto_deploy_articles: true
+  auto_deploy_pages: false
+  deploy_format: ghl-blog-post    # posts/{slug}.json format
+  deploy_dir: globalhighlevel-site/posts
+
+content:
+  output_dir: globalhighlevel-site/posts
+  categories:
+    - ghl-tips
+    - agency-growth
+    - ai-automation
+    - crm-marketing
+    - integrations
+    - pricing
+  subreddits:
+    - GoHighLevel
+    - marketing
+    - automation
+    - entrepreneur
+    - SaaS
+    - agencies
+
 # -- SEO Optimizer Config --
 seo_optimizer:
   model: claude-haiku-4-5-20251001
