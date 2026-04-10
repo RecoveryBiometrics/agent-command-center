@@ -2,8 +2,18 @@ id: power-to-the-people
 name: "Power to the People"
 status: building
 website: https://www.avlp2p.com
-niche: "electrical services, residential electrician, EV chargers, solar, generators"
-description: "Licensed and insured electrical contractor in Asheville, NC — residential electrical, EV chargers, solar, generators"
+niche: "electrical services, residential electrician, knob and tube rewire, EV chargers, panel upgrades"
+description: "Licensed and insured electrical contractor in Asheville, NC — knob & tube rewires, EV chargers, panel changes, residential service work"
+
+# -- Client --
+client:
+  owner: "Andrew Holbein"
+  team_size: 7  # Andrew + 3 crews x 2
+  relationship: "Friend from Facebook, former AT thru-hiker"
+  domain_registrar: GoDaddy
+  current_host: Squarespace  # migrating to Cloudflare
+  discovery_call: 2026-04-10
+  next_meeting: 2026-04-13T16:00:00-04:00  # 4pm ET
 
 # -- Org --
 org:
@@ -18,15 +28,38 @@ org:
 brand:
   phone_display: "(828) 551-9843"
   phone_tel: "+18285519843"
-  email: # TODO — get from client
+  email: # TODO — get from Andrew
   cta: "Call Today for a Free Estimate"
-  voice: "Friendly, approachable, expert electrician. Down-to-earth Asheville vibe. Emphasize safety, fair pricing, and lifetime workmanship warranty."
+  voice: "Friendly, approachable, expert electrician. Down-to-earth Asheville vibe. Emphasize safety, fair pricing, and lifetime workmanship warranty. They drive an electric van (BrightDrop) — lean into that for EV charger credibility."
+
+# -- Pricing --
+pricing:
+  setup_fee: "3500-5000"  # one-time
+  monthly: 500  # agent management
+  mailers: "per-piece, ~$1/ea"
+  ad_spend: "on client, TBD after site converts"
 
 # -- Service Areas --
 service_areas:
   states: ["NC"]
   primary_city: "Asheville"
   cities_per_run: 8
+  # Target surrounding: Hendersonville, Black Mountain, Weaverville, Brevard, Waynesville
+
+# -- Key Services (priority order from call) --
+# 1. Knob and tube rewires (bread & butter, high margin, diminishing market — low competition keyword)
+# 2. EV charger installs (Duke Energy rebate ~$1K, quick jobs, good margin)
+# 3. Panel changes/upgrades
+# 4. General residential service work
+# 5. New construction & renovation (growth target — wants to attract contractors/remodelers)
+# NOT targeting: large corporate work
+
+# -- Realtor Strategy --
+# Free inspections = door opener for rewire jobs
+# Realtors are #1 referral source for knob & tube work
+# Direct mail campaign to realtor home addresses (public info)
+# QR code tracking on mailers
+# TODO: Duke Energy partner affiliate signup
 
 # -- Slack Channels --
 slack:
@@ -89,4 +122,4 @@ teams: []
 
 # -- Deploy --
 deploy:
-  platform: Squarespace  # current client platform
+  platform: Cloudflare  # migrating from Squarespace
