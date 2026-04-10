@@ -17,7 +17,7 @@ function totals(rows) {
 }
 
 function analyze(data) {
-  const { byPage, byQuery, priorByPage } = data;
+  const { byPage, byQuery, priorByPage, queryByLang } = data;
 
   const priorMap = Object.fromEntries(
     priorByPage.map(r => [r.keys[0], r])
@@ -66,6 +66,24 @@ function analyze(data) {
     .sort((a, b) => b.impressions - a.impressions)
     .slice(0, 15);
 
+  // Language-specific gaps from country-bucketed queries
+  const langGaps = {};
+  if (queryByLang) {
+    for (const [lang, rows] of Object.entries(queryByLang)) {
+      langGaps[lang] = rows
+        .filter(r => r.impressions >= 20 && r.clicks === 0)
+        .sort((a, b) => b.impressions - a.impressions)
+        .slice(0, 15)
+        .map(r => ({
+          query: r.keys[0],
+          country: r.country,
+          impressions: r.impressions,
+          position: r.position,
+          language: lang,
+        }));
+    }
+  }
+
   return {
     currentTotals: totals(byPage),
     priorTotals: totals(priorByPage),
@@ -73,6 +91,7 @@ function analyze(data) {
     drops,
     opportunities,
     gaps,
+    langGaps,
     pageCount: byPage.length,
     queryCount: byQuery.length,
   };

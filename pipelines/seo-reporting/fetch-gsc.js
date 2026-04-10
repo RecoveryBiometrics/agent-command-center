@@ -34,11 +34,39 @@ async function fetchSearchConsoleData() {
   console.log(`Fetching current period: ${current.startDate} → ${current.endDate}`);
   console.log(`Fetching prior period:   ${prior.startDate} → ${prior.endDate}`);
 
-  const [byPage, byQuery, priorByPage] = await Promise.all([
+  const [byPage, byQuery, priorByPage, byQueryCountry] = await Promise.all([
     query(wm, current, ['page']),
     query(wm, current, ['query']),
     query(wm, prior, ['page']),
+    query(wm, current, ['query', 'country']),
   ]);
+
+  // Bucket queries by language based on country
+  const COUNTRY_TO_LANG = {
+    MEX: 'es', COL: 'es', ARG: 'es', ESP: 'es', CHL: 'es', PER: 'es', ECU: 'es',
+    IND: 'en-IN',
+    ARE: 'ar', SAU: 'ar', EGY: 'ar', QAT: 'ar', OMN: 'ar',
+  };
+  const queryByLang = { es: [], 'en-IN': [], ar: [] };
+  for (const row of byQueryCountry) {
+    const lang = COUNTRY_TO_LANG[row.keys[1]];
+    if (lang && queryByLang[lang]) {
+      queryByLang[lang].push({
+        keys: [row.keys[0]],
+        country: row.keys[1],
+        clicks: row.clicks,
+        impressions: row.impressions,
+        ctr: row.ctr,
+        position: row.position,
+      });
+    }
+  }
+  // Sort each bucket by impressions desc
+  for (const lang of Object.keys(queryByLang)) {
+    queryByLang[lang].sort((a, b) => b.impressions - a.impressions);
+  }
+
+  console.log(`  Language queries: ES:${queryByLang.es.length} IN:${queryByLang['en-IN'].length} AR:${queryByLang.ar.length}`);
 
   const data = {
     fetchedAt: new Date().toISOString(),
@@ -47,6 +75,7 @@ async function fetchSearchConsoleData() {
     byPage,
     byQuery,
     priorByPage,
+    queryByLang,
   };
 
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });

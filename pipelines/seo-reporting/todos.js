@@ -64,6 +64,21 @@ function extractTodos(analysis, interpretation) {
     });
   }
 
+  // Language-specific gaps — queries from non-English markets with no matching page
+  const LANG_NAMES = { es: 'Spanish', 'en-IN': 'India', ar: 'Arabic' };
+  for (const [lang, langGaps] of Object.entries(analysis.langGaps || {})) {
+    const langName = LANG_NAMES[lang] || lang;
+    for (const gap of langGaps.slice(0, 5)) {
+      todos.push({
+        area: `SEO — Gap (${langName})`,
+        task: `No page for "${gap.query}" — ${gap.impressions} impressions, position ${gap.position?.toFixed(1)}`,
+        priority: 'Medium',
+        status: 'New',
+        notes: `${langName} market (${gap.country}). High impressions, zero clicks. Needs ${langName} page.`,
+      });
+    }
+  }
+
   // Unattributed drops — need human investigation
   if (interpretation?.unattributed) {
     for (const drop of interpretation.unattributed.filter(u => u.direction === 'down').slice(0, 5)) {
