@@ -45,7 +45,7 @@ async function run() {
   const failures = [];
 
   for (const todo of todos) {
-    console.log(`\n--- Processing: ${todo.type} — "${todo.keyword || todo.slug}" ---`);
+    console.log(`\n--- Processing: ${todo.type} — "${todo.keyword || todo.slug}" [${todo.language || 'en'}] ---`);
 
     try {
       // Stage 2: Research (gaps only — opportunities skip to link stage)
@@ -67,6 +67,7 @@ async function run() {
           console.log(`[3/6] Writing content (attempt ${attempt}/${config.MAX_RETRY})...`);
           article = await writeArticle(researchResult, config);
           article._keyword = todo.keyword; // Pass through for linking
+          article.language = todo.language || 'en'; // Pass language for deployment
 
           // Stage 4: Check (structural + fact-check)
           console.log('[4/6] Checking content...');

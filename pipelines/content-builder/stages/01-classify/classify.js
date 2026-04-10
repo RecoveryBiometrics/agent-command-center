@@ -16,30 +16,51 @@ const PATTERNS = {
   investigate: /dropped\s+([\d.]+)\s*positions/i,
 };
 
+// Detect language from keyword text or area tag
+const SPANISH_INDICATORS = /[áéíóúñ¿¡]|gohighlevel\s+(para|en|cómo|guía|precios|prueba)|agencia|automatización|whatsapp.*negocio/i;
+const HINDI_INDICATORS = /india|rupee|₹|razorpay|upi|mumbai|bangalore|delhi|hyderabad|pune|chennai|indian/i;
+const ARABIC_INDICATORS = /[\u0600-\u06FF]/;
+
+function detectLanguage(keyword, area) {
+  const text = `${keyword} ${area}`.toLowerCase();
+  if (ARABIC_INDICATORS.test(keyword)) return 'ar';
+  if (SPANISH_INDICATORS.test(keyword)) return 'es';
+  if (HINDI_INDICATORS.test(text)) return 'en-IN';
+  // Check area tag for language hints
+  if (area.includes('Spanish') || area.includes('ES')) return 'es';
+  if (area.includes('India') || area.includes('IN')) return 'en-IN';
+  if (area.includes('Arabic') || area.includes('AR')) return 'ar';
+  return 'en';
+}
+
 function parseTodo(todo) {
   const { task, area } = todo;
 
   // Try gap pattern
   const gapMatch = task.match(PATTERNS.gap);
   if (gapMatch || area.includes('Gap')) {
+    const keyword = gapMatch ? gapMatch[1] : task;
     return {
       ...todo,
       type: 'gap',
-      keyword: gapMatch ? gapMatch[1] : task,
+      keyword,
       impressions: gapMatch ? parseInt(gapMatch[2]) : 0,
       position: gapMatch ? parseFloat(gapMatch[3]) : 0,
+      language: detectLanguage(keyword, area),
     };
   }
 
   // Try opportunity pattern
   const oppMatch = task.match(PATTERNS.opportunity);
   if (oppMatch || area.includes('Opportunity')) {
+    const slug = oppMatch ? oppMatch[1] : '';
     return {
       ...todo,
       type: 'opportunity',
-      slug: oppMatch ? oppMatch[1] : '',
+      slug,
       position: oppMatch ? parseFloat(oppMatch[2]) : 0,
       impressions: oppMatch ? parseInt(oppMatch[3]) : 0,
+      language: detectLanguage(slug, area),
     };
   }
 

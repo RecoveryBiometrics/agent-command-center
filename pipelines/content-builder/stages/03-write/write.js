@@ -44,8 +44,33 @@ function buildResearchContext(researchResult) {
 /**
  * Write an article from a research brief.
  */
+// Language-specific writing instructions
+const LANG_INSTRUCTIONS = {
+  en: 'Write in English.',
+  es: `Write in Latin American Spanish (español latinoamericano).
+- Use "tú" (informal), not "usted"
+- Mention WhatsApp as the primary communication tool (not SMS)
+- Mention MercadoPago, Conekta, or Stripe for payments
+- Include pricing in USD with approximate MXN/COP equivalents
+- Write naturally — NOT a translation from English`,
+  'en-IN': `Write in English for the Indian market.
+- Mention WhatsApp as the primary communication tool (saves SMS costs)
+- Mention Razorpay, PayU, UPI for payments
+- Include pricing in USD with INR equivalents (₹)
+- Reference Indian cities and business types where relevant
+- Mention DPDP Act for compliance context`,
+  ar: `Write in Modern Standard Arabic (فصحى).
+- Wrap content in <div dir="rtl" style="text-align:right">
+- Mention WhatsApp as primary business communication
+- Mention PayTabs, Tap Payments for payment processing
+- Include pricing in USD with AED/SAR/EGP equivalents
+- Reference UAE, Saudi Arabia, Egypt where relevant`,
+};
+
 async function writeArticle(researchResult, config) {
   const { keyword, brief, pageType } = researchResult;
+  const language = researchResult.language || 'en';
+  const langInstructions = LANG_INSTRUCTIONS[language] || LANG_INSTRUCTIONS.en;
 
   // Read references (full — not truncated)
   const voicePath = path.join(__dirname, '../../references/voice.md');
@@ -76,6 +101,8 @@ async function writeArticle(researchResult, config) {
     messages: [{
       role: 'user',
       content: `Write a comprehensive article for "${config.BRAND.name}" based on the research below.
+
+LANGUAGE: ${langInstructions}
 
 KEYWORD: "${keyword}"
 PAGE TYPE: ${pageType}
