@@ -29,13 +29,31 @@ dashboard/      — Next.js visual dashboard (live on Vercel)
 
 ## Live Deployments
 
-| Business | Skill | Runs On | Schedule |
-|----------|-------|---------|----------|
-| SafeBath | SEO Content Pipeline | GitHub Actions | Daily 6am ET |
+| Business | Pipeline | Runs On | Schedule |
+|----------|----------|---------|----------|
+| SafeBath | SEO Content | GitHub Actions | Daily 6am ET |
 | SafeBath | SEO Reporting | GitHub Actions | Weekly Tues 9am ET |
+| SafeBath | Content Builder | GitHub Actions | Weekly Wed 6am ET |
 | SafeBath | Analytics | GitHub Actions | Weekly Mon 8am ET |
-| GlobalHighLevel | Podcast Pipeline | IONOS VPS | 24/7, 25-hour cycles |
-| GlobalHighLevel | Analytics | GitHub Actions | Weekly Mon 8am ET |
+| GHL | Podcast (35 posts/cycle: EN/ES/IN/AR) | IONOS VPS | 24/7, 25h cycles |
+| GHL | SEO Reporting | GitHub Actions | Weekly Tues 9am ET |
+| GHL | Content Builder | GitHub Actions | Weekly Wed 6am ET |
+| GHL | Analytics | GitHub Actions | Weekly Mon 8am ET |
+
+## Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/report` | Weekly reports, error alerts, CEO digests (silent on success) |
+| `/localize` | Classify language + topic, localize CTAs/pricing |
+| `/topics` | 3-tier topic sourcing (GHL docs, GSC gaps, market verticals) |
+| `/social` | Social posts from ops activity |
+| `/org-status` | Status check across all businesses |
+| `/deploy-team` | Deploy team template to a business |
+| `/todo-agent` | Execute Sheet TODOs (SEO, content, investigation) |
+| `/content-builder` | Build pages from SEO gaps/opportunities |
+| `/pipeline-doctor` | Diagnose + fix pipeline failures |
+| `/analytics-team` | GA4 analysis, insights, dispatch |
 
 ## Design Principles
 
