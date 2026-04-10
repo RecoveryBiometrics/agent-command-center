@@ -1,0 +1,92 @@
+id: power-to-the-people
+name: "Power to the People"
+status: building
+website: https://www.avlp2p.com
+niche: "electrical services, residential electrician, EV chargers, solar, generators"
+description: "Licensed and insured electrical contractor in Asheville, NC — residential electrical, EV chargers, solar, generators"
+
+# -- Org --
+org:
+  director: dir-p2p
+  director_name: Director of Power to the People
+  reportsTo: vp-growth
+  github: RecoveryBiometrics/power-to-the-people
+  path: ~/Projects/power-to-the-people/
+  terminal_shortcut: p2p
+
+# -- Brand --
+brand:
+  phone_display: "(828) 551-9843"
+  phone_tel: "+18285519843"
+  email: # TODO — get from client
+  cta: "Call Today for a Free Estimate"
+  voice: "Friendly, approachable, expert electrician. Down-to-earth Asheville vibe. Emphasize safety, fair pricing, and lifetime workmanship warranty."
+
+# -- Service Areas --
+service_areas:
+  states: ["NC"]
+  primary_city: "Asheville"
+  cities_per_run: 8
+
+# -- Slack Channels --
+slack:
+  ops_log_channel: C0AQG0DP222   # shared #ops-log
+  ceo_channel: C0AQAHSQK38      # shared #ceo-briefing
+  business_channel: # TODO — create #p2p channel
+
+# -- SEO / Analytics --
+# seo:
+#   gsc_site_url: "sc-domain:avlp2p.com"
+#   ga4_property_id: ""  # TODO — get from client
+#   sitemap_url: https://www.avlp2p.com/sitemap.xml
+
+# -- Content Config --
+# content:
+#   max_similarity_percent: 85
+#   categories:
+#     - "Residential Electrical"
+#     - "EV Charger Installation"
+#     - "Solar Power"
+#     - "Generators"
+#     - "Wiring & Rewiring"
+#     - "Electrical Safety"
+#   subreddits:
+#     - "electricians"
+#     - "HomeImprovement"
+#     - "asheville"
+#     - "solar"
+#     - "EVcharging"
+
+# -- Analytics --
+# analytics:
+#   ga4_property_id: ""  # TODO — get from client
+#   business_type: local_service
+#   schedule: weekly
+#   conversion_events: []
+#   alert_thresholds:
+#     traffic_drop_pct: 20
+#     traffic_spike_pct: 50
+#     bounce_rate_ceiling: 75
+#   dispatch_targets:
+#     - seo-content
+#     - directory
+
+# -- Tracking --
+tracking_sheet_id: "17LisuuLu__nEdcVHbbpH4Tq21LIHCW2CfkIVOx-6SWo"
+
+# -- Secrets --
+secrets:
+  anthropic_api_key: ANTHROPIC_API_KEY
+  google_genai_api_key: GOOGLE_GENAI_API_KEY
+  slack_bot_token: SLACK_BOT_TOKEN
+
+# -- Teams to Deploy --
+teams: []
+  # - template: seo-content-team
+  #   runs_on: GitHub Actions
+  #   schedule: "Daily, 6:00 AM ET"
+  #   status: scheduled
+
+# -- Deploy --
+deploy:
+  platform: Squarespace  # current client platform
