@@ -1,0 +1,125 @@
+# ice-machines.yaml — Single source of truth for the Ice Machine business
+# Last updated: 2026-04-14
+
+id: ice-machines
+name: REI Amplifi Ice Infrastructure
+status: planning  # moves to "building" on first site agreement signed
+website: # TBD (possible: icetolake.com, bassicefinder.com, or integrate into bassforecast.com lake pages)
+niche: "Smart connected ice vending at underserved fishing ramps in TX, FL, CA"
+description: "Physical infrastructure business placing cellular-monitored ice vending machines at bass fishing ramps where early-morning demand exceeds local supply. Uses proprietary gap database and Bass Forecast Epic day correlation to outplace traditional operators who optimize for average daily traffic."
+
+# -- Core docs --
+docs:
+  playbook: businesses/ice-machines-docs/playbook.md
+  gap_database: # TBD — Google Sheets link once built
+  site_agreements: # TBD — folder of signed multi-year agreements
+
+# -- Org --
+org:
+  director: # N/A — solo operator
+  path: ~/Projects/ice-machines/   # will create when moved to building status
+  terminal_shortcut: ice
+
+# -- Primary markets --
+markets:
+  - Florida (launch market, year-round fishing, easy permits)
+  - East Texas (Sam Rayburn, Toledo Bend, Lake Fork, Lake Conroe)
+  - California (Clear Lake, Shasta, Castaic, Delta, thinner competition)
+
+# -- Target location types --
+location_types:
+  tier_1:
+    - Tournament launch ramps
+    - City and county-owned ramps
+    - Weigh-in venues (repeat use)
+    - Highway corridors 10-15 miles before the lake
+  tier_2:
+    - RV parks and campgrounds near fishing lakes
+    - Bait shop exteriors (off-hours coverage)
+    - Fishing piers and pay-to-fish ponds
+  tier_3:
+    - Boat storage facilities
+    - Church-sponsored tournament host ramps
+    - Commercial marinas with mid-week traffic
+
+# -- Unit economics --
+unit_economics:
+  production_cost_per_bag: "$0.10"
+  selling_price_range: "$1.50 to $3.00"
+  gross_margin: "~93%"
+  breakeven_bags_per_day: "20-25"
+  target_bags_per_day: "35-40+"
+  payback_period_used_machine: "~12 months at 27 bags/day"
+  dynamic_pricing_enabled: true  # required from day 1
+
+# -- Machine vendors --
+hardware:
+  primary_vendor: Kooler Ice  # IM1500 used ($12K-$18K) for first machine
+  alternative_vendor: IceRebus  # tech-forward, Regional Partner model possible
+  monitoring_required: "cellular modem, remote vend, hourly sales data, remote price adjustment"
+
+# -- Revenue model --
+revenue:
+  type: owner-operated infrastructure
+  monthly_net_per_proven_machine: "$1,500"
+  year_1_target_machines: "10-15"
+  year_1_target_monthly_net: "$15,000-$22,500"
+  exit_thesis:
+    scale: "150 machines"
+    annual_ebitda_target: "$2.7M"
+    multiple: "8x (with Bass Forecast platform premium)"
+    exit_value: "~$21.6M"
+    timeline: "3-5 years"
+
+# -- Operating rules (CRITICAL) --
+rules:
+  no_licensing_intelligence: true  # see feedback_no_licensing_the_moat.md memory
+  route_work_outsourced: true  # Bill does not drive service routes; contracted service partner does
+  minimum_site_agreement: "multi-year written, never handshake"
+  dynamic_pricing: "active day 1, not month 6"
+  parallel_execution: "sites 2-4 under LOI while site 1 is installing, not sequential"
+
+# -- Distribution advantage --
+distribution:
+  bass_forecast_integration:
+    goal: "Every placed machine listed on Bass Forecast lake page for that ramp"
+    pro_discount: "20% off ice at BFR partner machines"
+    status: "requires Bass Forecast retainer signed + formal written agreement"
+  public_data_fallback: "If Bass Forecast does not sign, use state wildlife agencies + Bassmaster/MLF tournament calendars + Google Places"
+
+# -- Operational support --
+operations:
+  llc_formation_state: Florida  # required before any site agreement
+  payment_processor: # TBD (Stripe vs Square vs machine-integrated)
+  service_partner: # TBD (1099 contractor per route)
+  monitoring_platform: IceTalk (Kooler) or V CORE (IceRebus)
+
+# -- Moat (internal only, never licensed) --
+moat:
+  - Signed multi-year site agreements at top locations
+  - Bass Forecast distribution partnership
+  - Proprietary placement scoring database
+  - Dynamic pricing execution capability
+  - Epic Day demand correlation data (proprietary)
+
+# -- Deployed teams --
+teams: []  # pipeline work only on intelligence layer; physical operations via contracted service partner
+
+# -- Deploy --
+deploy:
+  platform: # TBD for directory/content side
+  machines_infrastructure: physical, no deploy pipeline
+
+# -- Cost estimates (monthly, operational) --
+costs:
+  per_machine_operational: "$230-$960/month"
+  service_partner: "~$500/mo per route (4-6 machines/route)"
+  llc_annual: "~$150-$400"
+  insurance: "~$50/mo per machine"
+  payment_processing: "~2.7% of gross revenue (Stripe)"
+
+# -- Related memory files --
+memory_refs:
+  - feedback_no_licensing_the_moat.md
+  - feedback_no_done_for_you_work.md
+  - project_trades_pipeline.md
