@@ -66,14 +66,41 @@ Vertical content pipeline that ships vertical-specific (marketing agencies, plum
 - **Language-reviewer is a new shared skill** (option B from 2026-04-14 session), called by verticals AND retrofitted into podcast pipeline to catch Arabic quality drift.
 - **MVP = agency-starters Parts 1-3 × 4 languages = 12 articles** shipped as one experimental unit.
 
-## Open items (as of 2026-04-14)
+## Where to start next session (as of end-of-day 2026-04-14)
 
-- Write `references/market-config/{es,ar,in,en}.md` (per-market competitors, subreddits, pricing, regulatory notes)
-- Build `scripts/verticals-blog.py` (no code exists yet)
-- Build `lib/language-reviewer.py` (new shared part)
-- Create "Verticals Queue" tab in GHL Sheet with 11 rows × 4 languages schema
-- GitHub Roadmap project for tracking vertical rollout
-- Retrofit podcast pipeline to call language-reviewer
+When Bill says "start where we left off yesterday," load this file and work through this list in order.
+
+**Tomorrow (2026-04-15), focused 1-day build:**
+1. Create "Verticals Queue" tab in GHL Sheet `1A2eD2LeBpWFjDMe6W9BZbN6FvfW-em_7gD002pJD7_E`. Columns: `vertical | tier | part | language | status | shipped_date | url | position | ctr | affiliate_clicks_14d`. Seed 12 rows: agency-starters × Parts 1-3 × 4 languages (es, in, ar, en), all status=queued.
+2. Write `references/market-config/{es,ar,in,en}.md` in `~/.claude/skills/verticals-pipeline/references/`. Per market: competitors, subreddits, pricing norms, regulatory notes, banned phrases.
+3. Verify `references/article-template.md` and `references/voice.md` exist and match the locked decisions (they were written in session 48fd5669, pre-rename).
+
+**This week:**
+4. Build `scripts/verticals-blog.py` skeleton in `~/Developer/projects/marketing/podcast-pipeline/ghl-podcast-pipeline/scripts/`. Stages 01-source through 07-deploy.
+5. Build `lib/language-reviewer.py` as shared part.
+6. Wire tiered model routing: Haiku for research/write/interlink, Sonnet for fact-check, Opus for language-review.
+7. Create GitHub Project "REI Amplifi Roadmap" in `RecoveryBiometrics/agent-command-center`. Add 12 agency-starter articles as linked issues.
+
+**This month (through mid-May 2026):**
+8. Ship the 12 agency-starter articles (Parts 1-3 × 4 languages).
+9. Wire `reporting` skill to pull GSC + FirstPromoter + Extendly data weekly from Verticals Queue.
+10. Retrofit podcast pipeline's 4-language output to call `language-reviewer`.
+
+**Q2-Q3 2026:**
+11. Measure agency-starters at 8 weeks. Cull/scale.
+12. If winning, ship Parts 4-6 for survivors.
+13. Start plumbers Parts 1-3 × 4 languages as second cohort.
+14. Start Ice Machines placement gap database (biggest unbuilt 12-month-plan commitment).
+
+**This year (through April 2027):**
+15. Verticals pipeline at steady-state across 4 languages, 11 Tier 1 verticals.
+16. Ice Machines: placement gap DB + cellular monitoring prototype live.
+17. SafeBath: maintain existing pipelines, no new scope.
+18. Platform: extract shared libs (`lib/sheet.js`, `lib/slack.js`, `lib/auth.js`) when pain demands, not speculatively.
+
+## Session 2026-04-14 summary
+
+Renamed from `trades-pipeline`. Locked agency-starters as Tier 1 #1. Switched cadence from pulsed-parallel-single-language to parallel-4-language-bundles-of-3. Added `05-language-review` stage. Locked Sheet-only ship state. Locked per-market native research (no translate-once shortcut). Added tiered model routing table. Ran full audit: confirmed trades pipeline was never built (skill spec only, no code), confirmed skills are NOT interchangeable in current code (claim in CLAUDE.md is aspirational — config is shared via YAML, code is copy-pasted across 6 pipelines with only 1 cross-pipeline import in 75 JS files). Built `AGENTS.md` registry. Pushed commit 1c273fc to GitHub as backup.
 
 ## Related memory
 
