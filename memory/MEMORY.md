@@ -6,4 +6,20 @@
 - [Do the work](feedback_do_the_work.md) — Never punt to user when you have tools (gh, gcloud, MCP) to do it yourself
 - [Skills First](feedback_skill_sync.md) — Everything built must be a skill FIRST. No baking logic into triggers/scripts without a skill.
 - [Never make things up](feedback_never_make_things_up.md) — If it doesn't exist, say so. Don't fabricate features, config, or solutions.
+- [Never claim about Bill or William (HARD RULE)](feedback_never_claim_about_bill_or_william.md) — Never invent client counts, outcomes, credentials, or first-person anecdotes for Bill or the William Welch persona.
+- [William Welch canonical bio](reference_william_welch_bio.md) — Approved bio text. Do not expand without Bill's written approval.
+- [Verticals Pipeline Architecture](project_verticals_pipeline.md) — Renamed from Trades 2026-04-14. Tier system, URLs, win metric, parallel 4-lang cadence, tiered model routing. Agency-starters #1 in Tier 1.
+- [No done-for-you work (HARD RULE)](feedback_no_done_for_you_work.md) — Never pitch Bill on implementation, setup, snapshot builds, audits, consulting, or coaching. Exception: GHL clients at $7,500+/mo × 12 months only.
+- [No licensing the moat](feedback_no_licensing_the_moat.md) — Never propose licensing proprietary data/maps/intelligence to competitors. Moat stays owned, not rented. Applies to ice machine gaps, trades methodology, platform code, directory data.
+- [Relocation plan](project_relocation_plan.md) — Planning move from Doylestown, PA to South Venice Beach, FL. Aligns with ice machine launch market, no state income tax. Use FL for future-dated references only.
+- [Starting is success](feedback_starting_is_success.md) — When sharing public plans/vision, do not load them with pass/fail tests. Share ambition plainly. Only failure is not starting.
+- [Ask, do not assume. One at a time.](feedback_ask_dont_assume_one_at_a_time.md) — If unclear, ASK Bill, do not fabricate. Ask ONE question at a time, not a list. Walk through plans ONE section at a time.
+- [Org chart structure](project_org_chart_structure.md) — REI Amplifi uses Brands × Departments × Roles. Brands sit on top, departments serve all brands, roles inside each department. Editorial Department = the new publisher pipeline. Migration order: trades first, podcast second, SafeBath third.
 - [TODO Agent Skill](project_todo_agent.md) — BUILT: /todo-agent reads Active TODOs from Sheet and executes fixes (links, pages, investigations)
+- [Compose with existing agents](feedback_compose_existing.md) — New skills MUST use existing pipeline agents (researcher, fact-checker, copywriter, seo-audit), never bypass them
+- [Google Account Email](user_google_email.md) — Always use bill@reiamplifi.com for all Google Workspace MCP calls
+- [GSC Account (CRITICAL)](reference_gsc_account.md) — GSC ONLY uses williamcourterwelch@gmail.com. All other Google services use bill@reiamplifi.com.
+- [Power to the People](project_power_to_the_people.md) — Client Andrew Holbein, Asheville electrician, knob & tube niche, realtor mailer strategy, $3.5-5K setup
+- [Marketing Org Notion Hub](project_marketing_org_notion.md) — 3 linked DBs (Businesses/Pipelines/Agents) + Team org chart sub-page. Single source of truth.
+- [Don't use mermaid in Notion](feedback_notion_mermaid_sucks.md) — Renders too small. Use linked DB Board views or external tools (n8n/Whimsical).
+- [IONOS VPS SSH (stale)](reference_ionos_vps_ssh.md) — Credentials in podcast-pipeline SKILL.md don't work. Verify before using.
