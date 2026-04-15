@@ -1,59 +1,84 @@
 # Stage 2: Compose Report
 
 ## Inputs
-All data collected in stage 01:
-- `business`, `report_type`, `pipeline_status`, `ops_log_entries`
-- `search_performance`, `wins_drops`, `opportunities`, `gaps`
-- `traffic`, `conversions`, `content_velocity`
+From stage 01:
+- `business` — YAML config
+- `report_type` — ceo-daily | weekly | error | ceo
+- `live_data` — every metric tagged with source + pulled_at
+- `unavailable` — list of failed data sources (with reason)
 
-## Process
+## Hard rules
 
-### 1. Check suppress rules
-Read `references/suppress-rules.md` and apply:
-- **ceo:** If all ops-log entries are info-level (no warnings/errors), STOP. Output nothing. Log "CEO digest suppressed — all clean."
-- **ceo-daily:** NEVER suppress. Proof-of-life requires the post even on clean days. If a pipeline didn't run, say so — that's exactly when Bill needs to know.
-- **error:** Never suppress. That's the whole point.
-- **weekly:** Never suppress. Always send the weekly report.
+### 1. Never fabricate. Never estimate.
+If a number is missing, say "unavailable — {reason}". Do not round, average, or interpolate.
 
-### 2. Load report template
-Read the matching template from `references/`:
-- `weekly` → `references/weekly-summary.md`
-- `error` → `references/error-alert.md`
-- `ceo` → `references/ceo-digest.md`
-- `ceo-daily` → `references/ceo-daily.md` (plain-English narrative, proof-of-life)
+### 2. Live data only (enforced upstream)
+Stage 01 is responsible for live pulls. If stage 02 sees data without a `pulled_at` field, refuse to use it. Something upstream violated the no-cache rule.
 
-### 3. Render the report
-Fill the template with collected data. Follow these rules:
+### 3. Lead with the decision
+Every report opens with ONE bold sentence: the single decision or action for this report's audience. Before data, before numbers. If there's no decision, lead with the one concerning signal.
 
-**Numbers must be real.** Never invent, estimate, or round aggressively. If data is missing, say "no data" — don't guess.
+> Example: *"This week: fix the GHL 0.3% CTR — ranking is there, clicks aren't."*
 
-**Compare to prior period.** For weekly reports, always show direction: "Clicks: 142 (+23 vs last week)" or "Position: 18.3 (no prior data)". Use the `priorTotals` from analyze.js output when available.
+If there's genuinely nothing to decide, the lead is: *"No decisions this week. All metrics within normal range."*
 
-**Conditional sections.** Only render sections that have data:
-- If no wins → skip "What's Going Up"
-- If no drops → skip "What's Going Down"
-- If no gaps → skip "Content Gaps"
-- If no conversion data → skip "Conversions" (don't say "0 conversions", just omit)
-- If no GA4 data → skip "Traffic" section entirely
+### 4. Show deltas, not absolutes
+Every number is this-period vs prior-period. "47 clicks (-12 vs prior 28d)" beats "47 clicks." If no prior period exists yet, say so: "baseline period — no prior comparison."
 
-**Keep it scannable.** Use Slack formatting:
-- Bold headers with `*Header*`
-- Bullet points for lists
-- Code blocks for slugs: `` `page-slug` ``
-- Blockquotes for key metrics: `> Clicks: *142* | Impressions: *8,340*`
+### 5. End with action
+Close with ONE sentence: what are we doing differently because of this report? If the answer is "nothing," say so — then the report can probably be shorter next week.
 
-**Max length.** Slack truncates at ~4000 chars. If the report is longer, prioritize:
-1. Key metrics (totals, direction)
-2. Wins and drops (top 5 each)
-3. Opportunities (top 5)
-4. Gaps (top 5)
-5. Traffic summary (one line)
-6. Content velocity (one line)
+### 6. Dedupe
+One message per business, ever. Never two posts for the same business on the same day. If stage 01 returns partial data, the single post says so — don't post a "no data" then a "full data" later.
 
-## Outputs
-Pass to stage 03:
-- `formatted_message` — Slack-ready text
-- `report_type` — for routing decisions
-- `suppressed` — boolean, true if suppress rules triggered
-- `sheet_data` — structured data for Sheet write (weekly only)
-  - Row format: [date, clicks, impressions, ctr, position, sessions, users, content_count, wins_count, drops_count, opportunities_count, gaps_count]
+## Per report-type
+
+### ceo-daily — proof of life (template: references/ceo-daily.md)
+- Narrative paragraphs, 3-6 sentences per business
+- Severity tag opens each paragraph: "had a quiet day" / "had a busy day" / "had a concerning day" / "is dark"
+- Never suppress — even clean days get posted
+- Under 4000 chars total, single message to #ceo
+
+### weekly — deep metrics (template: references/weekly-summary.md)
+- ONE message per business, under 3500 chars
+- Opens with bolded decision sentence (rule 3)
+- Covers in this order:
+  1. The decision / headline signal
+  2. Output metrics with WoW deltas: clicks, impressions, position, CTR
+  3. **Input metrics** — what we shipped this week (pages, optimizations, listings, gaps closed)
+  4. **Conversion metrics** — CTA clicks, /trial/ visits, affiliate clicks, phone taps
+  5. Top 3 wins + top 3 drops (by city/service name, not URL paths)
+  6. Top 3 close-to-page-1 opportunities
+  7. Changes in the evaluation window ONLY entries due for review THIS week (not all pending)
+  8. Closes with "This week we're doing X" — written action
+- Link to Sheet at the end, not inline
+- Posts to #ceo only (business channels are archived)
+
+### error — immediate alert (template: references/error-alert.md)
+- Short, actionable, under 500 chars
+- What broke, which business, last successful run, link to GitHub Actions
+- Posts to #ops-log
+
+### ceo — aggregated digest (template: references/ceo-digest.md)
+- Silent on clean days (the only report type that suppresses)
+- Lists cross-business warnings only
+- Superseded by ceo-daily in practice; keep for compatibility
+
+## Suppress rules
+- **ceo:** suppress if all ops-log entries in the last 24h are info-level
+- **ceo-daily:** NEVER suppress (proof of life)
+- **weekly:** NEVER suppress (weekly cadence is the commitment)
+- **error:** NEVER suppress (that's the whole point)
+
+## Unavailable data — how to surface it
+If stage 01 returned any entries in `unavailable`, add a short paragraph at the end:
+
+> *Data gaps: GA4 unavailable (analytics-mcp not connected in trigger environment). SafeBath /trial/ conversion rate missing.*
+
+Do not silently omit. Bill decides whether to fix the gap.
+
+## Outputs to Stage 03
+- `formatted_message` — ready for Slack
+- `report_type`
+- `suppressed` — true only for `ceo` type with no warnings
+- `unavailable` — passed through for logging
