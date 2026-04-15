@@ -19,6 +19,7 @@
 - [Org chart structure](project_org_chart_structure.md) — REI Amplifi uses Brands × Departments × Roles. Brands sit on top, departments serve all brands, roles inside each department. Editorial Department = the new publisher pipeline. Migration order: trades first, podcast second, SafeBath third.
 - [TODO Agent Skill](project_todo_agent.md) — BUILT: /todo-agent reads Active TODOs from Sheet and executes fixes (links, pages, investigations)
 - [Compose with existing agents](feedback_compose_existing.md) — New skills MUST use existing pipeline agents (researcher, fact-checker, copywriter, seo-audit), never bypass them
+- [Build per-business, no premature abstraction](feedback_build_per_business_no_premature_abstraction.md) — Hardcode for the business in front of you. Extract patterns at N=3, not before. Rewriting later is a feature.
 - [Google Account Email](user_google_email.md) — Always use bill@reiamplifi.com for all Google Workspace MCP calls
 - [GSC Account (CRITICAL)](reference_gsc_account.md) — GSC ONLY uses williamcourterwelch@gmail.com. All other Google services use bill@reiamplifi.com.
 - [Power to the People](project_power_to_the_people.md) — Client Andrew Holbein, Asheville electrician, knob & tube niche, realtor mailer strategy, $3.5-5K setup

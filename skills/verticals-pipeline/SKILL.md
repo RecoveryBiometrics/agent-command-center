@@ -8,132 +8,137 @@ user-invocable: true
 
 # Verticals Pipeline
 
-You are operating the Verticals Pipeline. This pipeline produces vertical and persona focused content for GoHighLevel across four markets. Every post targets a specific buyer intent stage for a specific vertical. Series build topical authority. A vertical is any line of business that buys GHL — marketing agencies, trades (plumbers, HVAC, electricians, roofers, GCs), and professional services (dentists, chiropractors, med spas, real estate, insurance). Short posts net long tail.
+Ships vertical-specific long-form GHL content as hub-and-spoke topical clusters. Tier 1 = 9-part series; Tier 2 = 4-5 parts; Tier 3 = 1 flagship. Peter Attia "Straight Dope" style. Per-market native research mandatory.
+
+## Status (2026-04-15)
+
+**Built and ready for first dispatch: agency-starters Part 1 × ES.** Remaining 8 parts and EN/IN/AR language variants come after Part 1 measures at week 2 and week 8.
 
 ## The 7 locked decisions
 
-Do not relitigate these unless Bill says so explicitly.
+Do not relitigate unless Bill says so explicitly.
 
-1. **Style.** Peter Attia "Straight Dope" long form. See `references/article-template.md` for structure. See `references/voice.md` for tone and banned phrases.
-2. **Sizing.** Three tiers. Tier 1 verticals get 9 part series shipped in bundles of 3 (Parts 1-3, measure, Parts 4-6 if survivors, Parts 7-9 if still winning). Tier 2 gets 4 to 5 parts. Tier 3 gets 1 flagship.
-3. **Markets.** EN, ES, IN (English with India context), AR (Modern Standard Arabic). Per market native research — do NOT translate one research pass across languages. Regional problems, pricing, and competitors differ.
-4. **Source of truth.** "Verticals Queue" tab in the GHL Google Sheet `1A2eD2LeBpWFjDMe6W9BZbN6FvfW-em_7gD002pJD7_E`. Pipeline reads from the Sheet every run. Bill edits the Sheet. GSC suggestions auto append weekly. Ship state (queued/shipped/culled) lives only in the Sheet — no local JSON ship log.
-5. **URLs.** `/for/[vertical]/` is the series hub. Each part lives at `/for/[vertical]/[part-slug]/`. Per language: `/es/para/[vertical]/`, `/in/for/[vertical]/`, `/ar/لـ/[vertical]/`.
-6. **Winning metric.** After 8 weeks live, each vertical is scored on three thresholds: avg position <= 15, CTR >= 1.5%, at least 1 affiliate click in the last 14 days. Tier 1 keeps going if 2 of 3. Tier 2 keeps going if 1 of 3. Tier 3 promotes on any hit, archives on none.
-7. **Cadence.** Parallel 4-language bundles of 3. Ship Parts 1-3 for one vertical in all 4 languages (12 articles) as the unit. Measure 8 weeks. Cull non-performing languages or verticals. Ship Parts 4-6 for survivors. Daily runs, 7 days a week.
+1. **Style.** Peter Attia "Straight Dope" long form. See `references/article-template.md` and `references/voice.md`.
+2. **Sizing.** Tier 1 = 9 parts (bundles of 3). Tier 2 = 4-5 parts. Tier 3 = 1 flagship.
+3. **Markets.** EN, ES, IN (English with India context), AR (Modern Standard Arabic). Per-market native research.
+4. **Source of truth.** "Verticals Queue" + "Cluster Map" tabs in GHL Sheet `1A2eD2LeBpWFjDMe6W9BZbN6FvfW-em_7gD002pJD7_E`.
+5. **URLs.** `/es/para/[vertical]/` (hub) + `/es/para/[vertical]/[part-slug]/` (pillars). For other langs: `/for/[vertical]/`, `/in/for/[vertical]/`, `/ar/لـ/[vertical]/`. Legacy `/blog/{slug}/` posts untouched.
+6. **Winning metric.** After 8 weeks: avg position ≤15, CTR ≥1.5%, ≥1 affiliate click in last 14 days. Tier 1 keeps going if 2 of 3.
+7. **Cadence.** ES-first, not EN-first (ES has thinnest competition + highest current dwell on globalhighlevel.com).
 
-## Tier 1 verticals (the first 11)
+## What's built (GHL-only, hardcoded — this is correct)
 
-1. **Marketing agencies / agency-starters** — highest-value GHL buyer, thin competition in ES/AR/IN
-2. Plumbers
-3. HVAC contractors
-4. Electricians
-5. Roofers
-6. General contractors and remodelers
-7. Med spas and aesthetic clinics
-8. Dentists and dental practices
-9. Real estate agents and teams
-10. Chiropractors
-11. Insurance agents (P&C and Medicare)
+Per `feedback_build_per_business_no_premature_abstraction.md`, this pipeline is hardcoded to globalhighlevel.com. It will NOT be generalized until a second business needs the same shape (N=3 rule).
 
-Tier 2 and Tier 3 verticals populate over time from the Sheet and from GSC signal. Do not hard code them here.
+### New code in `ghl-podcast-pipeline/scripts/`
+- **`7-spanish-blog.py`** — extended with `--mode=attia-longform`, `--vertical`, `--part`, `--series-hub`, `--hub-title` flags. Added RULE #0 anti-fabrication block. When `attia-longform` runs, produces 2500-3500 word Attia pillar, saves with `url_path` set.
+- **`language_reviewer.py`** — Opus 4.6 quality gate for non-English content. ES rules built (Latin dialect, banned phrases, fabrication scan, claim parity). Future: IN, AR.
+- **`verticals_hub.py`** — Generates the series hub page (8 required elements). Saves as post JSON with `url_path=/es/para/[vertical]/` and `is_series_hub=True`.
+- **`verticals_dispatch.py`** — Thin dispatcher. Hub → attia writer → Opus review → report. Hardcoded for agency-starters Part 1 ES. Sheet integration deferred until Part 2 forces the question.
+- **`verticals_retrofit.py`** — One-time retrofit. Injects inbound link from each of 10 ES cluster spokes into the new hub. Idempotent.
 
-## The 9 parts of a Tier 1 series (buyer journey)
+### Updated code in `globalhighlevel-site/`
+- **`build.py`** — added `post_url()` + `post_output_rel()` helpers. 6 touchpoints updated (canonical, render output, sitemap, internal linker href, related cards, slug-keyed link index). Posts without `url_path` render at `/blog/{slug}/` exactly as before.
 
-Every Tier 1 vertical produces these 9 parts in order, one per cadence slot.
+### New tabs in GHL Google Sheet
+- **Verticals Queue** (10 cols: vertical, tier, part, language, status, shipped_date, url, position, ctr, affiliate_clicks_14d). Seeded with agency-starters Parts 1-3 × ES.
+- **Cluster Map** (7 cols: hub_url, spoke_url, language, relationship_type, retrofit_status, inbound_count, last_audited). Seeded with 10 ES agency spoke URLs.
 
-| # | Part title template | Buyer intent |
+## Shipping Part 1 (actual commands)
+
+```bash
+cd ~/Developer/projects/marketing/podcast-pipeline/ghl-podcast-pipeline
+
+# 1. Dry-run to confirm plan
+venv/bin/python3 scripts/verticals_dispatch.py --dry
+
+# 2. Real run — generates hub + pillar + runs Opus review (~3-5 min, ~$1-3 API)
+venv/bin/python3 scripts/verticals_dispatch.py
+
+# 3. Manually review the two new JSONs in posts/ for:
+#    - No invented people/companies/$ figures (RULE #0)
+#    - Attia 12 elements present (pre-intro, learning objectives, concepts, Q&A, footnotes, etc.)
+#    - Three-tier CTA (trial + Extendly + tertiary)
+#    - Word count 2500+
+#    - Hub lists Parts 2-9 as "próximamente"
+
+# 4. Retrofit cluster inbound links
+venv/bin/python3 scripts/verticals_retrofit.py --dry   # inspect
+venv/bin/python3 scripts/verticals_retrofit.py         # apply
+
+# 5. Build + deploy
+cd ../globalhighlevel-site
+python3 build.py
+git add posts/ public/
+git commit -m "Ship verticals ES Part 1 — agencias-de-marketing hub + pillar + cluster retrofit"
+git push  # Cloudflare auto-deploys on push
+
+# 6. Update Sheet Verticals Queue row: status=shipped, shipped_date, url
+#    Update Cluster Map retrofit_status=retrofitted for the 10 spokes
+```
+
+## Model routing
+
+| Stage | Model | Why |
 |---|---|---|
-| 1 | "Why [vertical plural] need a CRM in 2026" | Problem aware |
-| 2 | "Best CRM for [vertical plural] this year" | Solution aware |
-| 3 | "GoHighLevel vs [local competitor] for [vertical plural]" | Comparison |
-| 4 | "How to set up GoHighLevel for a [vertical singular] business" | How to |
-| 5 | "GoHighLevel workflows that [vertical plural] actually use" | Use case |
-| 6 | "GoHighLevel pricing for a [vertical] business" | Pricing |
-| 7 | "What changes in month 1 when a [vertical] adopts GoHighLevel" | Proof |
-| 8 | "Is GoHighLevel worth it for a solo [vertical singular]" | Objection |
-| 9 | "Common mistakes [vertical plural] make in their GoHighLevel setup" | Optimization |
+| Research | Haiku 4.5 | Mechanical SERP/Reddit extraction |
+| Write (Attia) | Haiku 4.5 | Long-form generation, proven in podcast pipeline |
+| Fact-check | Haiku 4.5 | Regional accuracy + natural Spanish |
+| Language review | Opus 4.6 | Dialect/fluency/fabrication judgment |
+| Hub generation | Haiku 4.5 | Structured, follows template |
 
-Tier 2 verticals pick 4 to 5 parts from this list. Tier 3 verticals pick Part 1 only (renamed "Complete guide to GoHighLevel for [vertical plural]").
+## Hard rules
 
-## Stages
+- Every non-English pillar must pass the Opus language reviewer. No exceptions.
+- No em-dashes anywhere.
+- No fabricated people, clients, case studies, specific dollar figures, or ROI claims. See `feedback_never_claim_about_bill_or_william.md` and RULE #0 in `SPANISH_FACT_RULES`.
+- William Welch bio uses canonical text only. See `reference_william_welch_bio.md`.
+- Pricing must match `businesses/globalhighlevel.yaml`.
+- Per-market research is mandatory (don't translate-once).
+- Every pillar links to its series hub. Every hub lists Parts 2-9 as "próximamente" until shipped.
+- Failed fact-check OR failed Opus review = no ship.
 
-Run these in order. Each stage has its own CONTEXT.md under `stages/`.
+## Three-tier CTA (required on every pillar and hub)
 
-1. **01-source.** Pull the next vertical and part from the Verticals Queue Sheet. Skip anything already shipped. Respect the parallel 4-language bundle cadence.
-2. **02-research.** For each of 4 markets, run researcher agent: per market DuckDuckGo SERP plus per market Reddit. Per-market research is mandatory — do NOT translate one research pass to other languages. See `references/market-config/[lang].md` for per market settings. Model: Haiku 4.5.
-3. **03-write.** Claude writes the part following `references/article-template.md` and `references/voice.md`. One native write per market using that market's research. Model: Haiku 4.5.
-4. **04-check.** Fact checker scrubs every post. Enforces banned phrases from `voice.md`, strips fabricated claims per the "Never claim about Bill or William" memory rule, validates pricing against YAML. Model: Sonnet 4.6 (different model from writer to avoid confirmation bias).
-5. **05-language-review.** Non-English posts get a language-reviewer pass: grammar/fluency, back-translation parity vs. source, dialect compliance (MSA for Arabic), claim parity. Model: Opus 4.6 (judgment-heavy).
-6. **06-interlink.** Wires internal links per `references/interlinking-rules.md`. Model: Haiku 4.5.
-7. **07-deploy.** Saves JSON to `globalhighlevel-site/posts/[language]/`. Updates Verticals Queue Sheet row with status=shipped, shipped_date, URL. Git commits and pushes. Netlify deploys. No local JSON ship log — the Sheet is the only source of truth.
-8. **08-offpage.** Calls Google Indexing API for fresh crawl. Appends to sitemap. Queues a LinkedIn cross post draft and a Reddit comment draft for Bill to review manually.
+| Position | Tier | Target | CTA pattern |
+|---|---|---|---|
+| Primary (top + bottom) | Self-service | GHL affiliate trial | "Prueba GoHighLevel GRATIS por 30 días" |
+| Secondary (mid-post) | Help-needed | Extendly affiliate | "¿Prefieres implementación hecha por expertos? Extendly..." |
+| Tertiary (gated footer) | Enterprise | Contact form, $7,500+/mo | (only when qualified) |
 
-## Usage
+**Never:** "book a call with Bill", "1-on-1 coaching", generic "work with us."
 
-```
-/verticals                           # Run the next scheduled slot
-/verticals --vertical agencies       # Force next pending part for one vertical
-/verticals --part 3                  # Override part number (rarely used)
-/verticals --lang es                 # Ship only one language (debug/test)
-/verticals --dry                     # Show what would ship, do not write
-/verticals status                    # Read-only. Show Sheet state and cull candidates
-```
+## De-siloing rule
+
+Every new hub URL must have ≥3 inbound internal links from existing published pages BEFORE deploy. For Part 1 agency ES, `verticals_retrofit.py` is the one-time enforcement. When Part 2 ships, promote this to a `seo-deploy-gate` rule #9 so future orphans become impossible.
+
+## Scaling plan (not premature — just the path)
+
+- **Now:** Part 1 ES ships. Measure week 2 leading indicator (indexed, impressions >0).
+- **Week 2-4:** If indexed cleanly, ship Part 1 in EN + IN + AR using the same hardcoded dispatcher pattern, copy-paste per language. Explicit three copies before any abstraction.
+- **Week 4-8:** Parts 2-3 ES.
+- **Week 8:** winning-metric check (position/CTR/affiliate). Cull if 2 of 3 fails.
+- **Second vertical (plumbers):** first copy of dispatcher.
+- **Third vertical (electricians):** signal to extract a shared skeleton. Not before.
 
 ## Where things live
 
 | Thing | Location |
 |---|---|
-| Live execution state | Verticals Queue tab in GHL Google Sheet |
-| Ship state (queued/shipped/culled) | Verticals Queue Sheet (NOT a local JSON file) |
-| Generated posts | `globalhighlevel-site/posts/[lang]/*.json` |
-| Generated hub pages | `globalhighlevel-site/public/[lang-prefix]/[vertical]/index.html` |
-| Pipeline code | `ghl-podcast-pipeline/scripts/verticals-blog.py` |
-| Shared agents | `ghl-podcast-pipeline/scripts/lib/agents.py` |
-| Shared language reviewer | `ghl-podcast-pipeline/scripts/lib/language-reviewer.py` |
-| This skill backup | `agent-command-center/skills/verticals-pipeline/SKILL.md` |
+| Verticals Queue tab | GHL Sheet `1A2eD2LeBpWFjDMe6W9BZbN6FvfW-em_7gD002pJD7_E` |
+| Cluster Map tab | Same Sheet |
+| Generated posts | `globalhighlevel-site/posts/*.json` |
+| Hub pages | `globalhighlevel-site/posts/hub-[vertical].json` (url_path routes them) |
+| Pipeline code | `ghl-podcast-pipeline/scripts/verticals_*.py` + `language_reviewer.py` |
+| Templates | `~/.claude/skills/verticals-pipeline/references/` |
+| This skill | `~/.claude/skills/verticals-pipeline/SKILL.md` |
+| Backup | `agent-command-center/skills/verticals-pipeline/SKILL.md` |
 
-## Model routing (tiered for cost + quality)
+## Related memory
 
-| Stage | Model | Why |
-|---|---|---|
-| Research | Haiku 4.5 | Mechanical SERP/Reddit extraction |
-| Write | Haiku 4.5 | Long-form generation, already proven in podcast pipeline |
-| Fact-check | Sonnet 4.6 | Different model from writer for real second opinion |
-| Language review | Opus 4.6 | Cultural/dialect judgment, non-English quality gate |
-| Interlink | Haiku 4.5 | Mechanical link insertion |
-| Retry on failure | Sonnet 4.6 | Existing pattern from podcast pipeline |
-
-## Hard rules
-
-- Every piece of content must pass the fact checker. No exceptions.
-- Every non-English post must pass the language reviewer. No exceptions.
-- No em-dashes. Anywhere. Ever.
-- No fabricated claims about Bill or William Welch. See memory `feedback_never_claim_about_bill_or_william.md`.
-- William Welch bio uses canonical text only. See memory `reference_william_welch_bio.md`.
-- No first person client counts, outcomes, or anecdotes.
-- Pricing numbers must match the current GHL pricing in `businesses/globalhighlevel.yaml`.
-- Per-market research is mandatory. Do NOT translate one research pass to other languages.
-- Every part links to its series hub, its previous part, and its next part.
-- Failed fact check means the post does not ship. It gets flagged for rewrite.
-- No licensing the placement intelligence, gap data, methodology, or platform code to competitors. See memory `feedback_no_licensing_the_moat.md`.
-
-## The three-tier CTA pattern (required on every post)
-
-Every trade post, series hub, and landing page MUST implement the three-tier customer routing model. This is how REI Amplifi earns revenue on every visitor tier without taking on delivery work below the $7,500/mo floor. See memory `feedback_no_done_for_you_work.md` for the rule.
-
-| Position | Tier | Target | CTA text pattern |
-|---|---|---|---|
-| Primary (top + bottom) | Self-service | GHL affiliate link with UTM | "Start your free 30-day GoHighLevel trial" |
-| Secondary (mid-post) | Help-needed | Extendly affiliate link | "Want it set up for you? Extendly handles GHL onboarding and white-label support" |
-| Tertiary (gated) | Enterprise | Contact form (qualified only, not always visible) | "$5M+ business, ready to embed GHL deep? Enterprise engagement inquiry" |
-
-**CTAs that must NOT appear:**
-
-- "Book a call with Bill"
-- "Let us set this up for you"
-- "1-on-1 coaching"
-- "Work with us" (too vague)
-- Anything that implies Bill delivers service work below the enterprise floor
-
-Fact checker verifies every generated post has the correct three-tier CTA pattern before publish.
+- `project_verticals_pipeline.md` — architectural decisions
+- `feedback_build_per_business_no_premature_abstraction.md` — why hardcoded is correct
+- `feedback_never_claim_about_bill_or_william.md` — fabrication rule
+- `reference_william_welch_bio.md` — canonical author bio
+- `feedback_no_done_for_you_work.md` — three-tier CTA rule
+- `project_globalhighlevel_trial_start_split.md` — /trial vs /start split
