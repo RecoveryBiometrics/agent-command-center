@@ -1,11 +1,13 @@
 - [Single Source of Truth](project_single_source_of_truth.md) — Architecture: YAML registry + shared pipelines + global skills + Google Sheets integration
 - [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
+- [GHL /trial + /start split](project_globalhighlevel_trial_start_split.md) — Two identical affiliate landing pages: /trial=podcast, /start=blog. Do not consolidate.
 - [FB Social Pipeline](project_fb_social_pipeline.md) — Trigger ID, voice rules, Slack channel for daily FB posts
 - [Trigger Inventory](project_trigger_inventory.md) — 3 enabled triggers (plan max), 4 disabled. Undocumented limit.
 - [Check before asking](feedback_dont_ask_check_first.md) — Search codebase for answers before asking user setup questions
 - [Do the work](feedback_do_the_work.md) — Never punt to user when you have tools (gh, gcloud, MCP) to do it yourself
 - [Skills First](feedback_skill_sync.md) — Everything built must be a skill FIRST. No baking logic into triggers/scripts without a skill.
 - [Never make things up](feedback_never_make_things_up.md) — If it doesn't exist, say so. Don't fabricate features, config, or solutions.
+- [Verify before citing](feedback_verify_before_citing.md) — Grep hits are not evidence. Confirm a file is live/deployed before citing it as a working example.
 - [Never claim about Bill or William (HARD RULE)](feedback_never_claim_about_bill_or_william.md) — Never invent client counts, outcomes, credentials, or first-person anecdotes for Bill or the William Welch persona.
 - [William Welch canonical bio](reference_william_welch_bio.md) — Approved bio text. Do not expand without Bill's written approval.
 - [Verticals Pipeline Architecture](project_verticals_pipeline.md) — Renamed from Trades 2026-04-14. Tier system, URLs, win metric, parallel 4-lang cadence, tiered model routing. Agency-starters #1 in Tier 1.
