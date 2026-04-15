@@ -51,7 +51,14 @@ analytics:
   business_type: affiliate_content
   schedule: weekly
   conversion_events:
-    - outbound_click                 # affiliate link clicks
+    - ghl_click                      # GHL affiliate link click (any page)
+    - extendly_click                 # Extendly affiliate link click (on /trial/ or /start/)
+    - cta_click                      # generic CTA button click (upper-funnel signal)
+  # Attribution split via page_path:
+  #   page_path = /trial/  → podcast listener (show-notes traffic)
+  #   page_path = /start/  → blog/site CTA traffic
+  # Both pages stack GHL + Extendly affiliates. True signups still land in the respective
+  # affiliate dashboards — GA4 captures click-through intent, not conversion.
   alert_thresholds:
     traffic_drop_pct: 20
     traffic_spike_pct: 50
