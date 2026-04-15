@@ -1,28 +1,38 @@
 # Channel Map
 
-Channel IDs are read from each business's YAML (`slack.*` section). This file documents the shared channels and routing rules.
+**Consolidation policy (2026-04-15):** All reports route to #ceo. Business-specific channels are archived. #ops-log is forensics-only (errors/warnings, not per-push).
 
-## Shared channels (all businesses)
-- **#ops-log** (C0AQG0DP222) — error alerts land here alongside business channel
-- **#ceo** (C0AQAHSQK38) — CEO digest posts here (errors/warnings only)
+## Active channels
+- **#ceo** (C0AQAHSQK38) — single source of truth. Daily narrative, weekly summaries, analytics, all businesses.
+- **#ops-log** (C0AQG0DP222) — errors/warnings only. Forensics, not notifications. Per-push git hook is killed.
 
-## Per-business channels (from YAML)
-- **SafeBath** → #safebath (C0AQCHCC2JW)
-- **GHL** → #globalhighlevel (C0AQ95LG97F)
+## Archived channels (un-archive when staffing expands)
+- **#safebath** (C0AQCHCC2JW) — weekly SafeBath report moved to #ceo
+- **#globalhighlevel** (C0AQ95LG97F) — weekly GHL report + SEO Optimizer moved to #ceo
+- **#social** (C08AEC99R5K) — FB pipeline dark since 2026-04-07; un-archive after trigger is fixed
 
 ## Routing rules
-| Report Type | Primary Channel | Also Post To |
-|---|---|---|
-| weekly | business_channel | — |
-| error | business_channel | ops_log_channel |
-| ceo | ceo_channel | — |
+| Report Type | Primary Channel |
+|---|---|
+| ceo-daily | #ceo |
+| weekly | #ceo |
+| ceo | #ceo |
+| error | #ops-log |
 
-## Adding a new business
-Just add a `slack:` section to the business YAML:
+**No dual-posting.** Each report goes to exactly one channel.
+
+## Business YAML — `slack` section
+Every business YAML should have:
 ```yaml
 slack:
-  ops_log_channel: C0AQG0DP222
-  ceo_channel: C0AQAHSQK38
-  business_channel: C_NEW_CHANNEL_ID
+  ceo_channel: C0AQAHSQK38       # #ceo — where all reports go
+  ops_log_channel: C0AQG0DP222   # #ops-log — errors only
+  business_channel: null         # archived; set to channel ID if you un-archive
 ```
-The skill reads these at runtime. No changes to this file needed.
+
+If `business_channel` is null, the skill routes to `ceo_channel` for everything non-error.
+
+## When to un-archive a business channel
+- Hired a VA or contractor who owns that business
+- Want per-business isolation for a specific stakeholder
+- Business has enough volume that the daily narrative can't cover it

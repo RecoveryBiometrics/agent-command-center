@@ -14,6 +14,7 @@ Generate reports from pipeline activity, search console data, and analytics. One
 /report ghl weekly         # Same for GHL
 /report safebath error     # Immediate error alert (usually from a trigger)
 /report safebath ceo       # CEO digest — only posts if warnings/errors exist
+/report all ceo-daily      # Daily narrative across ALL businesses, 7am ET → #ceo
 ```
 
 ## Stages
@@ -44,6 +45,13 @@ Fires when a pipeline fails. Short, actionable:
 
 ### ceo (errors-only digest)
 Aggregates ops-log entries across businesses. **Silent on clean days.** Only posts when there are warnings or errors worth escalating.
+
+### ceo-daily (plain-English narrative, daily)
+Amazon WBR-style. One paragraph per business, written like a human wrote it. Says what ran, what it produced, and if it produced nothing, why. **Proof of life.** Silence = broken, not green. Use this while the system is fragile; graduate to `ceo` (silent-on-clean) when pipelines are trustworthy.
+
+Template: `stages/02-compose/references/ceo-daily.md`
+Schedule: daily 7am ET → #ceo
+Replaces: per-push ops-log spam, daily SafeBath essay, duplicate analytics posts.
 
 ## References (Layer 3 — stable, shared)
 - `references/channel-map.md` — Per-business Slack channel routing

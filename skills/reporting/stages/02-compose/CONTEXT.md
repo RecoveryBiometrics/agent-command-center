@@ -11,6 +11,7 @@ All data collected in stage 01:
 ### 1. Check suppress rules
 Read `references/suppress-rules.md` and apply:
 - **ceo:** If all ops-log entries are info-level (no warnings/errors), STOP. Output nothing. Log "CEO digest suppressed — all clean."
+- **ceo-daily:** NEVER suppress. Proof-of-life requires the post even on clean days. If a pipeline didn't run, say so — that's exactly when Bill needs to know.
 - **error:** Never suppress. That's the whole point.
 - **weekly:** Never suppress. Always send the weekly report.
 
@@ -19,6 +20,7 @@ Read the matching template from `references/`:
 - `weekly` → `references/weekly-summary.md`
 - `error` → `references/error-alert.md`
 - `ceo` → `references/ceo-digest.md`
+- `ceo-daily` → `references/ceo-daily.md` (plain-English narrative, proof-of-life)
 
 ### 3. Render the report
 Fill the template with collected data. Follow these rules:

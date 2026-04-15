@@ -18,15 +18,21 @@ Route based on report type:
 
 | Report Type | Channel | Channel ID Source |
 |---|---|---|
-| weekly | Business channel | `business.slack.business_channel` |
-| error | Business channel + #ops-log | `business.slack.business_channel` + `business.slack.ops_log_channel` |
+| weekly | #ceo | `business.slack.ceo_channel` |
+| ceo-daily | #ceo | `business.slack.ceo_channel` |
+| error | #ops-log | `business.slack.ops_log_channel` |
 | ceo | #ceo | `business.slack.ceo_channel` |
+
+**Consolidation rule:** All reports route to #ceo (single source of truth) except errors, which route to #ops-log for forensics. Business-specific channels (#safebath, #globalhighlevel, #social) are archived — everything Bill needs to see lands in #ceo.
 
 Use `mcp__claude_ai_Slack__slack_send_message` for each post.
 
-If the message is over 3900 characters, split into multiple messages:
-- First message: key metrics + wins/drops
-- Second message: opportunities + gaps + traffic + content
+**Length enforcement.** If any single message is over 3900 chars, it's too verbose. Do NOT split into multiple messages — that creates the unreadable 5-message dump problem. Instead:
+- Tighten the narrative
+- Move details to the Google Sheet
+- Post a 3-bullet summary + Sheet link
+
+Exception: `ceo-daily` is capped at 4000 chars by the template itself; if it overflows, the composer must trim per-business paragraphs.
 
 ### 3. Write to Sheet (weekly only)
 Use `mcp__google-workspace__append_table_rows` to write a summary row to the business tracking sheet.
@@ -37,10 +43,9 @@ Use `mcp__google-workspace__append_table_rows` to write a summary row to the bus
 If the "Weekly Report" tab doesn't exist, create it with headers first.
 
 ### 4. Log completion
-Post a one-liner to #ops-log:
-- `[{business_name}] [Weekly Report] Posted to #{channel_name}`
-- Or: `[{business_name}] [CEO Digest] Suppressed — all clean`
-- Or: `[{business_name}] [Error Alert] Posted to #{channel_name} + #ops-log`
+Do NOT post completion confirmations to Slack. They create noise. Log to stdout only:
+- `[{business_name}] [{report_type}] Posted to #{channel_name}`
+- Or: `[{business_name}] [{report_type}] Suppressed — all clean`
 
 ## Outputs
 - Confirmation of what was posted and where
