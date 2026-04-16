@@ -35,6 +35,15 @@ report:
   opportunities: []                # [{url, position, impressions, ctr}]
   gaps: []                         # [{query, impressions, position}]
 
+  seo_rewrites:                    # SEO optimizer outcomes from seo-changelog.json
+    shipped_this_week: []          # [{slug, action, new_title, shipped_at}]
+    outcomes_measured: []          # [{slug, action, ctr_before, ctr_28d, delta, outcome}]
+    summary:
+      shipped: int                 # rewrites applied in last 7 days
+      improved: int                # pages with outcome="improved" this week
+      no_change: int               # pages with outcome="no_change" this week
+      parked: int                  # pages parked (exhausted retries)
+
   traffic:                         # from GA4
     sessions: int | null
     users: int | null

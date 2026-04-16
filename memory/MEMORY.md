@@ -30,3 +30,4 @@
 - [Don't use mermaid in Notion](feedback_notion_mermaid_sucks.md) — Renders too small. Use linked DB Board views or external tools (n8n/Whimsical).
 - [IONOS VPS SSH (stale)](reference_ionos_vps_ssh.md) — Credentials in podcast-pipeline SKILL.md don't work. Verify before using.
 - [claude.ai env vars + Google SA](reference_claude_ai_env_vars.md) — env `reiamplifi-google` (env_01TDtHFibihP4mCg7C5cZnxC) holds GOOGLE_SERVICE_ACCOUNT_KEY_B64 for live GSC/GA4 from triggers.
+- [SafeBath site architecture](reference_safebath_site_architecture.md) — Next.js App Router, phone in Header+Footer everywhere, GA4 G-M1Q5T7BLG2 / property 531047753, directory pages intentionally clean.
