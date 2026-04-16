@@ -6,9 +6,24 @@ originSessionId: ed1a4994-e1c6-4bae-b8aa-0723dbef015d
 ---
 # Resume the verticals work
 
-When Bill says "resume the verticals work" or anything similar, load this file. The MVP is built locally on his Mac, NOT pushed to git remote, NOT deployed to Cloudflare. Decision pending: ship or polish.
+When Bill says "resume the verticals work" or anything similar, load this file. ES Part 1 agency-starters is **LIVE on globalhighlevel.com as of 2026-04-16**. Next decision is the day-14 measurement gate.
 
-## Where we are (end of 2026-04-15)
+## SHIPPED 2026-04-16
+- Hub: https://globalhighlevel.com/es/para/agencias-de-marketing/ (HTTP 200 confirmed)
+- Pillar: https://globalhighlevel.com/es/para/agencias-de-marketing/por-que-agencias-marketing-necesitan-crm-2026-parte-1/ (HTTP 200 confirmed)
+- 10 ES cluster spokes retrofitted with inbound link to hub
+- Deploy mechanism: Netlify (NOT Cloudflare as SKILL claimed) — auto-builds on push to `Claude-notebookLM-GHL-Podcast` repo. netlify.toml runs `python3 build.py` from `globalhighlevel-site/`
+- Sheet "Verticals Queue" Part 1 row = shipped. Sheet "Cluster Map" 10 rows = retrofitted.
+- Google Indexing API NOT pinged (no existing integration). Discovery via sitemap + retrofit inbound links, expect 1-7 days for index.
+
+## Day-14 measurement gate (around 2026-04-30)
+1. Check GSC → both URLs indexed?
+2. GSC impressions ≥10/day for either URL?
+3. If yes → ship Parts 2-3 ES with same dispatcher
+4. If indexed but 0 impressions → rewrite title for higher-intent keyword, then ship 2-3
+5. If not indexed → URL structure or thinness issue, fix before continuing
+
+## Where we are (post-ship 2026-04-16)
 
 **Verticals pipeline ES Part 1 agency-starters is fully built locally.** 4 hours of build, multiple Opus review iterations, authority-skin UI redesign. Sleeping on it before deploying.
 
