@@ -1,4 +1,5 @@
 - [**RESUME VERTICALS WORK**](project_verticals_session_handoff.md) — Say "resume the verticals work" to pick up. ES Part 1 agency-starters SHIPPED 2026-04-16. Day-14 decision gate: ship Parts 2-3 if indexed/impressions, else pivot.
+- [SOP — Manual GSC indexing for new hub pages](project_sop_new_hub_indexing.md) — Every new hub/pillar ship = Bill manually requests indexing in GSC (williamcourterwelch@gmail.com). Compresses 1-7 days → hours.
 - [**RESUME REPORTING WORK**](project_reporting_session_handoff.md) — Say "resume the reporting work" to pick up. CEO Daily + Weekly SEO triggers live with service account.
 - [Single Source of Truth](project_single_source_of_truth.md) — Architecture: YAML registry + shared pipelines + global skills + Google Sheets integration
 - [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
