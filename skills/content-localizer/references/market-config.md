@@ -2,6 +2,21 @@
 
 Used by Stage 2 (Localize) to adapt content for each target market.
 
+## Localized Trial + Start Landing Page URLs (CRITICAL)
+
+Every non-English blog post MUST link CTAs to the language-appropriate landing page. The English `/trial` + `/start` pages are in English; linking ES/IN/AR readers to English pages tanks conversion.
+
+| Language | Trial URL (podcast traffic) | Start URL (blog traffic) |
+|---|---|---|
+| English | `https://globalhighlevel.com/trial` | `https://globalhighlevel.com/start` |
+| Spanish (es) | `https://globalhighlevel.com/es/trial/` | `https://globalhighlevel.com/es/start/` |
+| India (en-IN) | `https://globalhighlevel.com/in/trial/` | `https://globalhighlevel.com/in/start/` |
+| Arabic (ar) | `https://globalhighlevel.com/ar/trial/` | `https://globalhighlevel.com/ar/start/` |
+
+Each localized page has: native headline, 3 market-tailored value props (WhatsApp for ES/IN/AR, Razorpay for IN), 3 FAQ items, CTA button to the GHL affiliate URL with `fp_ref=amplifi-technologies12&utm_campaign={lang}-{podcast|blog}`. Arabic renders `dir="rtl"`.
+
+**Writer prompt rule:** Every blog script and verticals writer MUST use the language-appropriate URL — NEVER bare `/trial` or `https://globalhighlevel.com/trial` in a non-English post. The `ensure_affiliate_links()` function in each blog script should rewrite bare trial URLs to their localized equivalent.
+
 ## English (en)
 - **CTA:** "Free 30-Day Trial", "Start My Free Trial", "Try GoHighLevel Free"
 - **Pricing:** $97/month (Starter), $297/month (Unlimited), $497/month (SaaS Pro)
