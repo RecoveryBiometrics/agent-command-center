@@ -1,3 +1,5 @@
+- [**RESUME VERTICALS WORK**](project_verticals_session_handoff.md) — Say "resume the verticals work" to pick up. ES Part 1 agency-starters BUILT LOCALLY, NOT DEPLOYED. Decision pending tomorrow.
+- [**RESUME REPORTING WORK**](project_reporting_session_handoff.md) — Say "resume the reporting work" to pick up. CEO Daily + Weekly SEO triggers live with service account.
 - [Single Source of Truth](project_single_source_of_truth.md) — Architecture: YAML registry + shared pipelines + global skills + Google Sheets integration
 - [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
 - [GHL /trial + /start split](project_globalhighlevel_trial_start_split.md) — Two identical affiliate landing pages: /trial=podcast, /start=blog. Do not consolidate.
@@ -26,3 +28,4 @@
 - [Marketing Org Notion Hub](project_marketing_org_notion.md) — 3 linked DBs (Businesses/Pipelines/Agents) + Team org chart sub-page. Single source of truth.
 - [Don't use mermaid in Notion](feedback_notion_mermaid_sucks.md) — Renders too small. Use linked DB Board views or external tools (n8n/Whimsical).
 - [IONOS VPS SSH (stale)](reference_ionos_vps_ssh.md) — Credentials in podcast-pipeline SKILL.md don't work. Verify before using.
+- [claude.ai env vars + Google SA](reference_claude_ai_env_vars.md) — env `reiamplifi-google` (env_01TDtHFibihP4mCg7C5cZnxC) holds GOOGLE_SERVICE_ACCOUNT_KEY_B64 for live GSC/GA4 from triggers.
