@@ -73,7 +73,11 @@ git add posts/ public/
 git commit -m "Ship verticals ES Part 1 — agencias-de-marketing hub + pillar + cluster retrofit"
 git push  # Cloudflare auto-deploys on push
 
-# 6. Update Sheet Verticals Queue row: status=shipped, shipped_date, url
+# 6. Force Google discovery (do NOT rely on sitemap re-fetch — it's 3-7 days)
+/indexing-api --urls <hub_url> <pillar_url>
+# Delegates to indexing-api skill. Same-day crawl instead of days.
+
+# 7. Update Sheet Verticals Queue row: status=shipped, shipped_date, url
 #    Update Cluster Map retrofit_status=retrofitted for the 10 spokes
 ```
 

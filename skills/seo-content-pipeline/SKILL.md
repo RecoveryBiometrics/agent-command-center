@@ -128,6 +128,9 @@ The content pipeline reads dispatch instructions from the **Dispatch tab** on th
 | `email.js` | Send report via email |
 | `slack.js` | Post formatted report to Slack business channel |
 
+### Indexing delegation
+On deploy, invoke `/indexing-api --business <id> --source deploy-diff` to force same-day discovery of new/changed URLs via Google Indexing API. Do NOT reimplement indexing logic here — that skill owns the judgment about which URLs to ping and how to audit results. This skill only supplies the deploy trigger.
+
 ### SEO Reporting Flow (shared pipeline)
 - Fetches GSC/GA4 data → reads "SEO Changelog" tab from Google Sheet → connects ranking changes to content updates → generates report → posts to Slack
 - Writes weekly summary (clicks, impressions, CTR, position, indexed, wins, drops) to "Weekly SEO Report" Sheet tab
