@@ -1,183 +1,99 @@
 ---
-name: RESUME DISCOUNT CONSOLIDATION — one-page strategy
-description: Session handoff for consolidating trial + promo/discount queries on globalhighlevel.com onto one master page. Say "resume the discount consolidation" to pick up.
+name: DISCOUNT CONSOLIDATION — shipped 2026-04-21 (Option 2)
+description: Discount + trial + promo content consolidated onto one master page on globalhighlevel.com. Ship executed 2026-04-21. Day-30 measurement gate 2026-05-21.
 type: project
 originSessionId: 1f0a9d6b-410c-4e53-bb6d-1ff43eef6dab
 ---
-# Resume the discount consolidation
+# Discount Consolidation — SHIPPED 2026-04-21
 
-When Bill says "resume the discount consolidation," load this file. Plan agreed 2026-04-20, NOT yet executed. Next step is execution.
+Executed the Option 2 consolidation plan. All trial + promo + discount intent funnels to ONE authority blog post. Say "resume the discount consolidation" to check on progress or rerun measurement.
 
-## The decision (agreed, not yet done)
+## What shipped (evidence)
 
-Consolidate all GHL discount + free trial search intent onto ONE master page:
-**`/blog/gohighlevel-promo-code-discount-2026-real-ways-to-save/`**
+| Change | Commit | Where |
+|---|---|---|
+| Master blog post expanded to 4,975 words with Extendly section + ported /coupon/ + promo content | `2fcf7d2` | `posts/gohighlevel-free-trial-30-days-extended.json` |
+| 301 redirects for /coupon/, /start/, promo blog, legacy URLs → master | `2fcf7d2` | `globalhighlevel-site/_redirects` |
+| robots.txt disallow removed; meta noindex added via `base_html(noindex=True)` | `2fcf7d2` | `robots.txt`, `build.py` |
+| Stale `/trial/` and `/coupon/` internal links updated to master | `2fcf7d2` | `build.py`, `unsolicited-sms-...json` |
+| `/coupon/` and `/start/` removed from build + promo blog JSON deleted (so Cloudflare 301s fire) | `3788bf1` | `build.py`, deleted `posts/gohighlevel-promo-code-discount-2026-real-ways-to-save.json` |
 
-Reason: GSC data on 2026-04-20 showed 6 URLs fighting for the same queries, splitting signal, earning 287 total impressions and 2 clicks in 30 days.
+Repo: `RecoveryBiometrics/Claude-notebookLM-GHL-Podcast` branch `main`.
 
-## Baseline numbers (for measuring whether consolidation works)
+## Architecture (post-ship)
 
-Pulled 2026-04-20 from GSC (`sc-domain:globalhighlevel.com`), 30-day window `2026-03-21 → 2026-04-19`:
+**SEARCH-FACING (indexed, sitemap included):**
+- `/blog/gohighlevel-free-trial-30-days-extended/` — THE master page for ALL trial + promo + discount intent
+  - Title: "GoHighLevel 30-Day Free Trial, Promo Codes & Discounts 2026: Every Way to Save"
+  - 14 H2 sections, 19 FAQ H3s, 13 Q&As in FAQPage schema, 7 Extendly mentions
+  - Receives 742 internal links via /start/ 301 redirect (blog→/start/→master)
+  - Extendly CTA: `getextendly.com?deal=vqzoli&fp_sid=master-discount-guide`
 
-| Page | Queries | Impressions | Clicks |
+**NOT-IN-SEARCH (noindex, preserve for conversion flow):**
+- `/trial/` — podcast listener conversion page. Same content as before; now has `<meta name="robots" content="noindex, follow">`. Full 11-FAQ + Extendly page remains.
+- `/es/trial/`, `/in/trial/`, `/ar/trial/` — localized podcast conversion pages, same noindex treatment
+
+**301 REDIRECTS (fire from _redirects):**
+- `/start`, `/coupon`, `/promo`, `/promo-code`, `/discount`, `/coupon-code`, `/free-trial` → master
+- `/blog/gohighlevel-promo-code-discount-2026-real-ways-to-save` → master
+
+## Baseline GSC numbers (pre-ship, measure against at day 30)
+
+Pulled 2026-04-21, window `2026-03-22 → 2026-04-20`:
+
+| URL | Queries | Impressions | Clicks |
 |---|---|---|---|
 | `/trial/` (blocked ghost) | 22 | 157 | 0 |
 | `/blog/gohighlevel-free-trial-30-days-extended/` | 16 | 65 | 0 |
 | `/coupon/` | 12 | 25 | **2** |
-| `/blog/gohighlevel-promo-code-discount-2026-real-ways-to-save/` (master) | 10 | 25 | 0 |
-| `/blog/how-to-add-coupon-codes-in-gohighlevel-booking-discounts/` | 8 | 8 | 0 |
-| `/blog/how-to-create-coupons-in-gohighlevel-boost-conversions/` | 5 | 6 | 0 |
-| `/start/` | 0 | 0 | 0 |
+| `/blog/gohighlevel-promo-code-discount-2026-real-ways-to-save/` | 10 | 25 | 0 |
+| `/blog/how-to-add-coupon-codes-.../` | 8 | 8 | 0 |
+| `/blog/how-to-create-coupons-.../` | 5 | 6 | 0 |
 | **Combined** | | **287** | **2** |
 
-**Post-consolidation success metric:** master page earns >100 impressions AND >5 clicks per month by day 30. If not, re-examine.
+## Day-30 measurement gate (May 21, 2026)
 
-## The execution plan (agreed, not done)
+**Success criteria:**
+- Master blog post >200 impressions AND >5 clicks (absorbs 127 ghost imp + 65 current + 25 promo imp + redirects)
+- Master blog post average position <15 (improvement from current 28)
+- `/trial/` search visibility → ~0 (Google drops it post-noindex crawl)
+- `/coupon/`, `/start/`, promo blog return 301s in GSC URL Inspection
 
-### Change 1: Master post content edits
-
-File: `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/posts/gohighlevel-promo-code-discount-2026-real-ways-to-save.json`
-
-Current structure: 1,633 words, 12 headers (6 H2 + 6 H3). Existing H2s/H3s cover ~60% of the queries.
-
-**Update title + H1** from:
-> "GoHighLevel Promo Code 2026: 3 Real Ways to Save"
-
-To:
-> "GoHighLevel Promo Code, Discount & Free Trial 2026: Every Way to Save"
-
-**Update meta description** to include discount + free trial wording.
-
-**Add 5 new H3s to existing FAQ section**:
-
-1. **"Is there a GoHighLevel discount code?"** — captures `ghl discount code`, `gohighlevel discount code`, `go high level discount code`, `highlevel discount code`
-2. **"Is there a GoHighLevel coupon code?"** — captures `gohighlevel coupon code`, `go high level coupon code`
-3. **"How long is the GoHighLevel free trial?"** — captures `gohighlevel free trial duration 2026` (pos 10 — very pushable)
-4. **"What's the difference between the 14-day and 30-day GoHighLevel trial?"** — captures `gohighlevel 14-day trial` + reinforces 30-day wedge
-5. **"Is GoHighLevel free? / Does GoHighLevel have a free account?"** — captures `is gohighlevel free`, `gohighlevel free account`
-
-Total after: ~2,300 words, 17 headers. Within Attia-spec target.
-
-**Add FAQPage JSON-LD schema** at bottom of html_content for the 10 total FAQ questions.
-
-### Change 2: 301 redirects
-
-Need to add to site's routing/redirect mechanism (Cloudflare or netlify `_redirects` — check `globalhighlevel-site/_redirects` which exists per earlier dir listing):
-
-```
-/coupon/                                        /blog/gohighlevel-promo-code-discount-2026-real-ways-to-save/  301
-/blog/gohighlevel-free-trial-30-days-extended/  /blog/gohighlevel-promo-code-discount-2026-real-ways-to-save/  301
-```
-
-**Preserve hreflang alternates** — the trial blog post's Spanish/Hindi/Arabic siblings stay (they target non-English markets). Update their `<link rel="alternate" hreflang="en">` to point to the master.
-
-### Change 3: Remove robots.txt disallow + add meta noindex to /trial/ and /start/
-
-File: `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/robots.txt`
-
-Current (has ghost problem):
-```
-Disallow: /trial
-Disallow: /free-trial
-Disallow: /start
-```
-
-Remove those three lines.
-
-File: `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/build.py`
-
-In the trial and start page builders, add:
-```html
-<meta name="robots" content="noindex, follow">
-```
-
-This lets Google crawl, sees noindex, drops from index. Ghost ranking ends.
-
-**Don't canonical /trial/ or /start/ to the master** — they're distinct conversion pages with their own purpose. Just noindex them.
-
-### Change 4: Clean up ambiguous how-to posts
-
-Files:
-- `posts/how-to-add-coupon-codes-in-gohighlevel-booking-discounts.json`
-- `posts/how-to-create-coupons-in-gohighlevel-boost-conversions.json`
-
-These are about USING GHL's internal coupon feature (for agency owners' own bookings/stores). Different audience than "discount searchers." Fix:
-
-- Update title: prepend "Using GoHighLevel's Coupon Feature" or similar to disambiguate
-- Update first H2 to clarify topic is using GHL's feature
-- No redirect — keep them indexed, just tighten scope
-
-### Change 5: Ping Google via /indexing-api after deploy
-
-Already built this skill today (2026-04-20). Invocation:
-
+**How to measure:**
 ```bash
-~/Developer/projects/marketing/podcast-pipeline/ghl-podcast-pipeline/venv/bin/python \
-  ~/Developer/projects/marketing/podcast-pipeline/ghl-podcast-pipeline/scripts/indexing_api.py --urls \
-  "https://globalhighlevel.com/blog/gohighlevel-promo-code-discount-2026-real-ways-to-save/" \
-  "https://globalhighlevel.com/trial/" \
-  "https://globalhighlevel.com/start/" \
-  "https://globalhighlevel.com/coupon/" \
-  "https://globalhighlevel.com/blog/gohighlevel-free-trial-30-days-extended/"
+# Re-run the 10 validation tests from the pre-ship audit:
+cat /tmp/tests2.js  # or grab from the memory-linked skill if stored there
+cd ~/Projects/agent-command-center/pipelines/seo-reporting && node /tmp/tests2.js
 ```
 
-SA must have Indexing API scope and Owner on GSC property (both granted 2026-04-20).
+Or invoke the weekly `/report` — which now runs (pipeline was fixed this same day, see commits `1f66bc9`, `6608575`, `d697a58`).
 
-## What's NOT changing (decided, don't rethink)
+## Other fixes shipped same day
 
-- Spanish / Hindi / Arabic sibling trial posts — keep separate, serve different markets:
-  - `gohighlevel-prueba-gratis-30-dias-como-empezar` (ES)
-  - `gohighlevel-free-trial-india-30-days-setup-guide` (IN)
-  - `gohighlevel-free-trial-arabic-30-days-guide` (AR)
-- `/trial/` and `/start/` landing pages — keep as conversion surfaces, noindex them (don't delete)
-- Existing 6 H2s on the master — they work, don't rewrite
+1. **Weekly SEO Report pipeline** — was silently failing for 2+ weeks (GSC permission error). Fixed by swapping `GOOGLE_SERVICE_ACCOUNT_KEY` to `seo-agent@safebath-seo-agent.iam.gserviceaccount.com` (which is now Owner on both GSC properties). Manual verification run 24747543884 succeeded. Automatic next run: Tuesday 9:07 ET.
+2. **Failure alerts** — added `if: failure()` Slack alerts to weekly-seo-report.yml and weekly-analytics.yml (content-builder already had it). Routes to #ops-log channel C0AQG0DP222. Commit `d697a58`.
+3. **Sheets API + Drive API** enabled in project `safebath-seo-agent`. SA granted writer access to GHL tracking sheet `1A2eD2LeBpWFjDMe6W9BZbN6FvfW-em_7gD002pJD7_E`.
 
-## Evidence commands to re-verify state before executing
+## What to watch in the first 24 hours
 
-```bash
-# Is robots.txt still blocking /trial and /start?
-curl -s https://globalhighlevel.com/robots.txt | grep -iE 'disallow.*(trial|start)'
+- Cloudflare deploy propagation — `/coupon/`, `/start/`, old promo blog should all return 301 (`curl -I`)
+- Google Indexing API ping on master blog post (queued post-deploy verification)
+- No new errors on pipelines (weekly-seo-report, weekly-analytics, content-builder)
 
-# Any meta robots tag on /trial/ yet?
-curl -s https://globalhighlevel.com/trial/ | grep -i 'meta.*robots'
+## What to watch day 3-14
 
-# Fresh GSC impressions per URL (re-run to compare vs baseline above)
-cp /tmp/per-page.js ~/Projects/agent-command-center/pipelines/seo-reporting/_tmp.js && \
-  cd ~/Projects/agent-command-center/pipelines/seo-reporting && node _tmp.js
-```
+- GSC URL Inspection on master: should show updated `lastCrawlTime` post-ping
+- GSC URL Inspection on `/trial/`: coverageState should shift from "Crawled - currently not indexed" (ghost) → dropped entirely over ~7-14 days
+- Trial-intent queries should start appearing on the master's GSC page report
 
-## File locations to edit
+## What NOT to re-propose
 
-| Change | File |
-|---|---|
-| Master post edits | `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/posts/gohighlevel-promo-code-discount-2026-real-ways-to-save.json` |
-| robots.txt | `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/robots.txt` |
-| noindex meta for /trial /start | `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/build.py` (find /trial and /start page builders) |
-| Redirects | `~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/_redirects` |
-| Ambiguous how-to titles | Two JSON files in `posts/` (listed above) |
-
-## Ship checklist
-
-1. Edit master post (Change 1)
-2. Add redirects (Change 2)
-3. Update robots.txt + build.py (Change 3)
-4. Update how-to post titles (Change 4)
-5. Build: `cd globalhighlevel-site && python3 build.py`
-6. Commit + push (Cloudflare/Netlify auto-deploys)
-7. Verify live: check master URL, check /coupon/ 301s, check /trial/ has meta noindex
-8. Ping Indexing API (Change 5)
-9. Note ship date in this memory as "EXECUTED {date}"
-
-## Measurement gate (day 30 post-ship)
-
-Run fresh GSC per-page query. Compare to baseline above. Success = master earns >100 impressions and >5 clicks in 30 days post-ship. If yes → port pattern to ES/IN/AR siblings. If no → content wasn't the gap, revisit assumptions.
-
-## Open questions / flags
-
-- `/start/` currently earns 0 impressions. After removing robots.txt disallow + adding noindex, should stay 0 (no content to rank). If it suddenly earns impressions, something's wrong with the noindex deployment.
-- `gohighlevel official website` (22 imp, pos 9.5 on /trial/) is brand-navigation intent, not discount. After /trial/ goes noindex, this query will either drop entirely OR shift to the homepage. Monitor but don't optimize for it.
+- ~~Keep two masters (trial + promo separate)~~ — dismissed, consolidation is cleaner, 742 internal links now concentrate on ONE page
+- ~~Keep `/trial/` disallowed in robots.txt~~ — switched to meta noindex (crawlable, droppable) which is the correct modern SEO pattern
+- ~~Add a `/session-end` skill that needs invocation~~ — future work; use a SessionStart hook instead (Skills First Rule #3 fix, deferred)
 
 ## Related memories
-- `project_globalhighlevel_trial_start_split.md` — the /trial vs /start attribution architecture (keep)
-- `reference_globalhighlevel_robots_architecture.md` — robots.txt + noindex design (UPDATE after ship — currently says /trial and /start are disallowed; will need correction once we switch to meta noindex)
-- `project_verticals_session_handoff.md` — separate workstream, don't confuse
+
+- `project_globalhighlevel_trial_start_split.md` — original /trial vs /start attribution rationale (still valid)
+- `reference_globalhighlevel_robots_architecture.md` — NEEDS UPDATE: says /trial/ and /start/ are disallowed in robots.txt, but now they're meta-noindex (and /start/ is deleted, just a 301)
+- `project_verticals_session_handoff.md` — separate workstream, Day-14 gate ~Apr 30
