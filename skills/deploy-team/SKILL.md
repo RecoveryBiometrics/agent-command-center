@@ -129,6 +129,24 @@ If the business needs multi-language blogs:
 - Each language variant is a separate Python script that writes natively — NOT a translation layer
 - Scripts auto-generate new topics when pending list < 10 (from GSC data)
 
+### Step 4c: Deploy failure alerts (Vercel-hosted businesses only)
+
+Required for any business deploying via Vercel (safebath, power-to-the-people, GHL, etc.). Two redundant paths so we don't repeat the April 2026 `seo-agent@reiamplifi.com` incident where Vercel blocks silently emailed into Bill's inbox for three weeks.
+
+Both paths post to Slack `#ops-log` (channel ID `C0AQG0DP222`, shared across businesses).
+
+1. **Copy the alert workflow into the new repo.** Canonical copy lives in `RecoveryBiometrics/safebath-website/.github/workflows/deploy-failure-alert.yml`. It listens to GitHub's `deployment_status` event and posts on state `failure` or `error`. Verify the new repo has `SLACK_BOT_TOKEN` in secrets (repo → Settings → Secrets and variables → Actions). No code changes needed to the workflow — channel ID is hardcoded to `#ops-log`.
+
+2. **Subscribe Vercel's native Slack app.** In Slack `#ops-log`, run `/vercel subscribe` and pick:
+   - Team: `recoverybiometrics-projects`
+   - Project: the new business's Vercel project
+   - Events: **Deployment Errored** only (skip Ready/Promoted noise)
+   - Targets: **Production** only (skip Preview noise)
+
+   This step is an OAuth-style dialog Bill clicks through in Slack — you can't do it via API. After copying the workflow file in step 1, tell Bill: "Run `/vercel subscribe` in #ops-log for the new project — Deployment Errored, Production only."
+
+See `project_deploy_failure_alerting.md` memory for background.
+
 ### Step 5: Set up secrets
 Ensure the business project has the required API keys:
 - GitHub Actions: add as repository secrets (check YAML `secrets:` section for names)
