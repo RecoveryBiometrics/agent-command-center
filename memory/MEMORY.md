@@ -4,6 +4,8 @@
 - [Single Source of Truth](project_single_source_of_truth.md) — Architecture: YAML registry + shared pipelines + global skills + Google Sheets integration
 - [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
 - [GHL /trial + /start split](project_globalhighlevel_trial_start_split.md) — Two identical affiliate landing pages: /trial=podcast, /start=blog. Do not consolidate.
+- [GHL /trial + /start noindex by design](reference_globalhighlevel_robots_architecture.md) — Both disallowed in robots.txt + excluded from sitemap. GSC pos ~47 is ghost ranking, NOT a problem to fix.
+- [**RESUME DISCOUNT CONSOLIDATION**](project_discount_consolidation_handoff.md) — Say "resume the discount consolidation" to pick up. Agreed 2026-04-20, NOT executed. Plan: one master page, 5 new H3s, 301 redirects, noindex /trial/+/start/, ping Indexing API.
 - [FB Social Pipeline](project_fb_social_pipeline.md) — Trigger ID, voice rules, Slack channel for daily FB posts
 - [Trigger Inventory](project_trigger_inventory.md) — 3 enabled triggers (plan max), 4 disabled. Undocumented limit.
 - [Check before asking](feedback_dont_ask_check_first.md) — Search codebase for answers before asking user setup questions
