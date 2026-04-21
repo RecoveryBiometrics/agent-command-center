@@ -17,8 +17,22 @@ Executed the Option 2 consolidation plan. All trial + promo + discount intent fu
 | robots.txt disallow removed; meta noindex added via `base_html(noindex=True)` | `2fcf7d2` | `robots.txt`, `build.py` |
 | Stale `/trial/` and `/coupon/` internal links updated to master | `2fcf7d2` | `build.py`, `unsolicited-sms-...json` |
 | `/coupon/` and `/start/` removed from build + promo blog JSON deleted (so Cloudflare 301s fire) | `3788bf1` | `build.py`, deleted `posts/gohighlevel-promo-code-discount-2026-real-ways-to-save.json` |
+| Trailing-slash redirect variants added (Netlify treats `/coupon` vs `/coupon/` as distinct) | `db585b5` | `_redirects` |
+| Localized `/es/start/`, `/in/start/`, `/ar/start/` → localized trial blog masters | `7f622a5` | `_redirects` |
 
 Repo: `RecoveryBiometrics/Claude-notebookLM-GHL-Podcast` branch `main`.
+
+## Pain points hit during ship (document so future sessions don't repeat)
+
+**Pain 1 — Netlify credit limit pause silently dropped commits.** Commits pushed while Netlify team was over credit limit got queued but NEVER deployed — even after upgrading, the queued deploys were dropped. Fix: always check Netlify deploy history after push; upgrade Netlify before shipping big changes.
+
+**Pain 2 — Cloudflare CDN cached pre-deploy 200s for 7 days (s-maxage=604800) on URLs that got removed.** Purge cache API cleared the CDN edge but files still showed 200 from origin. Root cause: origin still had files until commit 3788bf1 actually deployed.
+
+**Pain 3 — Netlify `_redirects` treats trailing-slash variants as distinct.** `/coupon 301` does NOT match `/coupon/`. Both forms need explicit rules. Confirmed by observing `/coupon → 301` but `/coupon/ → 200`. Fix: always add both `/foo` and `/foo/` entries in `_redirects`.
+
+**Pain 4 — Weekly SEO Report was silently failing for 2+ weeks** (GSC permission error). Found via `gh run list --workflow weekly-seo-report.yml`. Fix: SA swap in secret + add Slack failure alerts (commit `d697a58`) so future silent failures can't hide.
+
+**Pain 5 — Cloudflare API token scopes matter.** P2P-project token had `Zone.Read` but not `Zone.Cache Purge.Purge`. Created a new dedicated token `ghl-cache-purge` stored at `~/.secrets/cloudflare-globalhighlevel-token` with only the Cache Purge scope for globalhighlevel.com.
 
 ## Architecture (post-ship)
 
