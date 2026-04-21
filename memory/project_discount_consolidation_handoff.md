@@ -109,5 +109,67 @@ Or invoke the weekly `/report` — which now runs (pipeline was fixed this same 
 ## Related memories
 
 - `project_globalhighlevel_trial_start_split.md` — original /trial vs /start attribution rationale (still valid)
-- `reference_globalhighlevel_robots_architecture.md` — NEEDS UPDATE: says /trial/ and /start/ are disallowed in robots.txt, but now they're meta-noindex (and /start/ is deleted, just a 301)
+- `reference_globalhighlevel_robots_architecture.md` — updated 2026-04-21 to reflect meta-noindex architecture
 - `project_verticals_session_handoff.md` — separate workstream, Day-14 gate ~Apr 30
+
+---
+
+# OPEN ITEMS AT SESSION END (2026-04-21 evening)
+
+When you resume, these are the only loose threads:
+
+## Verify within 24-48 hours
+
+1. **Last commit (`7f622a5`) deployed to live** — adds localized `/es/start/`, `/in/start/`, `/ar/start/` → language-specific trial blog 301s. Verify:
+   ```bash
+   for u in /es/start/ /in/start/ /ar/start/; do
+     curl -sI "https://globalhighlevel.com${u}" | head -1
+   done
+   ```
+   All three should show `301`. If not, that commit didn't deploy — force via Netlify "Trigger deploy" button.
+
+2. **Indexing API pings** from today (5 URLs incl. master, /trial/, /coupon/, /start/, old promo blog) — Google should have crawled them within 24h. Check with:
+   ```bash
+   ~/Developer/projects/marketing/podcast-pipeline/ghl-podcast-pipeline/venv/bin/python <<'EOF'
+   from google.oauth2 import service_account
+   from googleapiclient.discovery import build
+   from pathlib import Path
+   creds = service_account.Credentials.from_service_account_file(
+       str(Path.home() / ".secrets/safebath-seo-agent-c5d8ed814401.json"),
+       scopes=["https://www.googleapis.com/auth/webmasters"])
+   import google.auth.transport.requests
+   client = creds
+   # use URL Inspection API on the 5 URLs, compare lastCrawlTime to 2026-04-21 ping times in ~/.claude/skills/indexing-api/state/pings.jsonl
+   EOF
+   ```
+
+## Opportunity flagged but NOT addressed today (worth picking up soon)
+
+**AI-agent content cluster is quietly winning.** In the GSC analysis we did today, 3 of the top 5 traffic-earning blog posts are AI-agent topics:
+- `build-ai-agents-faster-gohighlevel-template-library-guide` — 4 clicks / 987 impressions pos 9
+- `how-to-build-ai-agents-in-gohighlevel-agent-studio-guide` — 9 sessions (GA4)
+- `automate-client-support-ask-ai-agent-studio-gohighlevel` — **1,612 impressions** pos 9, only 2 clicks (CTR problem — perfect candidate for FAQ treatment like we just did on the trial master)
+- Plus `how-to-use-mcp-server-gohighlevel-ai-integration` at pos 2 for "mcp gohighlevel"
+
+Potential next move: build an AI-agent hub page, run the same consolidation pattern. Could be the next master-blog-style ship. Say "resume the AI-agent cluster" to pick up.
+
+## Items for your attention (not mine)
+
+1. **Your uncommitted WIP in podcast-pipeline** (survived across 5 stash/pop cycles today, so it's intact):
+   - Modified: `CLAUDE.md`
+   - Modified: `ghl-podcast-pipeline/dashboard/app.py`
+   - New untracked: `ghl-podcast-pipeline/dashboard/templates/system.html`
+   
+   Not mine to commit. Decide: commit if done, stash properly if mid-thought.
+
+2. **Netlify credit limit** — upgraded today (caused 3 of your commits to silently fail-deploy this afternoon). Monitor usage — if builds get throttled or paused again, upgrade tier or reduce build frequency.
+
+## Deferred skill work (not urgent)
+
+1. **SessionStart hook** for drift detection — would show `git status` across the 3 known repos at each session start so uncommitted work doesn't pile up. Discussed earlier today; deferred.
+2. **Cache purge automation** — CF token at `~/.secrets/cloudflare-globalhighlevel-token` (scope: Zone.Cache Purge.Purge for globalhighlevel.com). Could wire into the `/indexing-api` skill OR a new `/deploy-assist` skill so future ships auto-purge CF cache. Not urgent since the token exists and is documented.
+3. **Netlify build hook** — not created today. Only needed if auto-deploy silently fails again. Bill decided to create only if needed.
+
+## Measurement gate: 2026-05-21 (Day 30)
+
+Re-run the 10 validation tests from today's audit. Compare to baseline above. All numbers are in the "Baseline GSC numbers" section of this file.
