@@ -1,3 +1,5 @@
+- [**RESUME DEREK WORK**](project_derek_simkins_handoff.md) — Say "resume the Derek work" to pick up. Capstone Connectors Fractional CTO $1,500/mo PAID 2026-04-20. Onboarding form live (capstone-onboarding.pages.dev/capstone), tracker sheet seeded, 2 GHL subs in play. First check-in Friday 2026-04-24 3pm ET.
+- [GHL API Gotchas](reference_ghl_api_gotchas.md) — Field-tested quirks (rrule nesting, PATCH 401, autoPayment drafts, CF secret reload, duplicate-contact 400, timezone override). Check before hitting GHL endpoints.
 - [**RESUME VERTICALS WORK**](project_verticals_session_handoff.md) — Say "resume the verticals work" to pick up. ES Part 1 agency-starters SHIPPED 2026-04-16. Day-14 decision gate: ship Parts 2-3 if indexed/impressions, else pivot.
 - [SOP — Manual GSC indexing for new hub pages](project_sop_new_hub_indexing.md) — Every new hub/pillar ship = Bill manually requests indexing in GSC (williamcourterwelch@gmail.com). Compresses 1-7 days → hours.
 - [**RESUME REPORTING WORK**](project_reporting_session_handoff.md) — Say "resume the reporting work" to pick up. CEO Daily + Weekly SEO triggers live with service account.
@@ -5,8 +7,9 @@
 - [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
 - [GHL /trial + /start split](project_globalhighlevel_trial_start_split.md) — Two identical affiliate landing pages: /trial=podcast, /start=blog. Do not consolidate.
 - [GHL /trial + /start noindex by design](reference_globalhighlevel_robots_architecture.md) — Both disallowed in robots.txt + excluded from sitemap. GSC pos ~47 is ghost ranking, NOT a problem to fix.
-- [**RESUME DISCOUNT CONSOLIDATION**](project_discount_consolidation_handoff.md) — Say "resume the discount consolidation" to pick up. Agreed 2026-04-20, NOT executed. Plan: one master page, 5 new H3s, 301 redirects, noindex /trial/+/start/, ping Indexing API.
+- [**RESUME DISCOUNT CONSOLIDATION**](project_discount_consolidation_handoff.md) — Say "resume the discount consolidation" to pick up. SHIPPED 2026-04-21: master page live, 301s + noindex in place. Day-30 measurement gate 2026-05-21.
 - [FB Social Pipeline](project_fb_social_pipeline.md) — Trigger ID, voice rules, Slack channel for daily FB posts
+- [Deploy failure alerting](project_deploy_failure_alerting.md) — Vercel deploy failures route to #ops-log via native Slack app + workflow backstop. New projects need BOTH paths wired.
 - [Trigger Inventory](project_trigger_inventory.md) — 3 enabled triggers (plan max), 4 disabled. Undocumented limit.
 - [Check before asking](feedback_dont_ask_check_first.md) — Search codebase for answers before asking user setup questions
 - [Do the work](feedback_do_the_work.md) — Never punt to user when you have tools (gh, gcloud, MCP) to do it yourself
