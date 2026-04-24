@@ -101,6 +101,22 @@ Each applies a different **lever** (track which — needed for Step 3 of self-im
 - No "Learn how to" meta opener (banned)
 - Banlist enforced (see self-improving rule 3)
 
+**Hard gate — fact-check (NEW, MANDATORY):** Any specific claim in the proposed title or meta — numbers, percentages, dollar amounts, currency figures, time promises, named case studies, agency names — MUST be directly supported by text in the article body. If the article doesn't contain the claim verbatim or close to it, set `skip=true` with reason `"unverified claim: <the claim>"`. Examples requiring article support:
+- `"65% Cost Cut"` → article must say "65%" or describe that case
+- `"$500/month"` → article must mention $500 (or close range)
+- `"in 60 seconds"` → article must mention 60 seconds (or close)
+- `"Bangalore agency"` → article must name a specific Bangalore agency
+- `"₹25,000–40,000"` → article must contain that rupee range
+
+**This rule exists because of Bill's no-fake-content directive. Preserving an unverified number from the OLD title doesn't make it verified — re-evaluate every claim against the article each run.**
+
+**Hard gate — don't-rewrite-if-strong (UPGRADED FROM RULE 2):** Before drafting ANYTHING, score the CURRENT title on the 4 tests in Phase 5 (pain specificity, feature specificity, verb strength, length discipline). If current scores ≥ 3 of 4, you MUST output `{"skip": true, "reason": "current title passes N of 4 tests: <which ones>"}`. This is not a guideline — it is a hard gate. Examples that ALWAYS trigger skip=true:
+- `"Enroll 1000+ Contacts to GHL Workflows in 60 Seconds"` (number + time + verb + specific = 4/4)
+- `"Cut Costs 60% in 10 Minutes"` (number + time + verb = 3/4)
+- `"Build a GHL AI Agent in 10 Minutes — Agent Studio Walkthrough"` (number + time + verb + specific = 4/4)
+
+Marginal style improvements DO NOT justify burning a 28-day cooldown slot.
+
 ### Phase 5 — Score + pick winner
 
 Four tests:
