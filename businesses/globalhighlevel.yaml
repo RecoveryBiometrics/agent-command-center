@@ -176,10 +176,10 @@ teams:
     schedule: "24/7 — 25-hour cycles, 20 episodes/day"
     status: active
 
-  - template: seo-optimizer-team
-    instance_id: ghl-seo-optimizer
-    runs_on: IONOS VPS (inside podcast scheduler)
-    schedule: "Weekly (7-day gate inside scheduler)"
+  - template: fix-page-snippet
+    instance_id: ghl-fix-page-snippet
+    runs_on: IONOS VPS (scheduler.py Step 0c, thin dispatcher)
+    schedule: "Every 25-hour cycle"
     status: scheduled
 
   - template: analytics-team

@@ -103,12 +103,12 @@ export const generatedTeamInstances: TeamInstance[] = [
     schedule: "24/7 — 25-hour cycles, 20 episodes/day",
   },
   {
-    id: "ghl-seo-optimizer",
-    templateId: "seo-optimizer-team",
+    id: "ghl-fix-page-snippet",
+    templateId: "fix-page-snippet",
     businessId: "globalhighlevel",
     status: "scheduled" as AgentStatus,
-    runsOn: "IONOS VPS (inside podcast scheduler)",
-    schedule: "Weekly (7-day gate inside scheduler)",
+    runsOn: "IONOS VPS (scheduler.py Step 0c, thin dispatcher)",
+    schedule: "Every 25-hour cycle",
   },
   {
     id: "ghl-analytics",

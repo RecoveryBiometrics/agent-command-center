@@ -119,7 +119,15 @@ export const generatedSkills: GeneratedSkill[] = [
       "mcp__google-workspace__read_sheet_values",
       "mcp__google-workspace__modify_sheet_values"
     ],
-    "deployments": []
+    "deployments": [
+      {
+        "business_id": "globalhighlevel",
+        "business_name": "GlobalHighLevel.com",
+        "runs_on": "IONOS VPS (scheduler.py Step 0c, thin dispatcher)",
+        "schedule": "Every 25-hour cycle",
+        "status": "scheduled"
+      }
+    ]
   },
   {
     "id": "indexing-api",
@@ -291,4 +299,4 @@ export const generatedSkills: GeneratedSkill[] = [
   }
 ];
 
-export const skillsLastGenerated = "2026-04-25T00:05:18.521Z";
+export const skillsLastGenerated = "2026-04-25T00:19:24.570Z";
