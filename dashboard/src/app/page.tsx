@@ -736,7 +736,15 @@ export default function Dashboard() {
         {view === "skills" && (
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">Skills</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">Skills</h2>
+                <a
+                  href="/skills"
+                  className="text-sm font-medium text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"
+                >
+                  View all 18 skills with deployments + triggers →
+                </a>
+              </div>
               <div className="grid md:grid-cols-3 gap-4">
                 {skills.map((s) => (
                   <SkillCard key={s.id} skill={s} />
