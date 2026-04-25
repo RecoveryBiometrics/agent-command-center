@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx tsx scripts/generate-workforce.ts && npx tsx scripts/generate-skills.ts && next build",
+    "build": "next build",
+    "prebuild:local": "npx tsx scripts/generate-workforce.ts && npx tsx scripts/generate-skills.ts",
     "start": "next start",
     "lint": "next lint"
   },
