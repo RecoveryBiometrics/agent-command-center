@@ -1,7 +1,7 @@
 ---
 name: fix-page-snippet
-version: 1.0.0
-description: "Rewrites one page's title + meta description together to lift CTR, then measures if it worked. Multi-step: reads current snippet + article opening, researches live SERP, finds intent/specificity gap, drafts 3 title + 3 meta variants, picks winner, ships to post JSON + cooldown lock + Google Sheet SEO Changelog. Has --audit mode that evaluates past rewrites after their 28-day window and auto-rolls back losers. Self-improving: appends proven lever rules back into this file after 10+ measured rewrites."
+version: 2.0.0
+description: "Rewrites one page's title + meta description together to lift CTR. Multi-step: reads current snippet + article opening, researches live SERP, finds intent/specificity gap, drafts 3 title + 3 meta variants, picks winner, ships to post JSON + cooldown lock + Google Sheet SEO Changelog. Also handles rollbacks (--rollback --slug X restores prior title/meta from cooldown). Single verb: mutate a page's snippet. Measurement of past rewrites lives in /measure-seo-change, NOT here."
 invocation: /fix-page-snippet
 allowed-tools:
   - Bash
@@ -16,31 +16,35 @@ triggers:
   - rewrite title and description
   - improve page CTR
   - fix snippet
-  - audit snippet rewrites
-  - did the rewrites work
+  - rollback snippet
+  - revert title and meta
 ---
 
-# /fix-page-snippet — Rewrite page snippets, then measure if they worked
+# /fix-page-snippet — Rewrite (or roll back) one page's title + meta
 
-Title and meta work as a pair. Google shows them stacked. If title hooks but meta repels, no click. This skill co-optimizes the pair from the article's own voice and real SERP intent — and closes the loop by measuring 28 days later whether the rewrite actually moved the needle. Auto-rolls back losers. Logs everything to the business Sheet so the team and stakeholders can see what changed and why.
+Title and meta work as a pair. Google shows them stacked. If title hooks but meta repels, no click. This skill co-optimizes the pair from the article's own voice and real SERP intent — OR reverts a prior rewrite that didn't pan out (when `/measure-seo-change` flags an Outcome=loss and signals rollback).
+
+**Single verb:** mutate a page's snippet. Two parameter shapes (`--fix` default, `--rollback`) — both write title+description to the post JSON and log to the SEO Changelog Sheet. Measurement of whether prior rewrites worked lives in `/measure-seo-change`, NOT here.
 
 ## The rule
 
 **A rewrite only ships if it beats the current snippet on ≥ 2 of these 4 tests: pain specificity, feature specificity, verb strength, or length discipline. Style-only tweaks = leave it alone, use the slot on a weaker page.**
 
-## Two modes
+## Invocation (parameterized)
 
 ```
-/fix-page-snippet --url <full-url>               # FIX MODE: rewrite one page
-/fix-page-snippet --slug <slug> --business <id>  # FIX by slug + business
-/fix-page-snippet --batch 5 --business <id>      # FIX top N candidates interactively
-/fix-page-snippet --audit --business <id>        # AUDIT: measure past rewrites past 28d
-/fix-page-snippet --audit --patterns             # AUDIT + run self-improvement rule update
+/fix-page-snippet --url <full-url>                                   # rewrite one page
+/fix-page-snippet --slug <slug> --business <id>                      # rewrite by slug + business
+/fix-page-snippet --batch 5 --business <id>                          # rewrite top N candidates interactively
+/fix-page-snippet --rollback --slug <slug> --business <id>           # restore prior title/meta from cooldown
+/fix-page-snippet --rollback --slug <slug> --business <id> --reason "..."   # rollback with logged reason
 ```
+
+For measurement of past rewrites (did they work?) → `/measure-seo-change`. This skill never measures.
 
 ---
 
-## FIX MODE (Phases 0–6)
+## FIX MODE (Phases 0–6) — default mode
 
 ### Phase 0 — Load context + 48h freshness gate (MANDATORY)
 
@@ -172,70 +176,57 @@ Sheet write failure → post JSON and cooldown JSON already wrote, so **don't ro
 
 ---
 
-## AUDIT MODE (`--audit`)
+## ROLLBACK MODE (`--rollback --slug X`)
 
-Triggered daily by cron OR manually. Closes the loop on past rewrites.
+Used when `/measure-seo-change` flags a prior rewrite as `Outcome=loss` and the threshold table specifies `auto_rollback=True`. Can also be run manually if a stakeholder wants to revert a rewrite for any reason.
 
-### A0. Load + freshness gate
-Same as Fix Phase 0. STOP if GSC > 48h old.
+### R0. Load context
 
-### A1. Find unlocked rewrites
-Read `data/seo-cooldown.json`. Filter entries where:
-- `action == "rewrite_meta"`
-- `locked_until` < now
-- No `verdict` field yet (not already measured)
+Same as Phase 0 freshness gate (GSC must be < 48h old). Read `data/seo-cooldown.json` and locate the entry for `--slug`.
 
-### A2. Compare before → now, verdict each
+**STOP conditions:**
+- Slug not found in cooldown → no recorded prior state to revert to. Surface error with a list of similar slugs.
+- Cooldown entry's `changes.old_title` or `changes.old_description` is missing → can't revert without baseline. Surface error.
+- Page is currently inside its 28-day cooldown window AND `/measure-seo-change` did NOT explicitly request the rollback → ask for `--force` confirmation.
 
-For each unlocked rewrite:
-- Pull current GSC row for that URL
-- Compute deltas: `rank_delta = before_pos - now_pos` (positive = rank improved), `ctr_delta = now_ctr - before_ctr`
-- Verdict:
-  - **WORKED:** `rank_delta ≥ 2` OR `ctr_delta ≥ 0.5` (percentage points)
-  - **HURT:** `rank_delta ≤ -2` OR `ctr_delta ≤ -0.3`
-  - **FLAT:** otherwise
+### R1. Restore the post JSON
 
-### A3. Act on verdict
+- Load `<posts_dir>/<slug>.json`.
+- Set `title` = cooldown entry's `changes.old_title`.
+- Set `description` = cooldown entry's `changes.old_description`.
+- Preserve all other fields. Write `indent=2, ensure_ascii=False`.
 
-**WORKED:** release lockout. Write `verdict: "worked"` + `measured_at` to cooldown entry. Log to Sheet (see A4). Page re-enters normal pool — if it degrades later, `/weekly-seo-check` re-flags it.
+### R2. Update cooldown entry
 
-**FLAT:** release lockout. Mark `verdict: "flat"` + `soft_cooldown_until: now + 60d`. Don't rewrite same page for 60 days. Log.
+Mark the cooldown entry with:
+- `rolled_back: true`
+- `rolled_back_at: <ISO-now>`
+- `rolled_back_reason: "<--reason value or default 'measured loss'>"`
+- `soft_cooldown_until: <now + 60d>` — don't rewrite same page for 60 days, the data is too noisy to redraft yet.
 
-**HURT:** **AUTO-ROLLBACK.**
-- Load post JSON
-- Restore `title` = `changes.old_title`, `description` = `changes.old_description`
-- Write post JSON back
-- Mark `verdict: "hurt"` + `rolled_back: true` + `soft_cooldown_until: now + 60d` + `failed_lever: "<title_lever>+<meta_lever>"`
-- Log rollback to Sheet loudly
+### R3. Log to SEO Changelog Sheet
 
-### A4. Log verdicts to SEO Changelog
-
-One row per measured rewrite:
+Append one row via MCP:
 
 | Col | Content |
 |---|---|
 | A Date | today |
-| B Page | same URL |
-| C Change Type | `Measurement: <WORKED\|FLAT\|HURT>` (append `— ROLLED BACK` for HURT) |
-| D Description | `28-day measurement. Before: imps=X clicks=Y ctr=Z rank=R. Now: imps=X' clicks=Y' ctr=Z' rank=R'. Δrank=+N, Δctr=+N.NN pp. Lever used: <title>+<meta>.` |
-| E Impact | For WORKED: `Lockout released. Page re-enters normal pool.` FLAT: `Soft-cooldown 60 days.` HURT: `Auto-rolled back to old title/meta. Soft-cooldown 60 days. Lever <X> flagged.` |
+| C Action | `Snippet rollback — restored prior title/meta` |
+| D / Description columns | `Reverted to: title='<old>', desc='<old>'. Reason: <reason>. Failed lever: <title-lever>+<meta-lever>.` |
+| Outcome | `rolled_back` |
 
-### A5. Pattern aggregation + self-improvement (if `--patterns` flag or ≥ 10 new verdicts)
+This row is for human visibility — it does NOT trigger another `/measure-seo-change` cycle.
 
-Aggregate by lever: how many WORKED / FLAT / HURT for each lever?
+### R4. Summary output
 
-Signal test: lever has ≥ 5 measured uses AND (win rate ≥ 70% OR win rate ≤ 30%).
-
-If signal fires, **self-modify this SKILL.md**:
-- Use Edit tool to APPEND a new line under "Self-improving rules" section:
-  ```
-  N+1. **Learned <YYYY-MM-DD>:** Prefer `<winning-lever>` (WW% win rate, n=NN).
-       Avoid `<losing-lever>` (XX% win rate, n=NN, shelved).
-  ```
-- Log the rule-update to SEO Changelog as its own row (Change Type: `Self-improvement: rule added`)
-- Commit the diff to git (if repo present)
-
-**Safety:** never DELETE existing rules automatically. Only append. Human can prune.
+```
+↩ <slug> rolled back
+  Title: <new>  →  <old>  (restored)
+  Meta:  <new>  →  <old>  (restored)
+  Reason: <reason>
+  Soft cooldown until: <date>
+  Logged: cooldown.json ✓  |  SEO Changelog ✓
+```
 
 ---
 
@@ -243,18 +234,20 @@ If signal fires, **self-modify this SKILL.md**:
 
 ```
 <project>/data/
-  seo-cooldown.json      — change log + lockouts + verdicts (JSON = source of truth)
+  seo-cooldown.json      — lockouts + change history + rollback markers (JSON = source of truth)
   gsc-stats.json         — latest GSC pull (must be < 48h old)
 
 <business-tracking-sheet>
-  "SEO Changelog" tab    — human-readable mirror (Date / Page / Change Type / Description / Impact)
-                           Append-only. Holds both rewrite rows AND measurement rows.
+  "SEO Changelog" tab    — human-readable mirror (Date / Business / Slug / Action / ... / Outcome)
+                           Append-only. Rewrite rows logged here by Phase 6c; rollback rows by R3.
+                           Outcome column populated later by /measure-seo-change at day 28.
 
 ~/.claude/skills/fix-page-snippet/SKILL.md
-                         — this file. Gets amended by --audit --patterns when signal is strong.
+                         — this file. Gets amended by /measure-seo-change Phase 4 when a lever
+                           reaches statistical signal (≥ 10 measured uses, win rate ≥ 70% or ≤ 30%).
 ```
 
-JSON is source of truth. If Sheet diverges, re-run Phase 6c. If SKILL.md loses rules, restore from git.
+JSON is source of truth for cooldown locks. Sheet is source of truth for change log + outcomes. SKILL.md self-improvement is driven by `/measure-seo-change`, not this skill.
 
 ---
 
@@ -289,8 +282,8 @@ Every rule below resolved a specific judgment call during 5 pair-programmed rewr
 
 1. Did we ship a rewrite that violated a rule above? → Tighten or add a rule.
 2. Did the user correct framing/audience? → Update rule 1.
-3. `--audit` reported HURT on a rewrite? → Post-mortem: which lever failed, update lever scoring.
-4. `--audit --patterns` fired a rule update? → Review the auto-appended rule next session, prune if wrong.
+3. Did `/measure-seo-change` flag a rollback (HURT verdict)? → Read its Sheet `Outcome` and lever data, post-mortem: which lever failed, update lever scoring rules above.
+4. Did `/measure-seo-change` auto-append a new rule below this section? → Review next session, prune if wrong.
 5. Sheet write failed > 1 time? → Check `tracking_sheet_id` in business YAML, check MCP auth, surface to user.
 
 Write rule updates directly into this file (above). Commit the diff. The skill compounds.
