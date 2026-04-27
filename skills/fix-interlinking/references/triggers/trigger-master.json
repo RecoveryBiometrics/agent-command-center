@@ -1,0 +1,16 @@
+{
+  "target": "/blog/gohighlevel-free-trial-30-days-extended/",
+  "language": "en",
+  "skip_slugs": ["gohighlevel-free-trial-30-days-extended"],
+  "trigger_phrases": [
+    ["30-day free trial", ["30-day GoHighLevel free trial", "extended 30-day trial"]],
+    ["30 day free trial", ["30-day GoHighLevel free trial", "extended 30-day trial"]],
+    ["30-day trial", ["30-day GoHighLevel trial", "extended 30-day free trial", "free 30-day GoHighLevel trial", "extended GoHighLevel trial", "GoHighLevel 30-day trial details"]],
+    ["30 day trial", ["30-day GoHighLevel trial", "extended 30-day free trial", "free 30-day GoHighLevel trial", "extended GoHighLevel trial", "GoHighLevel 30-day trial details"]],
+    ["free trial", ["GoHighLevel free trial", "GoHighLevel trial"]],
+    ["promo code", ["GoHighLevel promo codes", "real GoHighLevel promo codes"]],
+    ["promo codes", ["GoHighLevel promo codes", "real GoHighLevel promo codes"]],
+    ["coupon code", ["GoHighLevel coupon codes", "GoHighLevel discount codes"]],
+    ["discount code", ["GoHighLevel discount codes", "real GoHighLevel discounts"]]
+  ]
+}

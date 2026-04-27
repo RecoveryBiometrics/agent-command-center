@@ -1,0 +1,32 @@
+{
+  "site_id": "globalhighlevel",
+  "domain": "globalhighlevel.com",
+  "language_default": "en",
+  "posts_dirs": [
+    "~/Developer/projects/marketing/podcast-pipeline/posts",
+    "~/Developer/projects/marketing/podcast-pipeline/globalhighlevel-site/posts"
+  ],
+  "money_pages": [
+    {
+      "url": "/blog/gohighlevel-free-trial-30-days-extended/",
+      "language": "en",
+      "intent": "trial+promo+discount",
+      "trigger_config": "trigger-master.json"
+    },
+    {
+      "url": "/blog/gohighlevel-pricing-plans-2026-complete-guide/",
+      "language": "en",
+      "intent": "pricing",
+      "trigger_config": "trigger-pricing.json"
+    }
+  ],
+  "languages": {
+    "en": {"path_prefix": ""},
+    "es": {"path_prefix": "/es"},
+    "in": {"path_prefix": "/in"},
+    "ar": {"path_prefix": "/ar"}
+  },
+  "robots_blocked_or_noindex": [
+    "/trial/", "/start/"
+  ]
+}

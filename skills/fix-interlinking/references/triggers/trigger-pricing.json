@@ -1,0 +1,24 @@
+{
+  "target": "/blog/gohighlevel-pricing-plans-2026-complete-guide/",
+  "language": "en",
+  "skip_slugs": ["gohighlevel-pricing-plans-2026-complete-guide"],
+  "trigger_phrases": [
+    ["GoHighLevel pricing plans", ["GoHighLevel pricing plans 2026 guide", "full pricing plan breakdown"]],
+    ["GoHighLevel pricing", ["GoHighLevel pricing plans", "GoHighLevel pricing breakdown"]],
+    ["GHL pricing", ["GoHighLevel pricing plans", "GHL pricing breakdown"]],
+    ["GoHighLevel cost", ["GoHighLevel pricing plans", "GoHighLevel cost breakdown"]],
+    ["GoHighLevel plans", ["GoHighLevel pricing plans", "GoHighLevel plan tiers"]],
+    ["GHL plans", ["GoHighLevel pricing plans", "GHL plan tiers"]],
+    ["$97/month", ["GoHighLevel $97 Starter plan", "GoHighLevel pricing tiers"]],
+    ["$297/month", ["GoHighLevel $297 Unlimited plan", "GoHighLevel pricing tiers"]],
+    ["$497/month", ["GoHighLevel $497 Pro/SaaS plan", "GoHighLevel pricing tiers"]],
+    ["$97 plan", ["GoHighLevel $97 Starter plan", "GoHighLevel pricing plans"]],
+    ["$297 plan", ["GoHighLevel $297 Unlimited plan", "GoHighLevel pricing plans"]],
+    ["$497 plan", ["GoHighLevel $497 Pro/SaaS plan", "GoHighLevel pricing plans"]],
+    ["Starter plan", ["GoHighLevel $97 Starter plan", "Starter plan in GoHighLevel pricing"]],
+    ["Unlimited plan", ["GoHighLevel $297 Unlimited plan", "Unlimited plan pricing"]],
+    ["SaaS Pro plan", ["GoHighLevel $497 SaaS Pro plan", "SaaS Pro plan pricing"]],
+    ["Agency Pro plan", ["GoHighLevel $497 Agency Pro plan", "Agency Pro plan pricing"]],
+    ["pricing tiers", ["GoHighLevel pricing tiers", "GoHighLevel pricing plans"]]
+  ]
+}
