@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""measure-write-outcome — write Position(28d), CTR%(28d), Outcome to one Sheet row.
+
+Pure deterministic execution. No judgment.
+
+Usage:
+  measure-write-outcome <sheet_id> <row_index> <position_28d> <ctr_28d> <outcome>
+
+Auth: GOOGLE_SERVICE_ACCOUNT_KEY env var.
+
+Exit codes: 0 ok, 1 auth error, 2 API error.
+"""
+import json, os, sys
+
+if len(sys.argv) != 6:
+    print("usage: measure-write-outcome <sheet_id> <row_index> <position_28d> <ctr_28d> <outcome>", file=sys.stderr)
+    sys.exit(1)
+sheet_id, row_index, pos_28d, ctr_28d, outcome = sys.argv[1:]
+
+sa_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY")
+if not sa_json:
+    print("GOOGLE_SERVICE_ACCOUNT_KEY env not set", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    creds = service_account.Credentials.from_service_account_info(
+        json.loads(sa_json), scopes=["https://www.googleapis.com/auth/spreadsheets"]
+    )
+    svc = build("sheets", "v4", credentials=creds, cache_discovery=False)
+    svc.spreadsheets().values().update(
+        spreadsheetId=sheet_id,
+        range=f"Changelog!N{row_index}:P{row_index}",
+        valueInputOption="USER_ENTERED",
+        body={"values": [[pos_28d, ctr_28d, outcome]]},
+    ).execute()
+    print(f"ok: wrote row {row_index}")
+except Exception as e:
+    print(f"Sheet API error: {e}", file=sys.stderr)
+    sys.exit(2)

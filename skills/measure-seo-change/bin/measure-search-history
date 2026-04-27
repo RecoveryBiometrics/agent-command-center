@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""measure-search-history — query state/measurement-history.jsonl by lever/action.
+
+Pure deterministic execution. Read-only.
+
+Usage:
+  measure-search-history [--action X] [--lever Y] [--outcome win|loss|neutral] [--limit N]
+
+Output: JSON object with {total, win, loss, neutral, win_rate, matches: [...]}.
+Prints all matches if --limit not given.
+
+Exit codes: 0 ok, 1 file missing.
+"""
+import argparse, json, sys
+from pathlib import Path
+
+STATE = Path(__file__).resolve().parent.parent / "state"
+HISTORY = STATE / "measurement-history.jsonl"
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--action")
+ap.add_argument("--lever")
+ap.add_argument("--outcome")
+ap.add_argument("--limit", type=int)
+args = ap.parse_args()
+
+if not HISTORY.exists():
+    print(json.dumps({"total": 0, "win": 0, "loss": 0, "neutral": 0, "win_rate": 0.0, "matches": []}))
+    sys.exit(0)
+
+matches = []
+with open(HISTORY) as f:
+    for line in f:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if args.action and not str(obj.get("action", "")).startswith(args.action):
+            continue
+        if args.lever and obj.get("lever") != args.lever:
+            continue
+        if args.outcome and obj.get("outcome") != args.outcome:
+            continue
+        matches.append(obj)
+
+wins = sum(1 for m in matches if m.get("outcome") == "win")
+losses = sum(1 for m in matches if m.get("outcome") == "loss")
+neutrals = sum(1 for m in matches if m.get("outcome") == "neutral")
+total = len(matches)
+win_rate = wins / total if total else 0
+
+if args.limit:
+    matches = matches[-args.limit:]
+
+print(json.dumps({
+    "total": total, "win": wins, "loss": losses, "neutral": neutrals,
+    "win_rate": round(win_rate, 3), "matches": matches,
+}))

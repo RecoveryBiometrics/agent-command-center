@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""post-slack — post one message to a Slack channel via chat.postMessage.
+
+Pure deterministic execution. Reads message text from stdin OR --text arg.
+
+Usage:
+  echo "hello" | post-slack <channel_id>
+  post-slack <channel_id> --text "hello"
+
+Auth: SLACK_BOT_TOKEN env var.
+
+Exit codes: 0 ok, 1 input/auth error, 2 API error.
+"""
+import argparse, json, os, sys
+import urllib.request
+import urllib.error
+
+ap = argparse.ArgumentParser()
+ap.add_argument("channel")
+ap.add_argument("--text")
+args = ap.parse_args()
+
+token = os.getenv("SLACK_BOT_TOKEN")
+if not token:
+    print("SLACK_BOT_TOKEN env not set", file=sys.stderr)
+    sys.exit(1)
+
+text = args.text if args.text is not None else sys.stdin.read().rstrip("\n")
+if not text:
+    print("no message text", file=sys.stderr)
+    sys.exit(1)
+
+req = urllib.request.Request(
+    "https://slack.com/api/chat.postMessage",
+    data=json.dumps({"channel": args.channel, "text": text}).encode(),
+    headers={
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    },
+)
+try:
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        body = json.loads(resp.read())
+except urllib.error.URLError as e:
+    print(f"Slack request failed: {e}", file=sys.stderr)
+    sys.exit(2)
+
+if not body.get("ok"):
+    print(f"Slack post failed: {body.get('error')}", file=sys.stderr)
+    sys.exit(2)
+print(f"ok: ts={body.get('ts')}")

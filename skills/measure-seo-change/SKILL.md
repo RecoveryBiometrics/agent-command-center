@@ -39,15 +39,34 @@ A change has not "worked" until GSC says so. Until measured, every change is a h
 /measure-seo-change --dry-run                 # compute lift, do not write to Sheet
 ```
 
-## Phase 0 — Load context (resolver)
+## Phase 0 — Load context (resolver / preamble)
 
-Before measuring anything, read these in order:
+Run these commands FIRST, before any phase logic. They prime the session with current state so judgment in later phases is informed by what's actually happened:
 
-1. `~/.claude/projects/-Users-kerapassante-Developer-projects-marketing-podcast-pipeline/memory/reference_seo_changelog_sheet.md` — Sheet ID, tab name, auth options.
-2. `references/thresholds.md` (this skill) — win/loss thresholds per Action type.
-3. `state/measurement-history.json` (this skill) — past measurements, for self-improvement signal.
+```bash
+SKILL_DIR="$(dirname "$0" 2>/dev/null || echo ~/.claude/skills/measure-seo-change)"
+mkdir -p "$SKILL_DIR/state"
+HISTORY="$SKILL_DIR/state/measurement-history.jsonl"
+[ -f "$HISTORY" ] || touch "$HISTORY"
 
-If `state/measurement-history.json` does not exist, create it: `{"measurements": []}`.
+echo "=== measurement-history (last 20 events) ==="
+tail -n 20 "$HISTORY" 2>/dev/null || echo "(empty — first run)"
+
+echo "=== thresholds ==="
+cat "$SKILL_DIR/references/thresholds.md"
+```
+
+Then read these reference files for context:
+1. Memory entry `reference_seo_changelog_sheet.md` — Sheet ID, tab name, auth options.
+2. `references/thresholds.md` — win/loss thresholds per Action type (also printed above).
+
+The deterministic helpers in `bin/` are how this skill INTERACTS with the world. Never inline that logic — always shell out:
+- `bin/measure-read-sheet <sheet_id>` — list Sheet rows as JSONL
+- `bin/measure-fetch-gsc <site> <page>` — pull current 28-day GSC for one URL
+- `bin/measure-write-outcome <sheet_id> <row> <pos> <ctr> <outcome>` — write back to Sheet
+- `bin/measure-append-history` — append measurement event to history JSONL (reads JSON from stdin)
+- `bin/measure-search-history --action X --lever Y --outcome win` — query history (used in Phase 4)
+- `bin/post-slack <channel> --text "..."` — post a Slack summary
 
 ## Phase 1 — Discover rows ready to measure
 

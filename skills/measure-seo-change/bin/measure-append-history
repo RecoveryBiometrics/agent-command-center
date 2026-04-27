@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""measure-append-history — append one event to state/measurement-history.jsonl.
+
+Pure deterministic execution. Adds an ISO timestamp if none is provided.
+
+Usage:
+  echo '{"slug":"...","action":"...","outcome":"win","lever":"..."}' | measure-append-history
+
+Reads JSON from stdin, writes one line to:
+  ~/.claude/skills/measure-seo-change/state/measurement-history.jsonl
+
+Exit codes: 0 ok, 1 input error.
+"""
+import json, os, sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+STATE = Path(__file__).resolve().parent.parent / "state"
+STATE.mkdir(parents=True, exist_ok=True)
+HISTORY = STATE / "measurement-history.jsonl"
+
+raw = sys.stdin.read().strip()
+if not raw:
+    print("no JSON on stdin", file=sys.stderr)
+    sys.exit(1)
+try:
+    obj = json.loads(raw)
+except json.JSONDecodeError as e:
+    print(f"invalid JSON: {e}", file=sys.stderr)
+    sys.exit(1)
+
+obj.setdefault("ts", datetime.now(timezone.utc).isoformat())
+with open(HISTORY, "a") as f:
+    f.write(json.dumps(obj) + "\n")
+print(f"ok: appended to {HISTORY}")

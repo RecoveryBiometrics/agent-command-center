@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""measure-read-sheet — print Sheet rows as JSONL to stdout.
+
+Pure deterministic execution. No judgment.
+
+Usage:
+  measure-read-sheet <sheet_id> [<range>]
+    range defaults to 'Changelog!A2:P1000'
+
+Auth (env, required):
+  GOOGLE_SERVICE_ACCOUNT_KEY  — JSON service account key with Sheets access
+
+Output: one JSON object per line, each with fields {row_index, date, business,
+slug, action, position_before, impressions_before, ctr_before, outcome, ...}.
+
+Exit codes: 0 ok, 1 auth error, 2 API error.
+"""
+import json, os, sys
+
+if len(sys.argv) < 2:
+    print("usage: measure-read-sheet <sheet_id> [<range>]", file=sys.stderr)
+    sys.exit(1)
+sheet_id = sys.argv[1]
+range_name = sys.argv[2] if len(sys.argv) > 2 else "Changelog!A2:P1000"
+
+sa_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY")
+if not sa_json:
+    print("GOOGLE_SERVICE_ACCOUNT_KEY env not set", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    creds = service_account.Credentials.from_service_account_info(
+        json.loads(sa_json), scopes=["https://www.googleapis.com/auth/spreadsheets"]
+    )
+    svc = build("sheets", "v4", credentials=creds, cache_discovery=False)
+    resp = svc.spreadsheets().values().get(spreadsheetId=sheet_id, range=range_name).execute()
+except Exception as e:
+    print(f"Sheet API error: {e}", file=sys.stderr)
+    sys.exit(2)
+
+cols = ["date", "business", "slug", "action", "attempt",
+        "position_before", "impressions_before", "ctr_before",
+        "old_title", "new_title", "old_description", "new_description",
+        "words_added", "position_28d", "ctr_28d", "outcome"]
+
+for i, r in enumerate(resp.get("values", []), start=2):
+    r = (r + [""] * 16)[:16]
+    obj = {"row_index": i, **dict(zip(cols, r))}
+    print(json.dumps(obj))
