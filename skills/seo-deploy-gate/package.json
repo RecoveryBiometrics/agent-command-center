@@ -1,0 +1,19 @@
+{
+  "name": "seo-deploy-gate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "run.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "googleapis": "^171.4.0"
+  }
+}
