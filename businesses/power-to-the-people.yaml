@@ -1,19 +1,29 @@
+# power-to-the-people.yaml — single source of truth for Power to the People
+# Last updated: 2026-04-20
+
 id: power-to-the-people
 name: "Power to the People"
-status: building
+status: building  # live | building | planned | paused
 website: https://www.avlp2p.com
-niche: "electrical services, residential electrician, knob and tube rewire, EV chargers, panel upgrades"
-description: "Licensed and insured electrical contractor in Asheville, NC — knob & tube rewires, EV chargers, panel changes, residential service work"
+niche: "Residential electrician, electrical panel upgrades, EV charger installation, knob & tube rewiring, historic home wiring"
+description: "Licensed and insured electrical contractor in Asheville, NC. 3 crews (6 people + owner Andrew). Residential service first, panel upgrades + EV chargers as growth levers, knob & tube as specialty."
+tracking_sheet_id: "17LisuuLu__nEdcVHbbpH4Tq21LIHCW2CfkIVOx-6SWo"
 
 # -- Client --
 client:
   owner: "Andrew Holbein"
-  team_size: 7  # Andrew + 3 crews x 2
-  relationship: "Friend from Facebook, former AT thru-hiker"
+  owner_license_nc: # TODO — ask Andrew on 2026-04-20 call (needed for Person schema)
+  team_size: 7  # Andrew + 3 crews (6 field)
+  ein: "82-2189219"
+  legal_name: "Power to the People inc"
+  relationship: "Friend from Facebook, both AT thru-hikers"
   domain_registrar: GoDaddy
-  current_host: Squarespace  # migrating to Cloudflare
+  current_host: Squarespace  # migrating to Cloudflare Pages under Andrew's account
   discovery_call: 2026-04-10
-  next_meeting: 2026-04-13T16:00:00-04:00  # 4pm ET
+  next_meeting: 2026-04-20T17:00:00-04:00  # 5pm ET Monday — Workspace + Cloudflare signup walkthrough
+  onboarding_form_submitted: 2026-04-15T19:58:00Z
+  first_invoice_paid: 2026-04-16  # $1,500 retainer
+  godaddy_delegate_accepted: 2026-04-17  # Domains-Only role
 
 # -- Org --
 org:
@@ -28,98 +38,360 @@ org:
 brand:
   phone_display: "(828) 551-9843"
   phone_tel: "+18285519843"
-  email: # TODO — get from Andrew
+  email: # TODO — resolve on 2026-04-20 call. PowerPeopleAVL@gmail.com vs acormier5@gmail.com; recommend moving to info@avlp2p.com via Google Workspace
   cta: "Call Today for a Free Estimate"
-  voice: "Friendly, approachable, expert electrician. Down-to-earth Asheville vibe. Emphasize safety, fair pricing, and lifetime workmanship warranty. They drive an electric van (BrightDrop) — lean into that for EV charger credibility."
+  voice: "Friendly, approachable, expert electrician. Down-to-earth Asheville vibe. Emphasize safety, fair pricing, and lifetime workmanship warranty. BrightDrop EV van — lean into that for EV charger credibility."
+  trust_signals:
+    - Licensed & Insured
+    - 4.8 stars, 109+ reviews
+    - Asheville-owned & operated
+    - Historic-home rewire specialists
+  address:
+    street: "161 Virginia Ave"
+    city: Asheville
+    state: NC
+    zip: "28806"
+  hours: "M-F 8am-6pm"  # verified on onboarding form (earlier docs incorrectly said 8-4)
+  rating: 4.8
+  review_count: 109  # as of 2026-04-10 discovery
 
 # -- Pricing --
 pricing:
   setup_fee: "3500-5000"  # one-time
-  monthly: 500  # agent management
-  mailers: "per-piece, ~$1/ea"
+  monthly: 1500  # monthly retainer per CLAUDE.md, confirmed by 2026-04-16 invoice payment
+  mailers: "~$0.60-0.75/piece landed (print+postage)"
   ad_spend: "on client, TBD after site converts"
 
 # -- Service Areas --
+# 13 cities in 50-mile radius per CLAUDE.md + onboarding form
 service_areas:
-  states: ["NC"]
+  states: [NC]
   primary_city: "Asheville"
-  cities_per_run: 8
-  # Target surrounding: Hendersonville, Black Mountain, Weaverville, Brevard, Waynesville
+  cities_per_run: 4  # smaller than SafeBath — curated per SERP priority
+  max_radius_miles: 50
+  cities:
+    - slug: asheville
+      name: "Asheville"
+      county: "Buncombe"
+      priority: 1
+    - slug: hendersonville
+      name: "Hendersonville"
+      county: "Henderson"
+      priority: 2  # biggest market after Asheville per onboarding form
+    - slug: black-mountain
+      name: "Black Mountain"
+      county: "Buncombe"
+      priority: 3
+    - slug: weaverville
+      name: "Weaverville"
+      county: "Buncombe"
+      priority: 4
+    - slug: brevard
+      name: "Brevard"
+      county: "Transylvania"
+      priority: 5
+    - slug: waynesville
+      name: "Waynesville"
+      county: "Haywood"
+      priority: 6
+    - slug: fletcher
+      name: "Fletcher"
+      county: "Henderson"
+      priority: 7
+    - slug: arden
+      name: "Arden"
+      county: "Buncombe"
+      priority: 8
+    - slug: candler
+      name: "Candler"
+      county: "Buncombe"
+      priority: 9
+    - slug: swannanoa
+      name: "Swannanoa"
+      county: "Buncombe"
+      priority: 10
+    - slug: leicester
+      name: "Leicester"
+      county: "Buncombe"
+      priority: 11  # easy SERP per 2026-04-20 SERP Cities snapshot
+    - slug: mars-hill
+      name: "Mars Hill"
+      county: "Madison"
+      priority: 12  # easy SERP
+    - slug: mills-river
+      name: "Mills River"
+      county: "Henderson"
+      priority: 13  # easy SERP
 
-# -- Key Services (priority order from call) --
-# 1. Knob and tube rewires (bread & butter, high margin, diminishing market — low competition keyword)
-# 2. EV charger installs (Duke Energy rebate ~$1K, quick jobs, good margin)
-# 3. Panel changes/upgrades
-# 4. General residential service work
-# 5. New construction & renovation (growth target — wants to attract contractors/remodelers)
-# NOT targeting: large corporate work
+# -- Neighborhood Pages (Asheville only, historic) --
+neighborhoods:
+  - slug: montford
+    name: "Montford"
+    note: "Historic District, 600+ homes 1890-1920, K&T heavy"
+  - slug: grove-park
+    name: "Grove Park"
+    note: "Historic, high-value"
+  - slug: kenilworth
+    name: "Kenilworth"
+    note: "Historic older stock"
+  - slug: west-asheville
+    name: "West Asheville"
+    note: "Gentrifying, renovation focus"
+  - slug: biltmore-village
+    name: "Biltmore Village"
+    note: "Historic + higher-end residential"
 
-# -- Realtor Strategy --
-# Free inspections = door opener for rewire jobs
-# Realtors are #1 referral source for knob & tube work
-# Direct mail campaign to realtor home addresses (public info)
-# QR code tracking on mailers
-# TODO: Duke Energy partner affiliate signup
+# -- Services (priority order from 2026-04-15 onboarding form) --
+# Top: Residential service work
+# High: K&T rewires, EV chargers, Panel upgrades, Whole rewires, Renovation, Generators
+# Medium: New construction, Commercial
+# DON'T OFFER: Solar (per onboarding form)
+services:
+  residential_service:
+    tier: top
+    hub_url: /electrical-service/
+  panel_upgrade:
+    tier: high
+    hub_url: /electrical-panels/
+  ev_charger:
+    tier: high
+    hub_url: /ev-charging/
+    duke_rebate_credit: 1133  # 2026 Charger Prep Credit per Duke
+  whole_house_rewire:
+    tier: high
+    hub_url: /historic-home-wiring/
+    avg_job_value_usd: "10000-25000"
+  knob_and_tube:
+    tier: high  # Andrew's stated niche, but NOT the SEO spearhead — specialty page
+    hub_url: /historic-home-wiring/
+    role: specialty_conversion_asset
+  generator:
+    tier: high
+  renovation:
+    tier: high
+    b2b: true  # GC channel
+  new_construction:
+    tier: medium
+    b2b: true  # GC channel
+  commercial:
+    tier: medium
+  solar:
+    tier: excluded  # Andrew says don't offer
+
+# -- Partnership Channels --
+partnerships:
+  realtor:
+    existing: ["Billy Wells", "Jamie Jones", "Luiz Leonetti"]
+    mailer_url_pattern: "/r/{realtor-slug}"
+    noindex_tracking_pages: true
+  general_contractor:
+    existing_list: # TODO — ask Andrew on 2026-04-20 call (mirrors realtor list)
+    mailer_url_pattern: "/gc/{gc-slug}"
+    noindex_tracking_pages: true
 
 # -- Slack Channels --
 slack:
-  ops_log_channel: C0AQG0DP222   # shared #ops-log
-  ceo_channel: C0AQAHSQK38      # shared #ceo-briefing
+  ops_log_channel: C0AQG0DP222
+  ceo_channel: C0AQAHSQK38
   business_channel: # TODO — create #p2p channel
 
 # -- SEO / Analytics --
-# seo:
-#   gsc_site_url: "sc-domain:avlp2p.com"
-#   ga4_property_id: ""  # TODO — get from client
-#   sitemap_url: https://www.avlp2p.com/sitemap.xml
+# Decision 2026-04-20: GSC + GA4 owned by AGENCY (bill@reiamplifi.com). Andrew added as Admin/Owner for view.
+# GBP, YouTube, Cloudflare, Workspace stay client-owned.
+seo:
+  gsc_site_url: "sc-domain:avlp2p.com"
+  gsc_owner_account: "bill@reiamplifi.com"  # agency-owned, Andrew added as Owner
+  ga4_measurement_id: "G-2BLEG8CXEC"  # web stream created 2026-04-20 under bill@reiamplifi.com
+  ga4_stream_id: "14411799802"
+  ga4_stream_url: "https://www.avlp2p.com"
+  ga4_owner_account: "bill@reiamplifi.com"  # agency-owned, Andrew to be added as Admin
+  sitemap_url: https://www.avlp2p.com/sitemap.xml
+  seo_agent_email: seo-agent@reiamplifi.com
+  data_dir: seo-data
+  reports_dir: seo-reports
+  changelog_path: SEO-CHANGELOG.md  # fallback; primary = Google Sheet "SEO Changelog" tab
 
-# -- Content Config --
-# content:
-#   max_similarity_percent: 85
-#   categories:
-#     - "Residential Electrical"
-#     - "EV Charger Installation"
-#     - "Solar Power"
-#     - "Generators"
-#     - "Wiring & Rewiring"
-#     - "Electrical Safety"
-#   subreddits:
-#     - "electricians"
-#     - "HomeImprovement"
-#     - "asheville"
-#     - "solar"
-#     - "EVcharging"
+# -- Content Pipeline Config --
+content:
+  output_dir: src/data/local-news
+  changelog_path: src/data/content-changelog.json
+  city_slug_prefix: electrician  # URL pattern: /electrician-{city}-nc
+  max_similarity_percent: 70  # stricter than SafeBath's 85; P2P uses ≤30% body-copy overlap rule per plan thin-content rules
+  max_retry_attempts: 3
+  # Hub-and-spoke architecture (per approved plan v5)
+  architecture: hub-and-spoke
+  tier_a_flagships:
+    - /
+    - /electrical-panels/
+    - /ev-charging/
+    - /electrical-service/
+  tier_b_hubs:
+    - /historic-home-wiring/
+    - /construction/
+  authority_library_path: /guides/
+  categories:
+    - service-page
+    - hub-page
+    - city-page
+    - neighborhood-page
+    - authority-pillar  # Attia-style
+    - faq-post
+    - partnership-landing
+  subreddits:
+    - AshevilleNC
+    - HomeImprovement
+    - electricians
+    - electricvehicles
+    - RealEstate
+
+# -- Authority Library (Pillar 3 per plan) --
+# Peter Attia-style long-form, diagram-heavy, Andrew-bylined, Andrew-narrated video
+authority_library:
+  enabled: true
+  target_word_count: 3500  # 3000-8000 range
+  diagrams_per_pillar: 1  # minimum; Claude-generated SVG/Mermaid → Figma/Canva refine
+  video_per_pillar: true  # Andrew records 3-5 min phone walkthrough
+  opus_reviewer_gate: true  # pattern ported from verticals-pipeline language_reviewer.py
+  pillars:
+    - slug: how-home-electricity-works
+      priority: 1
+    - slug: electrical-panel-anatomy
+      priority: 2
+    - slug: wiring-types-through-the-decades
+      priority: 3
+    - slug: afci-gfci-explained
+      priority: 4
+    - slug: home-electrical-load-calculation
+      priority: 5
+    - slug: asheville-electrical-code
+      priority: 6
+    - slug: ev-home-charging-complete-guide
+      priority: 7
+    - slug: historic-home-electrical-safety
+      priority: 8
+
+# -- Content Builder --
+content_builder:
+  enabled: true
+  max_todos_per_run: 3
+  model: claude-haiku-4-5-20251001
+  min_impressions_for_gap: 25  # smaller market than SafeBath
+  auto_deploy_articles: false  # require human review for P2P while we extract LSB pattern
+  auto_deploy_pages: false
+
+# -- Interlinking --
+interlinking:
+  enabled: true
+  max_outbound_links_per_page: 12
+  max_related_links_per_article: 3
+  neighbor_count: 5
+  # Hub-and-spoke cross-link rules
+  panel_to_ev_crosslink: true  # trojan horse relationship
+  historic_to_knob_tube_crosslink: true
+
+# -- Thin Content Prevention (per plan hard rules) --
+thin_content_rules:
+  min_words_authority_pillar: 3000
+  min_words_hub: 1800
+  min_words_service_spoke: 1500
+  min_words_city_page: 800
+  min_words_faq_post: 1000
+  max_body_overlap_pct: 30
+  opus_reviewer_gate: true
+  no_fabrication: true  # enforces p2p-seo existing fact-check rule + RULE #0 from verticals-pipeline
+
+# -- GEO (Generative Engine Optimization) --
+geo:
+  enabled: true
+  schema_stack:
+    - LocalBusiness
+    - Service
+    - FAQPage
+    - HowTo
+    - Article
+    - Person  # Andrew with license # + sameAs
+    - BreadcrumbList
+    - AggregateRating
+  entity_sameAs:
+    - # TODO Andrew LinkedIn
+    - # TODO P2P Google Business Profile URL
+    - # TODO BBB profile URL
+    - # TODO Asheville Chamber profile URL (pending Chamber signup)
+  unique_data_requirement: true  # every page must include ≥1 P2P-specific data point (actual job count, Asheville-specific cost range, etc.)
+  llm_citation_monitoring: weekly  # ChatGPT / Perplexity / Claude / Google AI Overviews
+
+# -- NotebookLM Production Pipeline --
+notebooklm:
+  enabled: true  # requires Google Workspace Business Standard (bundles NotebookLM Plus)
+  tier_required: workspace_business_standard  # 300 sources/notebook
+  outputs_per_pillar:
+    - audio_overview  # feeds podcast-pipeline
+    - video_overview  # YouTube distribution + embed
+    - study_guide  # email nurture + realtor/GC handoff PDF
+    - faq_document  # grounded Q&A for FAQ cluster posts
+    - mind_map  # site architecture validation
+
+# -- Infrastructure (Monday 2026-04-20 call decisions) --
+infrastructure:
+  google_workspace:
+    plan: business_standard  # $14/user/mo × 7 ≈ $98-117/mo
+    includes_notebooklm_plus: true
+    recommend_handle: "info@avlp2p.com or andrew@avlp2p.com"
+    status: pending_andrew_approval  # Monday 2026-04-20
+  cloudflare:
+    account_owner: "Andrew Holbein"  # client owns, agency admin
+    billing: client
+    bill_role: team_admin
+    status: pending_setup  # Monday 2026-04-20, 15-min walkthrough
 
 # -- Analytics --
-# analytics:
-#   ga4_property_id: ""  # TODO — get from client
-#   business_type: local_service
-#   schedule: weekly
-#   conversion_events: []
-#   alert_thresholds:
-#     traffic_drop_pct: 20
-#     traffic_spike_pct: 50
-#     bounce_rate_ceiling: 75
-#   dispatch_targets:
-#     - seo-content
-#     - directory
+analytics:
+  ga4_property_id:  # TODO — get from Andrew 2026-04-20
+  business_type: local_service
+  schedule: weekly
+  conversion_events:
+    - click  # tel: click-to-call
+    - form_submit  # booking form
+  alert_thresholds:
+    traffic_drop_pct: 20
+    traffic_spike_pct: 50
+    bounce_rate_ceiling: 75
+  dispatch_targets:
+    - seo-content
+    - content-builder
 
-# -- Tracking --
-tracking_sheet_id: "17LisuuLu__nEdcVHbbpH4Tq21LIHCW2CfkIVOx-6SWo"
-
-# -- Secrets --
+# -- Secrets (env var references, never values) --
 secrets:
   anthropic_api_key: ANTHROPIC_API_KEY
   google_genai_api_key: GOOGLE_GENAI_API_KEY
   slack_bot_token: SLACK_BOT_TOKEN
 
 # -- Teams to Deploy --
-teams: []
-  # - template: seo-content-team
-  #   runs_on: GitHub Actions
-  #   schedule: "Daily, 6:00 AM ET"
-  #   status: scheduled
+teams:
+  - template: seo-content-team
+    runs_on: GitHub Actions
+    schedule: "Daily, 6:00 AM ET"
+    status: pending_deploy  # deploy after Cloudflare Pages + DESIGN.md + homepage live
+  - template: content-builder
+    runs_on: GitHub Actions
+    schedule: "Weekly, Wed 10:00 AM ET"
+    status: pending_deploy
+  - template: interlinking
+    runs_on: GitHub Actions
+    schedule: "Weekly, Sun 11:00 PM ET"
+    status: pending_deploy
 
 # -- Deploy --
 deploy:
-  platform: Cloudflare  # migrating from Squarespace
+  platform: Cloudflare Pages
+  account: client  # Andrew's account per infrastructure decision
+  domain: avlp2p.com  # stays on GoDaddy (Andrew owns), DNS moves to Cloudflare
+  framework: # TBD — likely Next.js or Astro, decide with DESIGN.md
+  migrating_from: Squarespace
+
+# -- Hard Rules (per ~/Projects/power-to-the-people/CLAUDE.md) --
+hard_rules:
+  - "Log every finding and change to the tracker sheet before/at the moment it ships"
+  - "Reference prior changes before building — never duplicate or undo without logging"
+  - "SEO deploy-gate lockout on routes/redirects/sitemaps/constants/service-pages/meta"
+  - "Evidence before claims — post commit hash or URL in the same message"

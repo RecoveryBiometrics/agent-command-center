@@ -153,6 +153,10 @@ analytics:
 ghl:
   location_id: VL5PlkLBYG4mKk3N6PGw
 
+# -- SEO deploy gate (auth for sheet logging) --
+seo_gate:
+  credentials_path: "~/.claude/keys/safebath-seo.json"
+
 # -- Secrets (names only — actual values in .env / GitHub Secrets) --
 secrets:
   anthropic_api_key: ANTHROPIC_API_KEY

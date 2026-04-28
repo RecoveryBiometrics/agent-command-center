@@ -183,6 +183,13 @@ Write new rules directly into this SKILL.md.
   (b) Review count: WebSearch says 105; CLAUDE.md + homepage trust strip say "109+". Likely just review-count drift over time.
   **Lesson:** Even read-only data pulls surface conflicts. When the gate fires for a "small" copy update (like swapping a number from 109 to 105), don't update silently — surface the discrepancy first. Aggregator data ≠ canonical; canonical is GBP API or Andrew himself.
 
+- **2026-04-28, source-field-context conflation (MAJOR)** — Cited Andrew's onboarding "Best time: Morning (7-10am)" as customer-facing phone hours on the homepage CTA AND the About page (line: *"Andrew picks up between 7am and 10am"*). Bill caught: that field was Andrew's preferred time for **Bill** to contact **Andrew** (the agency-relationship), NOT his customer-facing business hours. Andrew's actual business hours (M-F 8am-6pm) live in the *Business Basics* section of the same form. Compounded the error by ALSO fabricating "we get back same-day if you text us" — no Andrew quote backs that callback claim.
+  **Lesson 1 — read the question, not just the answer.** When citing an onboarding-form field, read the section header it sits under. Onboarding fields fall into two surfaces:
+  - **Customer-facing eligible:** Business Basics (legal name, email, phone, address, hours, EIN), Brand voice, Service Priorities, Service Area, Reviews/Social, Realtor inspection policy
+  - **Agency-relationship private:** Communication Preferences (channel/time/CC/cadence), Account Access, anything in "Anything Else" that's about working with Bill
+  **Never combine the two surfaces in customer-facing copy.** New Phase 1 rule: when a citation comes from a "Communication Preferences" / "Account Access" / "Anything Else" / agency-context field, STOP and reroute — that quote belongs in private docs, not the site.
+  **Lesson 2 — never invent service-level promises.** "Same-day callback," "responds within 4 hours," "morning callbacks guaranteed" all become contractual claims customers will hold the business to. Only ship a callback or response promise that's verbatim from Andrew (or the client). If you can't quote it, don't write it.
+
 ## Anti-patterns
 
 - Citing the file path without verifying the quote actually exists in the file
