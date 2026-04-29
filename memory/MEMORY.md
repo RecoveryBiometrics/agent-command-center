@@ -1,38 +1,33 @@
-- [**RESUME DEREK WORK**](project_derek_simkins_handoff.md) — Say "resume the Derek work" to pick up. Capstone Connectors Fractional CTO $1,500/mo PAID 2026-04-20. Onboarding form live (capstone-onboarding.pages.dev/capstone), tracker sheet seeded, 2 GHL subs in play. First check-in Friday 2026-04-24 3pm ET.
-- [GHL API Gotchas](reference_ghl_api_gotchas.md) — Field-tested quirks (rrule nesting, PATCH 401, autoPayment drafts, CF secret reload, duplicate-contact 400, timezone override). Check before hitting GHL endpoints.
-- [**RESUME VERTICALS WORK**](project_verticals_session_handoff.md) — Say "resume the verticals work" to pick up. ES Part 1 agency-starters SHIPPED 2026-04-16. Day-14 decision gate: ship Parts 2-3 if indexed/impressions, else pivot.
-- [SOP — Manual GSC indexing for new hub pages](project_sop_new_hub_indexing.md) — Every new hub/pillar ship = Bill manually requests indexing in GSC (williamcourterwelch@gmail.com). Compresses 1-7 days → hours.
-- [**RESUME REPORTING WORK**](project_reporting_session_handoff.md) — Say "resume the reporting work" to pick up. CEO Daily + Weekly SEO triggers live with service account.
-- [Single Source of Truth](project_single_source_of_truth.md) — Architecture: YAML registry + shared pipelines + global skills + Google Sheets integration
-- [Analytics Team](project_analytics_team.md) — Architecture, credentials, sheet IDs, deployment details for GA4 analytics pipeline
-- [GHL /trial + /start split](project_globalhighlevel_trial_start_split.md) — Two identical affiliate landing pages: /trial=podcast, /start=blog. Do not consolidate.
-- [GHL /trial + /start noindex by design](reference_globalhighlevel_robots_architecture.md) — Both disallowed in robots.txt + excluded from sitemap. GSC pos ~47 is ghost ranking, NOT a problem to fix.
-- [**RESUME DISCOUNT CONSOLIDATION**](project_discount_consolidation_handoff.md) — Say "resume the discount consolidation" to pick up. SHIPPED 2026-04-21: master page live, 301s + noindex in place. Day-30 measurement gate 2026-05-21.
-- [FB Social Pipeline](project_fb_social_pipeline.md) — Trigger ID, voice rules, Slack channel for daily FB posts
-- [Deploy failure alerting](project_deploy_failure_alerting.md) — Vercel deploy failures route to #ops-log via native Slack app + workflow backstop. New projects need BOTH paths wired.
-- [Trigger Inventory](project_trigger_inventory.md) — 3 enabled triggers (plan max), 4 disabled. Undocumented limit.
-- [Check before asking](feedback_dont_ask_check_first.md) — Search codebase for answers before asking user setup questions
-- [Do the work](feedback_do_the_work.md) — Never punt to user when you have tools (gh, gcloud, MCP) to do it yourself
-- [Skills First](feedback_skill_sync.md) — Everything built must be a skill FIRST. No baking logic into triggers/scripts without a skill.
-- [Never make things up](feedback_never_make_things_up.md) — If it doesn't exist, say so. Don't fabricate features, config, or solutions.
-- [Verify before citing](feedback_verify_before_citing.md) — Grep hits are not evidence. Confirm a file is live/deployed before citing it as a working example.
-- [Never claim about Bill or William (HARD RULE)](feedback_never_claim_about_bill_or_william.md) — Never invent client counts, outcomes, credentials, or first-person anecdotes for Bill or the William Welch persona.
-- [William Welch canonical bio](reference_william_welch_bio.md) — Approved bio text. Do not expand without Bill's written approval.
-- [Verticals Pipeline Architecture](project_verticals_pipeline.md) — Renamed from Trades 2026-04-14. Tier system, URLs, win metric, parallel 4-lang cadence, tiered model routing. Agency-starters #1 in Tier 1.
-- [No done-for-you work (HARD RULE)](feedback_no_done_for_you_work.md) — Never pitch Bill on implementation, setup, snapshot builds, audits, consulting, or coaching. Exception: GHL clients at $7,500+/mo × 12 months only.
-- [No licensing the moat](feedback_no_licensing_the_moat.md) — Never propose licensing proprietary data/maps/intelligence to competitors. Moat stays owned, not rented. Applies to ice machine gaps, trades methodology, platform code, directory data.
-- [Relocation plan](project_relocation_plan.md) — Planning move from Doylestown, PA to South Venice Beach, FL. Aligns with ice machine launch market, no state income tax. Use FL for future-dated references only.
-- [Starting is success](feedback_starting_is_success.md) — When sharing public plans/vision, do not load them with pass/fail tests. Share ambition plainly. Only failure is not starting.
-- [Ask, do not assume. One at a time.](feedback_ask_dont_assume_one_at_a_time.md) — If unclear, ASK Bill, do not fabricate. Ask ONE question at a time, not a list. Walk through plans ONE section at a time.
-- [Org chart structure](project_org_chart_structure.md) — REI Amplifi uses Brands × Departments × Roles. Brands sit on top, departments serve all brands, roles inside each department. Editorial Department = the new publisher pipeline. Migration order: trades first, podcast second, SafeBath third.
-- [TODO Agent Skill](project_todo_agent.md) — BUILT: /todo-agent reads Active TODOs from Sheet and executes fixes (links, pages, investigations)
-- [Compose with existing agents](feedback_compose_existing.md) — New skills MUST use existing pipeline agents (researcher, fact-checker, copywriter, seo-audit), never bypass them
-- [Build per-business, no premature abstraction](feedback_build_per_business_no_premature_abstraction.md) — Hardcode for the business in front of you. Extract patterns at N=3, not before. Rewriting later is a feature.
-- [Google Account Email](user_google_email.md) — Always use bill@reiamplifi.com for all Google Workspace MCP calls
-- [GSC Account (CRITICAL)](reference_gsc_account.md) — GSC ONLY uses williamcourterwelch@gmail.com. All other Google services use bill@reiamplifi.com.
-- [Power to the People](project_power_to_the_people.md) — Client Andrew Holbein, Asheville electrician, knob & tube niche, realtor mailer strategy, $3.5-5K setup
-- [Marketing Org Notion Hub](project_marketing_org_notion.md) — 3 linked DBs (Businesses/Pipelines/Agents) + Team org chart sub-page. Single source of truth.
-- [Don't use mermaid in Notion](feedback_notion_mermaid_sucks.md) — Renders too small. Use linked DB Board views or external tools (n8n/Whimsical).
-- [IONOS VPS SSH (stale)](reference_ionos_vps_ssh.md) — Credentials in podcast-pipeline SKILL.md don't work. Verify before using.
-- [claude.ai env vars + Google SA](reference_claude_ai_env_vars.md) — env `reiamplifi-google` (env_01TDtHFibihP4mCg7C5cZnxC) holds GOOGLE_SERVICE_ACCOUNT_KEY_B64 for live GSC/GA4 from triggers.
-- [SafeBath site architecture](reference_safebath_site_architecture.md) — Next.js App Router, phone in Header+Footer everywhere, GA4 G-M1Q5T7BLG2 / property 531047753, directory pages intentionally clean.
+# Memory Index
+
+- [project_mrr_clients.md](project_mrr_clients.md) — **TOP PRIORITY (2026-04-28):** p2p + Derek/Capstone, $1,500 MRR combined. GHL paused, SafeBath back burner, Hatch deprioritized
+- [feedback_priority_drift.md](feedback_priority_drift.md) — When Bill names current priorities, drop the others — don't keep using parked projects in examples
+- [feedback_focus_on_deliverable.md](feedback_focus_on_deliverable.md) — On client deliverables, don't chain side investigations of unrelated projects as gates on the build
+- [project_org_refactor_state.md](project_org_refactor_state.md) — **2026-04-27:** Shipped user-global `~/.claude/CLAUDE.md` (Garry Tan doctrine); 21 skills classified; agent-command-center duplicate-skills smell parked
+- [project_master_tracker.md](project_master_tracker.md) — **MASTER:** All 8 projects, paths, status, agents, and next steps
+- [project_command_center_status.md](project_command_center_status.md) — Agent Command Center build: dashboard + skills library, what's done + what's next
+- [feedback_shelve_visual_builder.md](feedback_shelve_visual_builder.md) — No visual builder yet; focus on dashboard quality + teaching Bill Claude Code patterns
+- [user_profile.md](user_profile.md) — User background and preferences
+- [user_voice.md](user_voice.md) — Bill's speaking/writing style for drafting emails and comms in his voice
+- [project_pipeline_migration.md](project_pipeline_migration.md) — GHL pipeline runs on IONOS VPS, fully automated
+- [project_moat_strategy.md](project_moat_strategy.md) — Strategic goal to build network of aging/elderly service websites and acquire complementary assets
+- [project_business_listings.md](project_business_listings.md) — Business directory listings are real businesses; future claim/upsell strategy
+- [feedback_fact_checking.md](feedback_fact_checking.md) — All generated content must be cross-referenced against multiple reputable sources
+- [feedback_no_fake_content.md](feedback_no_fake_content.md) — CRITICAL: Never publish fabricated/templated/unverified content anywhere, ever
+- [project_yc_ghl_claude_strategy.md](project_yc_ghl_claude_strategy.md) — YC app: AI layer on GHL + Claude API for recovery/behavioral health, custom front-end, hybrid architecture
+- [project_hatch_platform_pricing.md](project_hatch_platform_pricing.md) — 6-service AI platform for RE syndicators, pricing tiers, Hatch Investments first client
+- [project_service_as_software.md](project_service_as_software.md) — LOW PRIORITY: Acquire "service as a software" domain, build blog promoting Claude work & the concept
+- [project_safebath_directory.md](project_safebath_directory.md) — Full system live: pipeline, AI agent, claim flow, filters fixed
+- [project_safebath_vendor_leads.md](project_safebath_vendor_leads.md) — NEXT: SMS vendors when customer leads come in, prove directory value before upsell
+- [feedback_vercel_deploy.md](feedback_vercel_deploy.md) — Never change git email or Vercel logout without approval; caused deploy outage
+- [feedback_never_expose_secrets.md](feedback_never_expose_secrets.md) — CRITICAL: Never commit secrets, keys, credentials, server details, or personal info to any repo
+- [feedback_auto_resume.md](feedback_auto_resume.md) — Always auto-resume on project open — present where we left off immediately
+- [project_content_autopilot.md](project_content_autopilot.md) — Open-source podcast+blog pipeline (content-autopilot repo), setup wizard, lead gen for service
+- [project_ghl_homepage_filter.md](project_ghl_homepage_filter.md) — globalhighlevel.com homepage filters out India/Spanish posts, English only
+- [feedback_slack_usage.md](feedback_slack_usage.md) — Slack is for async agent questions only, never during active terminal sessions
+- [feedback_sheet_visibility.md](feedback_sheet_visibility.md) — Every ops change must also log to the business's Google Sheet, not just JSON — team + stakeholders read the Sheet
+- [feedback_socratic_for_skill_work.md](feedback_socratic_for_skill_work.md) — Skill-building = pair programming. Don't go solo even when Bill says "lets go"
+- [feedback_agency_model_mismatch.md](feedback_agency_model_mismatch.md) — Build work fits Bill, open-ended agency execution does not. Default to project-shaped, not retainer-shaped, when proposing scope
+- [project_verticals_refactor_state.md](project_verticals_refactor_state.md) — Verticals refactor mid-stream: hub+retrofit shipped, dispatch+measure pending, architectural purity question open
+- [project_addiction_platform.md](project_addiction_platform.md) — Addiction treatment lead gen platform: domains available, plan done, ready to build
+- [project_bass_forecast.md](project_bass_forecast.md) — Bass Forecast: AI automation for 1.5M user fishing app, $7.5K/mo, 92-item roadmap, shortcut: bass
