@@ -1,0 +1,64 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(*)",
+      "WebFetch",
+      "WebSearch",
+      "Agent",
+      "Skill",
+      "NotebookEdit",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskGet",
+      "TaskList",
+      "TaskOutput",
+      "TaskStop",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "AskUserQuestion",
+      "RemoteTrigger",
+      "ToolSearch"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/usage-dashboard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/gstack-invocation-check.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "voiceEnabled": true,
+  "theme": "dark-ansi"
+}

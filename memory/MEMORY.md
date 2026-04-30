@@ -29,6 +29,7 @@
 - [feedback_socratic_for_skill_work.md](feedback_socratic_for_skill_work.md) — Skill-building = pair programming. Don't go solo even when Bill says "lets go"
 - [feedback_build_mode.md](feedback_build_mode.md) — Client deliverables in build mode: stop offering option menus, pick the right answer and ship with evidence
 - [feedback_funnel_value_for_services.md](feedback_funnel_value_for_services.md) — For service-line decisions, weight by funnel value (entry-point search → bigger job conversion), not just by "is this Andrew's primary work"
+- [feedback_run_gstack_dont_substitute.md](feedback_run_gstack_dont_substitute.md) — When Bill invokes a gstack skill, RUN it via Skill tool — never substitute bash equivalents to "save time"
 - [feedback_agency_model_mismatch.md](feedback_agency_model_mismatch.md) — Build work fits Bill, open-ended agency execution does not. Default to project-shaped, not retainer-shaped, when proposing scope
 - [project_verticals_refactor_state.md](project_verticals_refactor_state.md) — Verticals refactor mid-stream: hub+retrofit shipped, dispatch+measure pending, architectural purity question open
 - [project_addiction_platform.md](project_addiction_platform.md) — Addiction treatment lead gen platform: domains available, plan done, ready to build
