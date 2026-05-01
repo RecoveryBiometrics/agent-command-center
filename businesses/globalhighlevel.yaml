@@ -191,7 +191,8 @@ teams:
 
 # -- Deploy --
 deploy:
-  platform: Netlify  # git push triggers deploy
+  platform: Cloudflare Pages  # git push triggers deploy via Cloudflare GitHub App
+  pages_project: claude-notebooklm-ghl-podcast  # auto-derived from repo name; preview at <project>.pages.dev
   vps_host: IONOS
   vps_user: williamcourterwelch
   vps_working_dir: /home/williamcourterwelch/Claude_notebookLM_GHL_Podcast/ghl-podcast-pipeline
