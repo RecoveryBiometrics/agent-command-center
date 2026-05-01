@@ -3,6 +3,7 @@
 - [project_mrr_clients.md](project_mrr_clients.md) — **TOP PRIORITY (2026-04-28):** p2p + Derek/Capstone, $1,500 MRR combined. GHL paused, SafeBath back burner, Hatch deprioritized
 - [feedback_priority_drift.md](feedback_priority_drift.md) — When Bill names current priorities, drop the others — don't keep using parked projects in examples
 - [feedback_focus_on_deliverable.md](feedback_focus_on_deliverable.md) — On client deliverables, don't chain side investigations of unrelated projects as gates on the build
+- [feedback_hard_money_vs_private_money.md](feedback_hard_money_vs_private_money.md) — Hard money and private money are different RE-lending products. Never conflate in routing, copy, or pipeline decisions
 - [project_org_refactor_state.md](project_org_refactor_state.md) — **2026-04-27:** Shipped user-global `~/.claude/CLAUDE.md` (Garry Tan doctrine); 21 skills classified; agent-command-center duplicate-skills smell parked
 - [project_master_tracker.md](project_master_tracker.md) — **MASTER:** All 8 projects, paths, status, agents, and next steps
 - [project_command_center_status.md](project_command_center_status.md) — Agent Command Center build: dashboard + skills library, what's done + what's next
